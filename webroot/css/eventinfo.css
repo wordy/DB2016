@@ -1,0 +1,105 @@
+/* 	Modified from Twitter Bootstrap's documentation website 
+	Credit: http://getbootstrap.com/
+*/
+
+/* By default it's not affixed in mobile views, so undo that */
+.db2014-sidebar.affix {
+  position: static;
+}
+
+/* First level of nav */
+.db2014-sidenav {
+  margin-top: 60px;
+  width: 200px;
+  margin-bottom: 30px;
+  padding-top:    10px;
+  padding-bottom: 10px;
+  text-shadow: 0 1px 0 #fff;
+  background-color: #efefef;
+  border-radius: 5px;
+}
+
+.db2014-content {
+  /*margin-top: 60px;*/
+  margin-bottom: 30px;
+  padding-top:    10px;
+  padding-bottom: 10px;
+  text-shadow: 0 1px 0 #fff;
+}
+
+
+/* All levels of nav */
+.db2014-sidebar .nav > li > a {
+  display: block;
+  color: #00816C;
+  padding: 5px 20px;
+}
+.db2014-sidebar .nav > li > a:hover,
+.db2014-sidebar .nav > li > a:focus {
+  text-decoration: none;
+  background-color: #e5e3e9;
+  border-right: 3px solid #dbd8e0;
+}
+.db2014-sidebar .nav > .active > a,
+.db2014-sidebar .nav > .active:hover > a,
+.db2014-sidebar .nav > .active:focus > a {
+  font-weight: bold;
+  color: #00816C;
+  background-color: transparent;
+  border-right: 3px solid #00816C;
+}
+
+/* Nav: second level (shown on .active) */
+.db2014-sidebar .nav .nav {
+  margin-bottom: 8px;
+}
+.db2014-sidebar .nav .nav > li > a {
+  padding-top:    3px;
+  padding-bottom: 3px;
+  padding-left: 30px;
+  font-size: 90%;
+}
+
+/* Show and affix the side nav when space allows it */
+@media (min-width: 992px) {
+  .db2014-sidebar .nav > .active > ul {
+    display: block;
+  }
+  /* Widen the fixed sidebar */
+  .db2014-sidebar.affix,
+  .db2014-sidebar.affix-bottom {
+    width: 213px;
+  }
+  .db2014-sidebar.affix {
+    position: fixed; /* Undo the static from mobile first approach */
+    top: 100px;
+  }
+  .db2014-sidebar.affix-bottom {
+    position: absolute; /* Undo the static from mobile first approach */
+  }
+  .db2014-sidebar.affix-bottom .db2014-sidenav,
+  .db2014-sidebar.affix .db2014-sidenav {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  /* Widen the fixed sidebar again */
+  .db2014-sidebar.affix-bottom,
+  .db2014-sidebar.affix {
+    width: 263px;
+  }
+}
+
+/* 	This is a fix for the positioning of anchor tags 
+	This should be relatively cross-browser, as webkit doesn't
+	seem to like empty anchors, even <a>&nbsp</a>. 
+*/
+a.anchor { position: relative; top: -40px; visibility: hidden; }
+a.anchor:before {
+  content:"";
+  float: left;
+  height: 0px;
+}
+

@@ -1,0 +1,9 @@
+<?php
+
+$config = array(
+    'Filepicker' => array(
+        'apikey' => 'YOUR_API_KEY'
+    )
+);
+
+?>

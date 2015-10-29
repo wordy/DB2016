@@ -1,0 +1,124 @@
+
+
+.bolder { font-weight: bolder;}
+
+.fine-print {font-size: 10px !important;}
+
+.panel-yh {
+  border-color: #00816C;
+}
+
+.lg-top { margin-top: 25px;}
+.lg-bot-marg { margin-bottom: 25px;}
+.sm-bot-marg { margin-bottom: 10px;}
+.neg-sm-bot-marg { margin-bottom: -20px;}
+.sm-top-marg { margin-top: 10px;}
+
+.bg-yh {
+  color: #fff;
+  background-color: #00816C;
+  border-color: #078E4C;
+}
+
+.bg-yh a:link {
+	color: #fff !important;}
+
+.panel-dark { border-color: #333;}
+
+.table-bordered{
+	border-collapse:collapse;
+}            
+.table-bordered td {
+	border: 1px solid #777 !important;
+}
+
+
+.table-nobotmarg {
+  margin-bottom: 0px;
+}
+
+.badge-white {
+	color: #000000;
+	background-color: #ffffff;
+}
+
+.badge-black {
+	color: #ffffff;
+	background-color: #101010;
+}
+.badge-warning {
+	color: #ffffff;
+	background-color: #8A0808;
+  }
+
+.badge-success {
+	color: #ffffff;
+	background-color: #0B610B;
+}
+
+.navbar-default .navbar-brand-white {
+  color: #FFFFFFF;
+}
+
+.navbar-inverse .navbar-brand {
+  color: #ffffff;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+  color: #CCCCCC;
+}
+
+.navbar-text-white {
+  color: #ffffff;
+}
+
+
+
+
+
+/* BOOTSTRAP 3 Mods */
+/*Adds Navbar Submenu support... dropped in BS3! 
+ * credit: http://bootply.com/86684
+ * */
+
+
+.btn-xxs {
+  padding: 3px 3px;
+  font-size: 10px;
+  line-height: 1;
+  border-radius: 0px;
+  margin-left: 3px;
+}
+
+.btn-xxs {
+  padding: 1px 3px;
+}
+
+/* Credit: http://charliepark.org/bootstrap_buttons/ */
+.btn-medgrey {
+  background-color: #444444 !important;
+  border-color: #444444;
+  color: #fff !important;
+ }
+
+
+.btn-darkgrey {
+  background-color: #3d3d3d !important;
+  color: #fff !important;
+}
+
+
+.panel-title-sm {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+
+
+
+
+.dropdown-menu a {
+  cursor: pointer;
+}
+
