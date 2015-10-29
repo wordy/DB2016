@@ -1,5 +1,4 @@
 <?php
-
     $this->set('title_for_layout', 'Ops Committee Compiler'); 
     if (!$this->Session->read('Auth.User')):?>
     
