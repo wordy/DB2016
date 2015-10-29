@@ -6,6 +6,7 @@ app/[Cc]onfig/core.php
 app/[Cc]onfig/database.php
 !empty
 .idea/
+.idea/*
 
 # =========================
 # Operating System Files
