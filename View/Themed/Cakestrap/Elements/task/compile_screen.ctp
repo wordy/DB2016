@@ -260,14 +260,15 @@
 <?php endif; 
 
     // Hold days of tasks
-    $cur_t_day = $prev_t_day = $last_t_day = $last_t_hr = $curr_t_day = $curr_t_hr = $last_c_day = '';
+    $cur_t_day = $prev_t_day = $last_t_day = $last_t_hr = $cur_t_day = $cur_t_hr = $last_mod_day = '';
 
     /******************************
      *  START of FOREACH $tasks   *          
      ******************************/
     foreach ($tasks as $k => $task):
     $inUsrShift = $userControls = $uControlsInvolved = $hasComment = $commentCount = $hasDueDate = $hasDueSoon = $hasActionable = $hasChange = $hasNewChange = false;
-    
+    $hoursAreSame = $daysAreSame = $modDaysAreSame = $onEday = $isPastDue = $isTimeControlled = false;
+        
     // FULL THREADING
     /*
     if(($view_type == 0) && !$single_task && !empty($task['Task']['parent_id']) && empty($task['Assist'])){
@@ -288,15 +289,16 @@
     if(!empty($controlledInInvolved)){ $uControlsInvolved = true;}
 
     // Figure out task start date & hr & created date.  Used to group tasks by relevant headers
-    $daysAreSame = $cDaysAreSame = $onEday = $hoursAreSame = $isPastDue = $isTimeControlled = false;
-    $curr_t_day = date('Y-m-d', strtotime($task['Task']['start_time']));
-    $curr_t_hr = date('H', strtotime($task['Task']['start_time']));
-    $curr_c_day = date('Y-m-d', strtotime($task['Task']['created']));
+    $cur_t_day = date('Y-m-d', strtotime($task['Task']['start_time']));
+    $cur_t_hr = date('H', strtotime($task['Task']['start_time']));
+    $cur_mod_day = date('Y-m-d', strtotime($task['Task']['modified']));
     
-    if($last_t_day == $curr_t_day){ $daysAreSame = true;}
-    if($last_c_day == $curr_c_day){ $cDaysAreSame = true;}
-    if($curr_t_day == $eday){ $onEday = true;}
-    if($curr_t_hr == $last_t_hr){ $hoursAreSame = true; }
+    //debug($curr_mod_day);
+    //debug($last_mod_day);    
+    if($last_t_day == $cur_t_day){ $daysAreSame = true;}
+    if($last_mod_day == $cur_mod_day){ $modDaysAreSame = true;}
+    if($cur_t_day == $eday){ $onEday = true;}
+    if($cur_t_hr == $last_t_hr){ $hoursAreSame = true; }
     
     //Hide/show elements based on permissions.
     if(in_array($task['Task']['team_id'], $userTeams)){ $userControls = true; }
@@ -337,9 +339,9 @@
     }
 ?>
 <div <?php
-    if((empty($task['Assist']) && !empty($task['Task']['parent_id'])) || ($task['Task']['actionable_type_id'] > 300)){
-        echo 'class = "';
-        if (empty($task['Assist']) && !empty($task['Task']['parent_id'])){
+        if((empty($task['Assist']) && !empty($task['Task']['parent_id'])) || ($task['Task']['actionable_type_id'] > 300)){
+            echo 'class = "';
+        if (!empty($task['Assist']) || !empty($task['Task']['parent_id'])){
             echo "isChild ";    
         }
         if($task['Task']['actionable_type_id'] > 300){
@@ -354,11 +356,12 @@
     <div class="col-xs-12">
     <?php
         // For recently created, use "created date" as basis for grouping tasks for display
-        if($view_type == 100 && !$single_task && !$cDaysAreSame){
+        if($view_type == 100 && !$single_task && !$modDaysAreSame){
             echo '<h4 class="great">';
             
-            if($curr_c_day != $today){
-                echo $this->Time->timeAgoInWords($task['Task']['modified'], array(
+            if($cur_mod_day != $today){
+                //echo 'mod not today';
+                echo $this->Time->timeAgoInWords($cur_mod_day, array(
                     'accuracy' => array('day' => 'day'),
                     'end' => '1 week',
                     'format' => 'M d'
@@ -389,11 +392,11 @@
                     <div class="col-xs-2 col-sm-2 col-md-2">
                         <div class="taskTs checkbox facheckbox xs-bot-marg facheckbox-circle facheckbox-success">
                             <input type="checkbox" class="tsCheck <?php if($inUsrShift){echo 'checked';} ?>" id="hide<?php echo $tid;?>" <?php if(!$userControls || $isTimeControlled){echo 'disabled="disabled"';} ?> <?php if($inUsrShift){echo 'checked="checked"';} ?> 
-                            data-tid="<?php echo $task['Task']['id']?>" 
-                            />
+                            data-tid="<?php echo $task['Task']['id']?>"/>
                             <label class="taskTimeshift" for="hide<?php echo $tid;?>"><?php 
                                     if($view_type != 100){
-                                        echo $this->Ops->durationFriendlyNoDate($task['Task']['start_time'], $task['Task']['end_time']);
+                                        //echo $this->Ops->durationFriendlyNoDate($task['Task']['start_time'], $task['Task']['end_time']);
+                                        echo $this->Ops->startTimeFriendly($task['Task']['start_time'], $task['Task']['end_time'], array('duration'=>true));
                                     }
                                     else { // When showing by created date, must show task date since overall tasks are sorted by created date (not task date)
                                         echo date('M j g:i A', strtotime($task['Task']['start_time']));
@@ -412,7 +415,7 @@
                                     echo '<hr align="left" style="width: 100%; margin-bottom:3px; margin-top:3px; border-top: 1px solid #aaa;"/>';
                                     echo nl2br($task['Task']['details']);
                                     echo '</div>';
-                                }else{echo '<br><br>';} ?></div>
+                                }else{echo '';} ?></div>
                     </div>
                     <div class="col-xs-2 col-sm-2 col-md-2">
                         <div class="pull-right task-buttons" style="text-align: right; margin-left: 8px;">
@@ -475,7 +478,7 @@
                             // Re-sort Time Controlled tasks by offset to highlight timing (before, synced, after)
                             $tc_tasks = Hash::sort($ass[1], '{n}.time_offset', 'asc');
                     ?>
-                            <div class="row xs-bot-marg med-top-marg">
+                            <div class="row xs-bot-marg sm-top-marg">
                                 <div class="col-xs-2"><div class="text-align-right"><h5><i class="fa fa-clock-o"></i> <b>Controls Start Of</b></h5></div></div>
                                 <div class="col-xs-10">
                                     <?php
@@ -508,9 +511,9 @@
     </div>
 </div>
 <?php
-    $last_t_day = $curr_t_day;
-    $last_t_hr = $curr_t_hr;
-    $last_c_day = $curr_c_day;
+    $last_t_day = $cur_t_day;
+    $last_t_hr = $cur_t_hr;
+    $last_mod_day = $cur_mod_day;
     endforeach; 
 
 echo '<br/>';

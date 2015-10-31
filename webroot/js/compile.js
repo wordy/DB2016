@@ -219,6 +219,7 @@ $(document).ready(function () {
         var addHtml = $('<span class=\"actButs\"><button style=\"margin:-5px 5px 0px 0px;\" class=\"btn btn-yh btn-xs addTask\"><i class=\"fa fa-plus-circle\"> </i> &nbsp;Add</button></span>');
         var linkHtml = $('<span class=\"actButs\"><button style=\"margin:-5px 0px 0px 0px;\" class=\"btn btn-yh btn-xs addLink\"><i class=\"fa fa-link\"> </i> &nbsp;Link</button></span>');
         var tsDiv = $(this).find('.taskTs').parent();
+        //var tsDiv = $(this).parent('.task-panel').find('.task-buttons');
         addHtml.hide().appendTo(tsDiv).fadeIn('fast');
         if(ucon_inv){
             linkHtml.hide().appendTo(tsDiv).fadeIn('fast'); 

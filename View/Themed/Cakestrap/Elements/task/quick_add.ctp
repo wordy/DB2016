@@ -62,9 +62,9 @@
         });
     ");
     
-    $new_task_stime = date('Y-m-d H:i:00');
-    $this->request->data('Task.start_time', $new_task_stime);
-    $this->request->data('Task.end_time', $new_task_stime);
+    $now_min = date('Y-m-d H:i:00');
+    $this->request->data('Task.start_time', $now_min);
+    $this->request->data('Task.end_time', $now_min);
 
     echo $this->Form->create('Task', array(
         'class'=>'formAddTask',

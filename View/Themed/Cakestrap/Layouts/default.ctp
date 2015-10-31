@@ -22,7 +22,7 @@
         echo $this->Html->css('libs/daterangepicker');
 		echo $this->Html->css('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css');
 		//echo $this->Html->css('libs/select2.min'); 
-		//echo $this->Html->css('libs/select2-bootstrap.min');
+		echo $this->Html->css('libs/select2-bootstrap.min');
 		
  
         echo $this->Html->css('libs/summernote');

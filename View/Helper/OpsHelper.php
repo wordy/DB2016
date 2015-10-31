@@ -1253,7 +1253,7 @@ class OpsHelper extends AppHelper {
         
         return $buttons;
     }
-*/
+
 
     public function durationFriendly($start, $end){
         if(!$start||!$end){ return 'None';}
@@ -1290,7 +1290,7 @@ class OpsHelper extends AppHelper {
 
         return $str;
     }
-
+*/
     public function durationFriendlyDaysOnly($start, $end, $two_lines = false){
         if(!$start||!$end){ return 'None';}
         
@@ -1354,13 +1354,21 @@ class OpsHelper extends AppHelper {
         return $str;
     }
     
-    public function durationFriendlyNoDate($start, $end, $two_line = false){
+    public function durationFriendlyNoDate($start, $end, $options=array()){
+        $show_d = '';
+
+        if(isset($options['show_date']) && $options['show_date']==true){
+            $show_d = 'M j ';
+        }
+        
         $t1 = date('Y-m-d H:i:s', strtotime($start));
         $s1 = date('s', strtotime($start));
         $s2 = date('s', strtotime($end));
         $t2 = date('Y-m-d H:i:s', strtotime($end));
         $d1 = date('Y-m-d', strtotime($start));
         $d2 = date('Y-m-d', strtotime($end));
+        $m1 = date('A', strtotime($start));
+        $m2 = date('A', strtotime($end));
         $diff = strtotime($t2)-strtotime($t1);
         $dh = floor($diff / 3600);
         $dm = floor(($diff / 60) % 60);
@@ -1369,40 +1377,41 @@ class OpsHelper extends AppHelper {
         $str = '';
 
         $impSecs = false;
-        if($s1 != 0 && $s2 !=0){
+        
+        // Secs are important when: (S1 != S2) && ((S1 != 0) && S2 !=0)) 
+        
+        if(($s1 != $s2) && (($s1 != 0) && ($s2 !=0) || (($diff <600) && ($diff >0)))){
             $impSecs = true;
         }
     
         if($diff == 0 && $impSecs == false){
-            $str.= date('g:i A', strtotime($t1));
+            $str.= date($show_d.'g:i A', strtotime($t1));
         }
         elseif($diff == 0 && $impSecs == true){
-            $str.= date('g:i:s A', strtotime($t1));
+            $str.= date($show_d.'g:i:s A', strtotime($t1));
         }
         // Important seconds
         elseif($diff < 60){
-            $str.= $this->Time->format('g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$diff.'s)';
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$diff.'s)';
         }
         // < hr
         elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
-            $str.= $this->Time->format('g:i', $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dm.' min)';
+            $str.= $this->Time->format($show_d.'g:i', $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dm.' min)';
         }
         elseif(($diff >= 60) && ($diff < 3600) && $impSecs == true){
-            $str.= $this->Time->format('g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$dm.' min)';
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$dm.' min, '.$ds.'s)';
         }        
         // > 1h < 24h
         elseif($diff >= 3600 && $diff < 86400){
             $s = ($dh > 1)? 's':'';
+            $a = ($m1 != $m2)? 'A':'';
+             
             
             if($dm == 0){
-                $str.= $this->Time->format('g:i A', $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.')';
-            }
-            elseif($dm <= 9){
-                $dm = '0'.$dm;
-                $str.= $this->Time->format('g:i A', $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.', '.$dm.' min)';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.')';
             }
             else{
-                $str.= $this->Time->format('g:i A', $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.', '.$dm.' min)';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.', '.$dm.' min)';
             }
             
             
@@ -1411,12 +1420,87 @@ class OpsHelper extends AppHelper {
         }
         // >1 day or spans days
         elseif ($diff >= 86400){
-            $str.= date('g:i A', strtotime($t1));
+            $str.= date($show_d.'g:i A', strtotime($t1));
         }
         if($d1 != $d2){
             $str.= '<br/>(Multi-day)';
         }
 
+        return $str;
+    }
+
+    // $options: show date, show duration
+    public function startTimeFriendly($start, $end, $options=array()){
+        $show_d = '';
+        $show_dur = false;
+
+        if(isset($options['date']) && $options['date']==true){
+            $show_d = 'M j ';
+        }
+        if(isset($options['duration']) && $options['duration']==true){
+            $show_dur = true;
+        }
+
+        $t1 = date('Y-m-d H:i:s', strtotime($start));
+        $t2 = date('Y-m-d H:i:s', strtotime($end));
+        $s1 = date('s', strtotime($start));
+        $s2 = date('s', strtotime($end));
+        $d1 = date('Y-m-d', strtotime($start));
+        $d2 = date('Y-m-d', strtotime($end));
+        $m1 = date('A', strtotime($start));
+        $m2 = date('A', strtotime($end));
+        $diff = strtotime($t2)-strtotime($t1);
+        $dh = floor($diff / 3600);
+        $dm = floor(($diff / 60) % 60);
+        $ds = $diff % 60;
+        $str = '';
+        $impSecs = false;
+        
+        // Try to guess when seconds are actually important. 10 mins seems reasonable.
+        if(($s1 != $s2) && (($s1 != 0) && ($s2 !=0) || (($diff <600) && ($diff >0)))){
+            $impSecs = true;
+        }
+        if($diff == 0 && $impSecs == false){
+            $str.= date($show_d.'g:i A', strtotime($t1));
+        }
+        elseif($diff == 0 && $impSecs == true){
+            $str.= date($show_d.'g:i:s A', strtotime($t1));
+        }
+        // Important seconds
+        elseif($diff < 60){
+            $dur = ($show_dur)? '<br/>('.$diff.'s)':'';
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).$dur;
+        }
+        // < hr
+        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
+            $dur = ($show_dur)? '<br/>('.$dm.' min)':'';
+            $str.= $this->Time->format($show_d.'g:i', $start).' - '.$this->Time->format('g:i A', $end).$dur;
+        }
+        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == true){
+            $dur = ($show_dur)? '<br/>('.$dm.' min, '.$ds.'s)':'';
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).$dur;
+        }        
+        // > 1h < 24h
+        elseif($diff >= 3600 && $diff < 86400){
+            $s = ($dh > 1)? 's':'';
+            $a = ($m1 != $m2)? 'A':'';  // Show only if meridian changed (e.g. 10am-12pm but 10-12pm)
+             
+            if($dm == 0){
+                $dur = ($show_dur)? '<br/>('.$dh.' hr'.$s.')':'';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).$dur;
+            }
+            else{
+                $dur = ($show_dur)? '<br/>('.$dh.' hr'.$s.', '.$dm.' min)':'';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).$dur;
+            }
+        }
+        // >1 day or spans days
+        elseif ($diff >= 86400){
+            $str.= date($show_d.'g:i A', strtotime($t1));
+        }
+        if(($d1 != $d2) && $show_dur){
+            $str.= '<br/>(Multi-day)';
+        }
         return $str;
     }
    
