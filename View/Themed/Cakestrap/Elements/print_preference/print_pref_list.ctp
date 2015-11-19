@@ -9,14 +9,42 @@
     $this->Paginator->options(array(
         'update' => '#printTaskListWrap',
         'evalScripts' => true,
-        'before' => $this->Js->get('#pSpinner')->effect('fadeIn', array('buffer' => false)),
-        'complete' => $this->Js->get('#pSpinner')->effect('fadeOut', array('buffer' => false)),
+        'before' => $this->Js->get('.pSpinner')->effect('fadeIn', array('buffer' => false)),
+        'complete' => $this->Js->get('.pSpinner')->effect('fadeOut', array('buffer' => false)),
         'url' => array('controller' => 'tasks', 'action' => 'userPrint')
     ));
     
     
     if (!empty($tasks)){ ?>
     <div class="tasks index">
+        
+        
+        <?php if($this->Paginator->param('current')):?>
+    <div class="row hidden-print">
+        <div class=" col-xs-12" style="margin-bottom: -10px;">
+            <div style="text-align:right; margin-bottom:-40px;">
+                <div>
+                    <ul class="pagination" style="margin-top:0px; margin-left: auto; margin-right:auto">
+                    <?php
+                            $prev_lab = 'Earlier';
+                            $next_lab = 'Later';    
+                        echo '<span class="pSpinner" style="display: none; margin-left: 5px;"><i class="fa fa-cog fa-spin fa-2x"></i></span>'; 
+                        echo $this->Paginator->prev('< ' . __($prev_lab), array('tag' => 'li'), null, array('class' => 'pagPrev disabled', 'tag' => 'li', 'disabledTag' => 'a'));
+                        echo $this->Paginator->numbers(array('separator' => '', 'class'=>'pagNum', 'currentTag' => 'a', 'tag' => 'li', 'currentClass' => 'disabled'));
+                        echo $this->Paginator->next(__($next_lab) . ' >', array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
+                    ?>
+                    </ul><!-- /.pagination -->
+                </div>
+                <p><?php echo $this->Paginator->counter(array('format' => __('Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}'))); ?></p>
+            </div>
+        </div><!-- /.index -->
+    </div>
+<?php endif;?> 
+        
+        
+        
+        
+        
 
     <?php
          // Hold days of tasks
@@ -172,12 +200,11 @@
         </p>
         <ul class="pagination hidden-print">
             <?php
-                echo $this->Paginator->prev('< ' . __('Previous'), array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
+                echo $this->Paginator->prev('< ' . __('Earlier'), array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
                 echo $this->Paginator->numbers(array('separator' => '', 'currentTag' => 'a', 'tag' => 'li', 'currentClass' => 'disabled'));
-                echo $this->Paginator->next(__('Next') . ' >', array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
-             echo '<span id="pSpinner" style="display: none; margin-left: 5px; vertical-align: middle; float: left;">';
-                        echo $this->Html->image('ajax-loader_old.gif', array('id' => 'spinner_img', ));
-                        echo '</span>';
+                echo $this->Paginator->next(__('Later') . ' >', array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
+                echo '<span class="pSpinner" style="display: none; margin-left: 5px;"><i class="fa fa-cog fa-spin fa-2x"></i></span>'; 
+            
             ?>
         </ul><!-- /.pagination -->
     <div id="pageNum" style="visibility:hidden"><?php echo $this->Paginator->param('page');?></div>

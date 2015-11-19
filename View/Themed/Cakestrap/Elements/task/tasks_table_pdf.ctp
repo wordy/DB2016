@@ -35,8 +35,8 @@
                             <thead>
                                 <tr>
                                     <th style="width: 7px;"></th>
-                                    <th style="width: 150px;">Date</th>
-                                    <th style="width: 150px;">Teams</th>
+                                    <th style="width: 100px;">Date</th>
+                                    <th style="width: 200px;">Teams</th>
                                     <th style="width: 750px;">Description</th>
                                 </tr>
                             </thead>

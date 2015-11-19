@@ -29,6 +29,10 @@
     }
     else{ $team_input_empty = false;}
    
+   
+   
+   
+ 
     $this->Js->buffer("
         bindToSelect2($('.linkableParentSelect'));
         
@@ -45,10 +49,10 @@
                 $(this).parents('form').find('.endTimeLabel').html(diff_msg);
             }
             else if(diff >= 86400000){
-                $(this).parents('form').find('.endTimeLabel').html('(<b>Duration: \>1 Day</b>)');
+                $(this).parents('form').find('.endTimeLabel').html('&nbsp;&nbsp;(<b>Duration: \>1 Day</b>)');
             }
             else{
-                $(this).parents('form').find('.endTimeLabel').html('(<b>Duration: None</b>)');
+                $(this).parents('form').find('.endTimeLabel').html('&nbsp;&nbsp;(<b>Duration: None</b>)');
             }
         });
 
@@ -62,9 +66,9 @@
         });
     ");
     
-    $new_task_stime = date('Y-m-d H:i:00');
-    $this->request->data('Task.start_time', $new_task_stime);
-    $this->request->data('Task.end_time', $new_task_stime);
+    $now_min = date('Y-m-d H:i:00');
+    $this->request->data('Task.start_time', $now_min);
+    $this->request->data('Task.end_time', $now_min);
 
     echo $this->Form->create('Task', array(
         'class'=>'formAddTask',
@@ -77,6 +81,11 @@
 ?>
 
 <div id="qaPanelBody">
+    <div class="row">
+                <div class="col-xs-12">
+                    <div class="qaValidationContent"></div>
+                </div>
+            </div>
     <div class="row">
         <div class="col-md-9 col-xs-12">
             <div class="row">
@@ -94,7 +103,7 @@
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-4">
                     <div class="form-group">
-                        <?php echo $this->Form->label('Task.start_time', 'Start Time*'); ?>
+                        <?php echo $this->Form->label('Task.start_time', 'Start Time'); ?>
                         <?php echo $this->Form->input('Task.start_time', array(
                             'type'=>'text',
                             'id'=>'qaStartTime',
@@ -116,7 +125,7 @@
                 <div class="col-xs-6 col-md-4">
                     <div class="form-group">
                     <?php 
-                        echo $this->Form->label('Task.end_time', 'End Time* &nbsp;'); 
+                        echo $this->Form->label('Task.end_time', 'End Time*'); 
                         echo '<span class="endTimeLabel"></span>';
                         
                         echo $this->Form->input('Task.end_time', array(
@@ -127,7 +136,7 @@
                                 'class'=>'input-group',
                                 'data-date-format' => 'Y-m-d H:i:s'),
                             'after'=>'<span class="input-group-addon"><i class="fa fa-calendar"></i></span>',
-                            'class'=>'form-control inputEndTime',
+                            'class'=>'form-control inputEndTime required',
                             ));
                     ?>    
                     </div>  
@@ -255,14 +264,20 @@
                 </div>
             </div><!--well -->
             
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="qaValidationContent"></div>
-                </div>
-            </div>
+            
         </div><!-- /end left col-->
 
         <div class="col-md-3 col-xs-12">
+            <div class="well">
+                <div class="row">
+        <div class="col-sm-12">
+            <button class="btn btn-yh btn-block qaSubmitButton submit"><i class="fa fa-plus"></i> Add New Task</button>
+            <?php 
+                echo '<span class="qaSpinner" style="display: none;"><i class="fa fa-cog fa-spin fa-2x"></i></span>'; 
+           ?>
+        </div>
+    </div></div>
+
             <div class="row sm-top-marg" id="teamStatus">
                 <div class="col-md-12">
                     <div class="panel panel-dark panel-qa">
@@ -367,20 +382,6 @@
                     </div>
                 </div>
             </div>               
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-12">
-            <?php 
-                echo $this->Form->submit('Add Task', array(
-                    'div'=>false, 
-                    'class' => 'qaSubmitButton submit btn btn-large btn-yh'));
-                echo '&nbsp;&nbsp;';
-                echo '<span class="qaSpinner" style="display: none; margin-left: 5px; vertical-align: middle;">';
-                echo $this->Html->image('ajax-loader_old.gif');
-                echo '</span>'; 
-           ?>
         </div>
     </div>
 </div><!--panel body-->

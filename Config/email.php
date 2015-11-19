@@ -51,7 +51,9 @@ class EmailConfig {
         'port' => 465,
         'username' => 'DBOpsCompiler@gmail.com',
         'password' => '60Scottfield',
-        'transport' => 'Smtp'
+        'transport' => 'Smtp',
+        //'log' => true,
+        
     );
 	
 

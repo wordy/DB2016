@@ -43,6 +43,7 @@
         ");    
     }
     
+    
     $this->Js->buffer("
     
         $('.helpTTs').popover({
@@ -60,30 +61,49 @@
 			<div class="panel-heading" style="background-color: <?php echo $task['Task']['task_color_code'];?>; border-top-right-radius: 0px;border-top-left-radius: 0px">
 				<ul class="nav nav-tabs">
 				<?php
-                    // Default view to edit if you control it.
-                    echo '<li ';                    
-					echo (!$userControls)? 'class="active"':'';
-					echo '><a href="#view_'.$tid.'" data-toggle="tab"><i class="fa fa-bookmark-o"></i> View</a></li>'; 
-                    
-                    if($userControls){
-                        echo '<li class="active"><a href="#edit_'.$tid.'" data-toggle="tab"><i class="fa fa-pencil"></i> Edit</a></li>';
+				    // What's shown at first?
+				    $f_view = $f_edit = $f_link = $s_edit = $s_link= false;    
+				    $s_view = true;                         // Always allow view
+				    
+				    if(!empty($task['Task']['parent_id']) || !empty($task['Assist'])){ $s_link = true; }
+                    if($userControls){ $s_edit = true;}
+				    
+				    if(isset($view_first)){
+				        if($view_first == 'links'){ $f_link = true; }
+                        elseif($view_first == 'edit'){  $f_edit = true; }
+                        elseif($view_first == 'comments' || $view_first == 'changes' || $view_first == 'actions'){  $f_view = true; }
+                        else { $f_view = true; }
+				    }
+                    else{
+                        if($userControls){  $f_edit = true; }
+                        else{ $f_view = true; }
                     }
-                    if(!empty($task['Task']['parent_id']) || !empty($task['Assist'])){
-                        echo '<li><a href="#links'.$tid.'" data-toggle="tab"><i class="fa fa-link"></i> Linked Tasks</a></li>';    
-                    }
+				
+                    $cl_v = $cl_e = $cl_l = '';
+                    if($f_view){ $cl_v = 'active';}
+                    elseif($f_edit){ $cl_e = 'active';}
+                    elseif($f_link){$cl_l = 'active';}
+				
+                    if($s_view){ echo '<li class="'.$cl_v.'"'.'><a href="#view_'.$tid.'" data-toggle="tab"><i class="fa fa-bookmark-o"></i> View</a></li>'; }
+                    if($s_edit){ echo '<li class="'.$cl_e.'"'.'><a href="#edit_'.$tid.'" data-toggle="tab"><i class="fa fa-pencil"></i> Edit</a></li>';}
+                    if($s_link){ echo '<li class="'.$cl_l.'"'.'><a href="#links'.$tid.'" data-toggle="tab"><i class="fa fa-link"></i> Linked Tasks</a></li>';}
                 ?>
 				</ul>
 			</div>
 			<div class="panel-body">
 				<div class="tab-content">
-					<div class="tab-pane fade in <?php echo (!$userControls)? 'active':''?>" id="view_<?php echo $tid ?>">
+			    <?php if($s_view): ?>
+					<div class="tab-pane fade in <?php echo $cl_v;?>" id="view_<?php echo $tid ?>">
 						<?php echo $this->element('task/tab_view', array('task' => $task)); ?>
 					</div><!-- /tab_view-->
-                    <div class="tab-pane fade in <?php echo ($userControls)? 'active':''?>" id="edit_<?php echo $tid ?>">
+				<?php endif;?>
+                <?php if($s_edit): ?>
+                    <div class="tab-pane fade in <?php echo $cl_e;?>" id="edit_<?php echo $tid ?>">
                         <?php echo $this->element('task/tab_edit', array('task' => $task, 'linkable'=>$linkable)); ?>
                     </div><!-- /tab_edit-->
-                <?php if(!empty($task['Task']['parent_id']) || !empty($task['Assist'])): ?>
-                    <div class="tab-pane fade in" id="links<?php echo $tid ?>">
+                <?php endif;?>
+                <?php if($s_link): ?>
+                    <div class="tab-pane fade in <?php echo $cl_l;?>" id="links<?php echo $tid ?>">
                         <?php echo $this->element('task/tab_links');?>
                     </div><!-- /tab_links-->
                 <?php endif;?>

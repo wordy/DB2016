@@ -27,7 +27,9 @@ class User extends AppModel {
                 'rule' => array('notblank'),
                 'message' => 'A username is required',
                 'allowEmpty' => false,
-                'required' => true
+                'required' => true,
+                'on' => 'create', // Limit validation to 'create' or 'update' operations
+                
             ),
             'isUnique' => array(
                 'rule' => 'isUnique',
@@ -49,7 +51,9 @@ class User extends AppModel {
                 'rule' => array('notblank'),
                 'message' => 'A user handle is required',
                 'allowEmpty' => false,
-                'required' => true
+                'required' => true,
+                'on' => 'create', // Limit validation to 'create' or 'update' operations
+                
             )
         ),
        'email' => array(
@@ -57,11 +61,13 @@ class User extends AppModel {
                 'rule' => array('notblank'),
                 'message' => 'An email address is required.',
                 'allowEmpty' => false,
-                'required' => true
+                'required' => true,
+                'on'=>'create'
             ),
             'isUnique' => array(
                 'rule' => 'isUnique',
-                'message' => 'This email address is already registered to another user. Please choose another.'
+                'message' => 'This email address is already registered to another user. Please choose another.',
+                'on'=>'create'
             ),
             'email'=>array(
                 'rule'=>'email',
@@ -75,6 +81,8 @@ class User extends AppModel {
                 'allowEmpty' => false,
                 'required' => true,
                 'message' => 'A user role is required',
+                'on' => 'create', // Limit validation to 'create' or 'update' operations
+                
             )
         ),
     );
@@ -98,15 +106,18 @@ class User extends AppModel {
         'Change' => array(
             'className' => 'Change',
             'foreignKey' => 'user_id',
+            'dependent' => true,
         ),
         'Comment'=>array(
             'className'=> 'Comment',
-            'foreignKey'=> 'user_id'
+            'foreignKey'=> 'user_id',
+            'dependent' => true,
         ),
 
         'PrintPref'=>array(
             'className'=> 'PrintPref',
-            'foreignKey'=> 'user_id'
+            'foreignKey'=> 'user_id',
+            'dependent' => true,
         ),
         'TeamsUser' => array(
             'className' => 'TeamsUser',
@@ -123,25 +134,24 @@ class User extends AppModel {
     }
 
     public function beforeSave($options=array()) {
-        // Hash password if adding new record
+        // Hash password if adding new record (no $this->id)
         if(!$this->id){
             $passwordHasher = new SimplePasswordHasher();
             $this->data['User']['password'] = $passwordHasher->hash($this->data['User']['password']);
         }
-    
-        $this->old_teams = array();
-        // Grab data pre-save... only bother if we're doing an update (i.e. $this->id exists)
-        if($this->id){
-            // Can't use $this->data (it's lost on save...), so save it here
-            $this->presave = $this->findById($this->id);
 
-            // Grab and save old teams
-            $ct_list = $this->TeamsUser->getControlledTeamsTidList($this->id);
+        // Grab data pre-save. $this->data is lost on save, so save it to $this->presave
+        // Only bother if we're doing an update ($this->id exists)
+        $this->old_teams = array();
+        if($this->id){
+            $this->presave = $this->findById($this->id);
             
+            // Save user's old teams
+            $ct_list = $this->TeamsUser->getControlledTeamsTidList($this->id);
             $this->old_teams = (!empty($ct_list)) ? $ct_list : array();
         }
         
-        if(!empty($this->data[$this->alias]))
+        //if(!empty($this->data[$this->alias]))
             
         return true;
     }
@@ -167,12 +177,18 @@ class User extends AppModel {
             }
         }
     }
+    /*
+    public function afterDelete(){
+        //$this->unsetChildrenByParentId($this->id);   
+        return true;
+    }*/
     
     public function getHandleByUser($user_id){
         if($this->exists($user_id)){
             $uhan = $this->field('handle', array($this->alias.'.id'=>$user_id));
             return $uhan;
         }
+        return false;
     }    
 
 /**
@@ -188,35 +204,40 @@ class User extends AppModel {
         }
 
         $usr = $this->findById($user);
-
         $usr_id = $usr['User']['id'];
-        
+
         $new_token = String::uuid();
         $new_token_hash = Security::hash($new_token, 'sha1', true);
         
         $usr['User']['pass_reset_token'] = $new_token_hash;
         $usr['User']['status'] = 401;
         
+        //$this->log($usr);
         if($this->save($usr)){
             return $new_token;
         }
+/*
+        else{
+            $this->log($this->validationErrors);
+        }*/
         
         return false;
     }
-
-    public function sendWelcomeEmail($user, $token){
-        if(!$this->exists($user)){
+    
+    public function sendWelcomeEmail($user_id, $token){
+        if(!$this->exists($user_id)){
             return false;
         }
         
-        $usr = $this->findById($user);
+        $usr = $this->findById($user_id);
         
         $uid = $usr['User']['id'];
-        $status = $usr['User']['status'];
+        //$status = $usr['User']['status'];
         $email = $usr['User']['email'];
         $usrToken = $usr['User']['pass_reset_token'];
         
-        if($status == 401 && !empty($token) &&!empty($usrToken) && !empty($email)){
+        //if($status == 401 && !empty($token) &&!empty($usrToken) && !empty($email)){
+        if(!empty($token) && !empty($usrToken) && !empty($email)){
             $Email = new CakeEmail('gmail');
             $Email->from(array('DBOpsCompiler@gmail.com' => 'DBOps Compiler'));
             $Email->to($email);
@@ -227,7 +248,7 @@ class User extends AppModel {
                 //->emailFormat('both');
             $Email->viewVars(array(
                 'user' => $usr,
-                'token'=>$token
+                'token'=> $token
                 )
             );    
         
@@ -239,27 +260,30 @@ class User extends AppModel {
         return false;
     }
 	
-	
-    public function getDigestUsersByTeam(){
-        $rs = $this->find('all', array(
-            'conditions'=>array('User.user_role_id'=>10, 'User.pref_digest'=>true),
-            'fields'=>array('User.id', 'User.email'),
-            
-        ));
-        
-        return $rs;
-    }
-
-
+    // 2015
     public function updateLastDigestByUser($user_id){
-        $today = date('Y-m-d');
+        if(!$this->exists($user_id)){
+            return false;
+        }
+        
         $this->id = $user_id;
-        if($this->saveField('last_digest', $today)){
+        if($this->saveField('last_digest', date('Y-m-d'))){
             return true;
         }
         return false;
     }  
+    
+    public function updateLastWelcomeByUser($user_id){
+        if(!$this->exists($user_id)){
+            return false;
+        }
 
+        $this->id = $user_id;
+        if($this->saveField('last_welcome', date('Y-m-d'))){
+            return true;
+        }
+        return false;
+    }  
 
 
 }

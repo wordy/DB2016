@@ -50,7 +50,7 @@
                     'class' => 'form-control linkableParentSelect',
                     'div'=>array(
                         'class'=>'input-group'),
-                    'after'=>'<span class="input-group-btn"><button class="pidClearBut btn btn-yh'.$unlink_enabled.'"><i class="fa fa-unlink"></i> Unlink</button></span>',
+                    'after'=>'<span class="input-group-btn"><button class="pidClearBut btn btn-danger'.$unlink_enabled.'"><i class="fa fa-unlink"></i> Unlink</button></span>',
                 )); 
             ?>
             <span id="lpHelpBlock" class="help-block">Link tasks when they are related. For example, when responding to requests from other teams.</span>

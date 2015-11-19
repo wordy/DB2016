@@ -34,36 +34,32 @@ class TasksController extends AppController {
             //'index',
             'add',
             'view', 
-            'actionable',
+            //'actionable',
             'compile',
             
-            //2016
+            //2015
             'linkable',
             'details',
-            'urgent',
-            'urgentByUser',
+            //'urgent',
+            //'urgentByUser',
             'checkPid',
             'getTaskById',
             'digest',
+            'pdfFromSearch',
                         
-            //2015
-            'addShift',
+            //2014
             'timeShift',
+            'addShift',
             'remShift',
+            'resetShift',
             'search',
             'userPrint',
-            'resetShift',
             'compilePrint', 
-            //'addTo',
-            //'makeLinkableParentsList',
-            //'compileUser',
-            //'details',
-
             ))) {
             return true;
         }
         
-        // The owner of a post can edit and delete it
+        // The owner of a task can edit and delete it
         if (in_array($this->action, array(
                 'edit', 
                 'delete',
@@ -77,6 +73,20 @@ class TasksController extends AppController {
 
         return parent::isAuthorized($user);
     }
+
+/**
+ * Retrive task details by id
+ * Used in loops to find parent->parent->parent
+ * @param int $id Task id
+ * @since 2015
+ */
+    public function getTaskById($id){
+        if (!$this->Task->exists($id)) {
+            //throw new NotFoundException(__('That task does not exist. Please try a different Task ID.'));
+        }
+        
+        return $this->Task->findById($id);
+    } 
 
 
 
@@ -101,7 +111,7 @@ class TasksController extends AppController {
             'Task.id'=>'desc')
         );
         $this->set('teams', $this->Task->Team->listTeamCodeByCategory());
-        $this->set('zoneTeamCodeList', $this->Task->Team->zoneTeamCodeList());
+        $this->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
         
        // $this->set('teams', $this->Task->Team->find('list'));
         $this->set('showTeamColors', TRUE);
@@ -193,12 +203,12 @@ class TasksController extends AppController {
             if ($this->Task->save($this->request->data)) {
                 $new_tid = $this->Task->id;    
                 
+                
                 if($this->request->is('ajax')){
                     $this->response->statusCode(200);
                     $this->set('message', __('New task created.'));
                     return $this->render('/Elements/task/validation_error');
                 }
-                
                 $this->Session->setFlash(__('The task was successfully created'), 'flash/success');
                 $this->redirect(array('action' => 'compile'));
             } // End of saving new data
@@ -236,6 +246,9 @@ class TasksController extends AppController {
  * @return void
  */
     public function edit($id = null) {
+        if ($this->request->is('get')) {
+            throw new MethodNotAllowedException();
+        }
         //$this->log($this->request->data);
         if (!$this->Task->exists($id)) {
             throw new NotFoundException(__('Invalid task'));
@@ -400,6 +413,8 @@ class TasksController extends AppController {
 
             // Querystring Params
             $qSingle = $this->request->query('task');
+            
+            //$this->log($qSingle);
             // PDF, Plain, Threaded, Rundown, Lead Only, Open Requests, Action Items, Recent
             $qView = $this->request->query('view'); 
             $qSort = $this->request->query('sort');
@@ -483,11 +498,6 @@ class TasksController extends AppController {
             // Use current compile + user visibility settings (hide details/hide tasks)
             // Currently forces download of PDF in browser
             $this->pdfFromUserSettings();
-            
-            /*
-            // Get and set print prefs (used to hide tasks in printed view)
-            $upref = $this->Task->PrintPref->getUserPrefsByType($this->Auth->user('id'));
-            $this->set('printPrefs', $upref);*/
         }
         
         //$this->log($conditions);
@@ -516,22 +526,6 @@ class TasksController extends AppController {
             ));
         }
         
-        $tlist = $this->Task->Team->zoneTeamList();
-        $teamIdCodeList = array();
-        foreach ($tlist as $zcode => $zteams){
-            foreach ($zteams as $tid =>$tcode){
-                $teamIdCodeList[$tid] = $tcode;   
-            }
-        }
-        
-        $zoneTeamList = array();
-        $zoneTeamCodeList = array();
-        foreach ($tlist as $zone => $tids){
-            $zoneTeamList[$zone] = array_keys($tids);
-            foreach ($tids as $tid => $tcode){
-                $zoneTeamCodeList[$zone][$tid] = $tcode;    
-            }
-        }
         // Set and store new compile settings, if different
         if(!$comp_is_same){
             $this->Session->write('Auth.User.Compile', $settings);
@@ -541,9 +535,9 @@ class TasksController extends AppController {
         $this->request->data('Compile', $settings);
         $this->set('cSettings', $settings);
         $this->set('tasks', $tasks);
-        $this->set('teamIdCodeList', $teamIdCodeList);
-        $this->set('zoneTeamCodeList', $zoneTeamCodeList);
-        $this->set('zoneNameTeamList', $this->Task->Team->zoneNameTeamCodeList());
+        $this->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
+        $this->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
+        $this->set('zoneNameTeamList', $this->Task->Team->Zone->listZoneNameTeamIdTeamCode());
         $this->set('actionableTypes', $this->Task->ActionableType->makeList());
         $this->set('taskTypes', $this->Task->TaskType->makeListByCategory());
         $this->set('user_shift', $this->Session->read('Auth.User.Timeshift'));
@@ -581,140 +575,26 @@ class TasksController extends AppController {
         //$this->render('/Elements/task/tasks_table');
     }
 
-    public function urgentByUser(){
-        $user_id = $this->Auth->user('id');
-        $order = array();
-        $conditions = array();
-        $limit = 10;
-        $sort = '';
-        //$new_prefs = array();
-        //NOTE: DBALL Setting. Default time to treat changes as "new" (Default is 7 days)
-        //$date_str = strtotime(date('Y-m-d').'-7 days');
-        //$new_limit = date('Y-m-d', $date_str);
-    
-            // If we were paging, pass the settings into the next request
-            if($this->params['paging']){
-                $this->Paginator->settings = $this->params['paging'];
-            }
-            // Set up to compare settings as submitted vs. stored in user session variable
-            $ucomp = $this->Session->read('Auth.User.Compile');
-            
-            $settings = $this->Task->makeSafeCompileSettings($ucomp);
-            
-            // Enforced for Urgent
-            $settings['view_type']=399;
-
-        // Process settings, set defaults if necessary        
-        $cc = $this->Task->makeCompileConditions($settings);
+    public function details($task_id = null, $view_first = null){
+        if (!$this->Task->exists($task_id)) {
+            throw new NotFoundException(__('Invalid task'));
+        }
         
-        $teams = $cc['teams'];
-        $conditions = $cc['conditions'];
-        $order = $cc['order'];
-        $contain = $cc['contain'];
-        $limit = $cc['limit'];
-       
-        $this->Paginator->settings = array(
-            'Task'=>array(
-                'contain'=>$contain,
-                'limit'=>10,
-                'conditions'=>$conditions,
-                'order'=>$order,
-        ));
-
-        $nextMeeting = $this->nextOpsMeeting();
-        
-        //$this->log($nextMeeting);
-        
-        $this->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
-
-        $tasks = $this->Paginator->paginate('Task');
-//$this->log($tasks);
-        if(!empty($this->request->params['requested'])){ 
-            return array('utasks'=> $tasks, 'nextMeeting'=>$nextMeeting);
-        } 
-        $this->render('compile');
-    }
-
-    public function urgent($pdf = null){
-        $user_id = $this->Auth->user('id');
-        
-        $order = array();
-        $conditions = array();
-        $limit = 50;
-        $sort = '';
-        //$new_prefs = array();
-        //NOTE: DBALL Setting. Default time to treat changes as "new" (Default is 7 days)
-        //$date_str = strtotime(date('Y-m-d').'-7 days');
-        //$new_limit = date('Y-m-d', $date_str);
-    
-            // If we were paging, pass the settings into the next request
-            if($this->params['paging']){
-                $this->Paginator->settings = $this->params['paging'];
-            }
-            // Set up to compare settings as submitted vs. stored in user session variable
-            $ucomp = $this->Session->read('Auth.User.Compile');
-            
-            $settings = $this->Task->makeSafeCompileSettings($ucomp);
-            
-            $settings['view_type']=4;
-
-        
-        // Process settings, set defaults if necessary        
-        $cc = $this->Task->makeCompileConditions($settings);
-        
-        $teams = $cc['teams'];
-        $conditions = $cc['conditions'];
-        $order = $cc['order'];
-        $contain = $cc['contain'];
-        $limit = $cc['limit'];
-        //$sort = $cc['sort'];
-        
-
-       
-            $this->Paginator->settings = array(
-                'Task'=>array(
-                    'contain'=>$contain,
-                    'limit'=>(!$limit)? 100: $limit,
-                    'conditions'=>$conditions,
-                    'order'=>$order,
-            ));
-                    
-            $tasks = $this->Paginator->paginate('Task');
-            
-//            $this->request->data('Compile', $settings);
-            
-        
-        $this->set('tasks', $tasks);
-        $this->set('teams', $this->Task->Team->listTeamCodeByCategory());
-        $this->set('teamsList', $this->Task->Team->find('list'));
-        $this->set('taskColors', $this->Task->TaskColor->makeCodeAndNameList());
-        $this->set('actionableTypes', $this->Task->ActionableType->makeList());
-        $this->set('taskTypes', $this->Task->TaskType->makeListByCategory());
-        $this->set('cSettings', $settings);
-        $this->set('cteams', $teams);
-        $this->set('view_type', $settings['view_type']);
-        $this->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
-        
-        // These are set by default, uncomment to control view/layout        
-        //$this->layout = 'default';    
-        //$this->render('compile');
-        
-        
-    }
-
-    public function details($task_id=null){
         $options = array(
-            'contain'=>array(
+            'contain' => array(
                 //'Comment',
                 'TasksTeam',
-                'Assist'=>array(
-                    'order'=>array('Assist.created DESC')
+                'Assist' => array(
+                    'order' => array('Assist.created DESC')
                 ),
                 'Assist.TasksTeam',
                 'Parent'
-                ), 
+            ), 
             'conditions' => array(
-                'Task.' . $this->Task->primaryKey => $task_id));
+                'Task.'.$this->Task->primaryKey => $task_id
+            )
+        );
+        
         $task = $this->Task->find('first', $options);
 
         if(isset($task['Task']['time_control']) && isset($task['Task']['time_offset'])){
@@ -724,26 +604,21 @@ class TasksController extends AppController {
             $task['Offset']['seconds'] = $to['sec'];
         }
 
-        //$this->set('task', $task);
-        //$this->set('tid', $task_id);
         $allowTRoles = $this->Task->TasksTeam->getPossibleRolesByTask($task['Task']['team_id'],$task['Task']['id']); 
         $aInControl = $this->Task->Team->listAssistingAndControlledByUser($task['Task']['id']);
-        $taskTypes = $this->Task->TaskType->makeListByCategory();
         $linkable = $this->Task->linkableParentsList($task['Task']['team_id'], $task['Task']['parent_id'], $task['Task']['id']);
-        $actionableTypes = $this->Task->ActionableType->find('list');
-        $teams = $this->Task->Team->listTeamCodeByCategory();
+        
+        $this->set('task', $task);
+        $this->set('teams', $this->Task->Team->listTeamCodeByCategory());
         $this->set('controlled_teams', $this->Task->Team->listControlledTeamCodeByCategory());
-        $this->set(compact(
-            'allowTRoles',
-            'task', 
-            'aInControl',
-            //'tid',
-            'linkable',
-            'taskTypes',
-            'actionableTypes', 
-            'teams')
-        );
-
+        $this->set('actionableTypes', $this->Task->ActionableType->makeList());
+        $this->set('taskTypes', $this->Task->TaskType->makeListByCategory());
+        $this->set(compact('allowTRoles', 'aInControl', 'linkable'));
+        
+        if(isset($view_first)){
+            $this->set('view_first', $view_first);
+        }
+        
        $this->render('/Elements/task/details');
   }
     
@@ -895,23 +770,12 @@ class TasksController extends AppController {
             $this->Paginator->settings = $this->params['paging'];
         }
                     
-        $tlist = $this->Task->Team->zoneTeamList();
-        $zoneTeamCodeList = array();
-            foreach ($tlist as $zone => $tids){
-                foreach ($tids as $tid => $tcode){
-                    $zoneTeamCodeList[$zone][$tid] = $tcode;    
-                }
-            }
         
         //User Print Preferences
         $upref = $this->Task->PrintPref->getUserPrefsByType($user_id);
         $tasks = $this->Paginator->paginate('Task');
         $this->set('tasks', $tasks);
-        //$this->set('controlled_teams', $this->Task->Team->listControlledTeamCodeByCategory());
-        $this->set('zoneTeamCodeList', $zoneTeamCodeList);
-//        $this->set('taskColors', $this->Task->TaskColor->makeCodeAndNameList());
-//        $this->set('actionableTypes', $this->Task->ActionableType->makeList());
-//        $this->set('taskTypes', $this->Task->TaskType->makeListByCategory());
+        $this->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
         $this->set('PrintPrefs', $upref);
         
         if($this->request->is('ajax')){
@@ -923,6 +787,10 @@ class TasksController extends AppController {
 
     //2015
     public function search($q=null){
+        
+        //$cs = Configure::read('CompileStart');
+        //$ce = Configure::read('CompileEnd');
+        
         if ($this->request->is('post')){
             $q = $this->request->data('Search.term');
         }
@@ -950,13 +818,21 @@ class TasksController extends AppController {
                 'Assist',
             );
             
+            
+        $cstart = Configure::read('CompileStart');
+        $cend = Configure::read('CompileEnd');
+            
             $rs = $this->Task->find('all', array(
                 'contain'=>$contain,
                 'conditions'=>array(
                     'OR' => array(
                         'Task.short_description LIKE' => "%$q%",
                         'Task.details LIKE' => "%$q%"
-                    )    
+                    ),
+                    'AND'=> array(
+                        'Task.start_time >=' =>$cstart,
+                        'Task.end_time <=' =>$cend,
+                    )                
                 ),
                 'order'=>'Task.start_time ASC',
                 )
@@ -964,7 +840,9 @@ class TasksController extends AppController {
         }
         $this->set('tasks', $rs);
         $this->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
-        $this->set('zoneTeamCodeList', $this->Task->Team->zoneTeamCodeList());
+        $this->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
+        $this->set ('start_date', $cstart);
+        $this->set ('end_date', $cend);
         
         //$this->set('user_controls', $this->Session->read('Auth.User.Teams'));
         $this->set('teams', $this->Task->Team->listTeamCodeByCategory());
@@ -996,8 +874,8 @@ class TasksController extends AppController {
         $this->set('team', $team);
         $this->set('current', $current);
         $this->set('child_task', $child_task);
-        $this->set(compact('linkable','team','current','child'));
-        $this->set('_serialize', array('linkable','team','current','child'));
+        $this->set(compact('linkable', 'team', 'current', 'child'));
+        $this->set('_serialize', array('linkable', 'team', 'current', 'child'));
 
         $this->render('/Elements/task/linkable_parents_list');       
     }
@@ -1007,37 +885,40 @@ class TasksController extends AppController {
         //$tids = $this->Task->digestByTeam($team);
         $rs = $this->Task->getDigestDataByTeam($team);
                 
-        $this->set('team_code', $rs['team_code']);
+        $this->set('team_code', $rs['Team']['team_code']);
         $this->set('next_meeting', $rs['next_meeting']);
-        //$this->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
-        //$this->set('zoneTeamCodeList', $this->Task->Team->zoneTeamCodeList());
         $this->set('recent_requests', $rs['recent_requests']);
         $this->set('recent_links', $rs['recent_links']);
         $this->render('/Elements/task/digest');
         
     }
-  /*  
-    public function getDigestByTeam($team){
+  
+    public function manageDigest(){
+        $teams_list = $this->Task->Team->listTeams();
+        $teams_ids = array_keys($teams_list);
+        $counts = $this->Task->Team->Task->getDigestDataCountByTeams($teams_ids);
+
+        $this->set('data', $counts);
+        $this->set('digestUsers', $this->Task->Team->TeamsUser->getDigestUsersByTeam());
+        $this->set('teamsList', $teams_list);
+        $this->render('/Elements/digest/team_digest');
+    }
+
+    public function sendDigestToTeam($team){
+        $emails = $this->Task->sendDigestToTeam($team);
+        $this->set('data', $teamsusers);
         
-        $ticl = $this->Task->Team->teamIdCodeList();
-        
-        foreach($ticl as $tid => $tcode){
-            
+        if($emails['success'] == true){
+            $this->Session->setFlash(__('Digest sent to team successfully'), 'flash/email_list', array('sent'=>$emails['sent']));
         }
-        
-        //$tids = $this->Task->digestByTeam($team);
-        $rs = $this->Task->getDigestByTeam($team);
-                
-        $this->set('team_code', $rs['team_code']);
-        $this->set('next_meeting', $rs['next_meeting']);
-        $this->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
-        //$this->set('zoneTeamCodeList', $this->Task->Team->zoneTeamCodeList());
-        $this->set('recent_requests', $rs['recent_requests']);
-        $this->set('recent_links', $rs['recent_links']);
-        $this->render('/Elements/task/digest');
-        
+        else{
+            $this->Session->setFlash(__('Sending to some users failed.'), 'flash/email_list', array('failed'=>$failed));    
+        }
+      
+        return $this->redirect($this->referer());
     }
-*/
+
+/*
     // 2015
     public function sendDigestAll(){
         // Retrieves only users subscribed to digest. Return is of form array(team_id=>array(uid=>array(id, email, etc.)))
@@ -1065,56 +946,6 @@ class TasksController extends AppController {
             $this->Session->setFlash('Digest successfully sent to all', 'flash/success');
         }
         return $this->redirect($this->referer());
-    }
-
-
-/*
-    public function openReqByTeam($team){
-        $d2 = $this->Task->TasksTeam->openRequestsByTeam($team);
-        $now = date('Y-m-d H:i:s');
-        
-        $rs = $this->Task->find('all', array(
-            'conditions'=>array(
-                'Task.id'=>$d2,
-                //'Task.end_time >='=>$now
-            ),
-            'contain'=>array(
-                'TasksTeam'
-            )
-        ));
-        $this->set('data2', $d2);
-        $this->set('taskTypes', $this->Task->TaskType->makeListByCategory());
-        $this->set('tasks', $rs);
-        $this->set('teams', $this->Task->Team->listTeamCodeByCategory());
-        $this->set('controlled_teams', $this->Task->Team->listControlledTeamCodeByCategory());
-        $this->set('teamsList', $this->Task->Team->find('list'));
-        $this->set('actionableTypes', $this->Task->ActionableType->makeList());
-        
-        $this->render('compile');
-        //$this->render('/Elements/Utility/debug');       
-    }
-*/
-
-/*
-    public function getStartTimeByTask($task){
-        $stime = null;
-        $rs = $this->Task->findById($task);
-        
-        if($rs['Task']['start_time']){
-            $stime = $rs['Task']['start_time'];
-        }
-        
-        if(!empty($this->request->params['requested'])){ 
-            return $stime;
-        }
-        
-        if($this->request->is('ajax')){
-            return $stime;
-        } 
-
-        $this->set('data', $stime);
-        $this->set('data2', $rs);
-        $this->render('/Elements/Utility/debug');    
     }
 */
     public function checkPid(){
@@ -1145,142 +976,7 @@ class TasksController extends AppController {
         return $this->Task->getNextOpsMeeting();
     }
 
-/***********************
- *TESTING
- * 
- * 
- ***********************/
- 
- 
-  /*
-    public function changeChildStartEndTime($parent_tid){
-        $rs = $this->Task->changeChildStartEndTime($parent_tid);
-        
-        $this->set('data', $rs);
-        $this->render('/Elements/Utility/debug');
-    }
- 
 
-    public function makeView(){
-        
-        $rs = $this->request->pass;
-        $rs2 = $this->request->named;
-        
-        
-        $this->set('data', $rs);
-        $this->set('data2', $rs2);
-        $this->render('/Elements/Utility/debug');
-        
-    }
-
-    public function tcChain($task){
-        $chain = $this->Task->getRootPidChain($task);
-            
-        
-        $this->set('data', $chain);
-        //$this->set('data2', $tcc);
-        $this->render('/Elements/Utility/debug');
-        
-    }
-
-
-
-   
-    public function addNew(){
-        $teams = $this->Task->Team->listTeamCodeByCategory();
-        $this->set('data', $teams);
-        
-        $d2 = array_keys(array_values($teams));
-        
-        $this->set('data2', $d2);
-        
-        $this->render('/Elements/Utility/debug');       
-        
-    }
-    
-    public function testThreaded($task){
-        
-        $rs = $this->Task->find('threaded', array(
-            'conditions'=>array(
-                'Task.id'=>$task    
-            ),
-            'recursive'=>1,
-        ));
-        
-        $this->set('data', $this->Task->find('threaded', array('recursive'=>-1, 'conditions'=>array('Task.id'=>$task))));
-        
-        $this->render('/Elements/Utility/debug');
-    }
-
-
-
-    public function testHello(){
-        
-        $this->set('data', $this->sayHello());
-        
-        $this->render('/Elements/Utility/debug');
-        
-    }
-    
- //   App::uses('CakeEmail', 'Network/Email');
-
-
-function testMail () {
-    $Email = new CakeEmail('gmail');
-    $Email->from(array('DBOpsCompiler@gmail.com' => 'DBOps Compiler'));
-    $Email->to('bplogins@gmail.com');
-    $Email->replyTo('DBOpsCompiler@gmail.com');
-    $Email->subject('About');
-    $Email->send('My message');
-    $Email->log=true;
-    
-    $this->set('data', $Email);
-    $this->render('/Elements/Utility/debug');
-}
-
-    public function testTT($team){  
-        $roles = array(1,2,3,4);
-        
-        $rs = $this->Task->TasksTeam->find('all', array(
-            'conditions'=>array(
-                'TasksTeam.team_id'=>$team,
-                'TasksTeam.task_role_id' => $roles
-            ),
-            'contain'=>array('Task','Task.TasksTeam','Task.Assist','Task.Change','Task.Comment'),
-            'order'=>array('Task.start_time ASC')
-        ));
-        $tlist = $this->Task->Team->zoneTeamList();
-        $teamIdCodeList = array();
-        foreach ($tlist as $zcode => $zteams){
-            foreach ($zteams as $tid =>$tcode){
-                $teamIdCodeList[$tid] = $tcode;   
-            }
-        }
-        
-        $zoneTeamList = array();
-        $zoneTeamCodeList = array();
-            foreach ($tlist as $zone => $tids){
-                $zoneTeamList[$zone] = array_keys($tids);
-                foreach ($tids as $tid => $tcode){
-                    $zoneTeamCodeList[$zone][$tid] = $tcode;    
-                }
-            }
-        
-        $this->set('teamIdCodeList', $teamIdCodeList);
-        $this->set('zoneTeamCodeList', $zoneTeamCodeList);
-        $this->set('actionableTypes', $this->Task->ActionableType->makeList());
-        $this->set('controlled_teams', $this->Task->Team->listControlledTeamCodeByCategory());
-        $this->set('user_controls', $this->Session->read('Auth.User.Teams'));
-        $this->set('taskTypes', $this->Task->TaskType->makeListByCategory());
-        $this->set('user_shift', $this->Session->read('Auth.User.Timeshift'));
-        //$this->set('cSettings', $settings);
-       
-    //$this->set('data', $rs);
-    //$this->render('/Elements/Utility/debug');
-	$this->set('tasks',$rs);
-    $this->render('compile_2');
-}
-*/
     public function pdfFromUserSettings(){
         $settings = $this->Session->read('Auth.User.Compile');
 
@@ -1304,27 +1000,7 @@ function testMail () {
         $this->set('printPrefs', $upref);
         $this->set('cSettings', $settings);
         
-
-
-
-        $tlist = $this->Task->Team->zoneTeamList();
-        $teamIdCodeList = array();
-        foreach ($tlist as $zcode => $zteams){
-            foreach ($zteams as $tid =>$tcode){
-                $teamIdCodeList[$tid] = $tcode;   
-            }
-        }
-        
-        $zoneTeamList = array();
-        $zoneTeamCodeList = array();
-        foreach ($tlist as $zone => $tids){
-            $zoneTeamList[$zone] = array_keys($tids);
-            foreach ($tids as $tid => $tcode){
-                $zoneTeamCodeList[$zone][$tid] = $tcode;    
-            }
-        }
-
-        $view = new View($this,false);
+        $view = new View($this, false);
         //$view->viewPath='Tasks/pdf';  // Directory inside view directory to search for .ctp files
         //$view->layout='pdf/default'; // if you want to disable layout
         $view->viewPath='Elements/task';  // Directory inside view directory to search for .ctp files
@@ -1332,321 +1008,146 @@ function testMail () {
         $view->layout='compile_pdf';
        
         $view->set ('tasks', $tasks); // set your variables for view here
-        $view->set('teamIdCodeList', $teamIdCodeList);
-        $view->set('zoneTeamCodeList', $zoneTeamCodeList);
+        $view->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
+        $view->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
         //$this->set(compact('tasks','teamIdCodeList','zoneTeamCodeList'));
         //$html=$view->render('compile_pdf');
         $html=$view->render('tasks_table_pdf');
 
         $cdate = date('M j, Y');
-         
-        
-        //$this->log($html);
-//$this->render('compile_pdf');
-
-
-
-//$this->set('data', $html);
-//$this->render('/Elements/Utility/debug');
-
-
-
-
-
-        //$html = $this->render('/Task/pdf/compile');
-        
-     $this->Mpdf->init(array('format'=>'A4-L'));
-     //$this->Mpdf->AddPage('','','','','on');
-    //$this->Mpdf->setFooter("Page {PAGENO} of {nb}");
+        $this->Mpdf->init(array('format'=>'A4-L'));
     
-    
-$footer = array (
-  'odd' => array (
-    'L' => array (
-      'content' => 'As of '.$cdate,
-      'font-size' => 9,
-      'font-style' => '',
-      'font-family' => 'serif',
-      'color'=>'#333'
-    ),
-    'C' => array (
-      'content' => '',
-      'font-size' => 10,
-      'font-style' => 'B',
-      'font-family' => 'serif',
-      'color'=>'#000000'
-    ),
-    'R' => array (
-      'content' => 'Page {PAGENO} of {nb}',
-      'font-size' => 9,
-      'font-style' => '',
-      'font-family' => 'serif',
-      'color'=>'#333'
-    ),
-    'line' => 1,
-  ),
-  'even' => array ()
-);
-
-/*  
-$this->Mpdf->defaultfooterfontsize=10;
-$this->Mpdf->defaultfooterfontstyle='B';
-$this->Mpdf->defaultfooterline=1;
-*/    
-        //$this->Mpdf->setFooter("Page {PAGENO} of {nb}");
-    
-    $this->Mpdf->SetFooter($footer);
-    
-
-     //$this->Mpdf->WriteHTML('Section 2 - No Footer');
-     
-     
-    //$this->Mpdf->AddPage('','','','','on'); 
-    $this->Mpdf->WriteHTML($html);
-    /*
-    $this->Mpdf->SetFooter(array (
-  'odd' => array (
-    'L' => array (
-      'content' => '{PAGENO}',
-      'font-size' => 10,
-      'font-style' => 'B',
-      'font-family' => 'serif',
-      'color'=>'#000000'
-    ),
-    'C' => array (
-      'content' => 'yomomma',
-      'font-size' => 10,
-      'font-style' => 'B',
-      'font-family' => 'serif',
-      'color'=>'#000000'
-    ),
-    'R' => array (
-      'content' => 'My document',
-      'font-size' => 10,
-      'font-style' => 'B',
-      'font-family' => 'serif',
-      'color'=>'#000000'
-    ),
-    'line' => 1,
-  ),
-  'even' => array ('L' => array (
-      'content' => '{PAGENO}',
-      'font-size' => 10,
-      'font-style' => 'B',
-      'font-family' => 'serif',
-      'color'=>'#000000'
-    ),
-    'C' => array (
-      'content' => 'yomomma',
-      'font-size' => 10,
-      'font-style' => 'B',
-      'font-family' => 'serif',
-      'color'=>'#000000'
-    ),
-    'R' => array (
-      'content' => 'My document',
-      'font-size' => 10,
-      'font-style' => 'B',
-      'font-family' => 'serif',
-      'color'=>'#000000'
-    ),
-    'line' => 1,)
-));*/
-    // setting filename of output pdf file
-    //$this->Mpdf->SetWatermarkText("Draft");
-    //$this->Mpdf->showWatermarkText = true;
-    $this->Mpdf->Output($ename.' Plan_'.$user.'-'.$date.'.pdf', 'D');
-    
-    
-    // setting output to I, D, F, S
-    //$this->Mpdf->Output('file.pdf', 'D');
-
-    // you can call any mPDF method via component, for example:
-    $this->redirect(array('controller'=>'tasks', 'action'=>'userPrint'));
-    $this->layout=false;
-    $this->render(false);
-    
-    }
-
-    public function testThreaded(){
-	
-    
-    
-    $this->set('data', $rs);
-    $this->render('/Elements/Utility/debug');
-}
-
-    // 2016 -- Used to find parent_parent etc
-    public function getTaskById($task_id){
-        
-        $rs = $this->Task->find('first', array(
-            'conditions'=> array(
-                'Task.id'=>$task_id
+        $footer = array (
+          'odd' => array (
+            'L' => array (
+              'content' => 'As of '.$cdate,
+              'font-size' => 9,
+              'font-style' => '',
+              'font-family' => 'serif',
+              'color'=>'#333'
             ),
-        ));
-        return $rs;
+            'C' => array (
+              'content' => '',
+              'font-size' => 10,
+              'font-style' => 'B',
+              'font-family' => 'serif',
+              'color'=>'#000000'
+            ),
+            'R' => array (
+              'content' => 'Page {PAGENO} of {nb}',
+              'font-size' => 9,
+              'font-style' => '',
+              'font-family' => 'serif',
+              'color'=>'#333'
+            ),
+            'line' => 1,
+          ),
+          'even' => array()
+        );
+
+        $this->Mpdf->SetFooter($footer);
+        $this->Mpdf->WriteHTML($html);
+        // setting output to I, D, F, S
+        $this->Mpdf->Output($ename.' Plan_'.$user.'-'.$date.'.pdf', 'D');
+        
+        $this->redirect(array('controller'=>'tasks', 'action'=>'userPrint'));
+        $this->layout=false;
+        $this->render(false);
     }
 
-    public function openReq($team){
-        $or = $this->Task->getOpenRequestsByTeam($team);
-        $ow = $this->Task->getOpenWaitingByTeam($team);
-        
-        
-        $tlist = $this->Task->Team->zoneTeamList();
-        $teamIdCodeList = array();
-        foreach ($tlist as $zcode => $zteams){
-            foreach ($zteams as $tid =>$tcode){
-                $teamIdCodeList[$tid] = $tcode;   
-            }
-        }
-        
-        $zoneTeamList = array();
-        $zoneTeamCodeList = array();
-        foreach ($tlist as $zone => $tids){
-            $zoneTeamList[$zone] = array_keys($tids);
-            foreach ($tids as $tid => $tcode){
-                $zoneTeamCodeList[$zone][$tid] = $tcode;    
-            }
-        }
-
-        $this->set('open_tasks', $or);
-        $this->set('waiting_tasks', $ow);
-        $this->set('teamIdCodeList', $teamIdCodeList);
-        $this->set('zoneTeamCodeList', $zoneTeamCodeList);
-    
-        //$this->render('compile_pdf');
-        $this->render('/Elements/task/open_req');    
-    }
-    
-    public function openWaiting($team){
-        $rs = $this->Task->getOpenWaitingByTeam($team);
-        
-        $tlist = $this->Task->Team->zoneTeamList();
-        $teamIdCodeList = array();
-        foreach ($tlist as $zcode => $zteams){
-            foreach ($zteams as $tid =>$tcode){
-                $teamIdCodeList[$tid] = $tcode;   
-            }
-        }
-        
-        $zoneTeamList = array();
-        $zoneTeamCodeList = array();
-        foreach ($tlist as $zone => $tids){
-            $zoneTeamList[$zone] = array_keys($tids);
-            foreach ($tids as $tid => $tcode){
-                $zoneTeamCodeList[$zone][$tid] = $tcode;    
-            }
-        }
-
-        $this->set('tasks', $rs);
-        $this->set('teamIdCodeList', $teamIdCodeList);
-        $this->set('zoneTeamCodeList', $zoneTeamCodeList);
-    
-        $this->render('compile_pdf');    
-    }
-
-    public function getOpenWaitingByTeam($team){
-        $tids = $this->Task->TasksTeam->getOpenWaitingByTeam($team);
-        
-        $this->virtualFields['priority_date'] = 'MIN(`Task`.`due_date`, `Task`.`end_time`)';
+    public function pdfFromSearch($term){
         $contain = array(
-            'Task'=>array(
-                'fields'=>array(
-                    'Task.id',
-                    'Task.start_time',
-                    'Task.end_time',
-                    'Task.short_description',
-                    'Task.task_type',
-                    'Task.team_code',
-                    'Task.task_color_code',
-                    'Task.time_control',
-                    'Task.time_offset',
-                    'Task.priority_date',
-                )
-            ),
-        
-            'Assist'=>array(
-                'fields'=>array(
-                    'Assist.id',
-                    'Assist.start_time',
-                    'Assist.end_time',
-                    'Assist.short_description',
-                    'Assist.task_type',
-                    'Assist.team_code',
-                    'Assist.task_color_code',
-                    'Assist.time_control',
-                    'Assist.time_offset',
-                )
-            ),
-            'Comment',
-            //'Assist.Assist',
-            'Parent'=>array(
-                'fields'=>array(
-                    'Parent.id',
-                    'Parent.parent_id',
-                    'Parent.start_time',
-                    'Parent.end_time',
-                    'Parent.short_description',
-                    'Parent.task_type',
-                    'Parent.team_code',
-                    'Parent.task_color_code',
-                    'Parent.time_offset',
-                    'Parent.time_control',
-                )
-            ),
             'TasksTeam'=>array(
-                'fields'=>array(
-                    'TasksTeam.team_id',
-                    'TasksTeam.team_code',
-                    'TasksTeam.task_role_id',
-                    )),
-            'Change'=>array(
-                'conditions'=>array('Change.created >'=>$owa),
-                'fields'=>array(
-                    'Change.created'))
-        ); 
+                'fields'=>array('TasksTeam.team_id', 'TasksTeam.team_code', 'TasksTeam.task_role_id'))
+        );
         
-        
-        $rs = $this->find('all', array(
-            'conditions'=>array(
-                'Task.id'=>$tids
-            ),
-            'contain'=>$contain,
-            'order'=>'Task.priority_date ASC',
-        ));
-        
-        $tlist = $this->Task->Team->zoneTeamList();
-        $teamIdCodeList = array();
-        foreach ($tlist as $zcode => $zteams){
-            foreach ($zteams as $tid =>$tcode){
-                $teamIdCodeList[$tid] = $tcode;   
-            }
-        }
-        
-        $zoneTeamList = array();
-        $zoneTeamCodeList = array();
-        foreach ($tlist as $zone => $tids){
-            $zoneTeamList[$zone] = array_keys($tids);
-            foreach ($tids as $tid => $tcode){
-                $zoneTeamCodeList[$zone][$tid] = $tcode;    
-            }
-        }
+        $date = date('Y-m-d');
+        $user = AuthComponent::user('handle');
+        $ename = Configure::read('EventShortName');
+        $cstart = Configure::read('CompileStart');
+        $cend = Configure::read('CompileEnd');
 
-        $this->set('tasks', $rs);
-        $this->set('teamIdCodeList', $teamIdCodeList);
-        $this->set('zoneTeamCodeList', $zoneTeamCodeList);
+        $tasks = $this->Task->find('all', array(
+            'contain'=>$contain,
+            'conditions'=>array(
+                'OR' => array(
+                    'Task.short_description LIKE' => "%$term%",
+                    'Task.details LIKE' => "%$term%"
+                ),
+                'AND'=> array(
+                    'Task.start_time >=' =>$cstart,
+                    'Task.end_time <=' =>$cend,
+                )
+            ),
+            'order'=>'Task.start_time ASC',
+        ));
+
+        $view = new View($this, false);
+        $view->viewPath='Elements/task';  // Directory inside view directory to search for .ctp files
+        $view->layout='compile_pdf';
+       
+        $view->set ('tasks', $tasks); // set your variables for view here
+        $view->set ('term', $term);
+        $view->set ('start_date', $cstart);
+        $view->set ('end_date', $cend);
+        $view->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
+        $view->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
+
+        $html=$view->render('tasks_table_from_search');
+
+        $cdate = date('M j, Y');
+        $this->Mpdf->init(array('format'=>'A4-L'));
     
-        $this->render('/Elements/task/open_req');    
+        $footer = array (
+          'odd' => array (
+            'L' => array (
+              'content' => 'As of '.$cdate,
+              'font-size' => 9,
+              'font-style' => '',
+              'font-family' => 'serif',
+              'color'=>'#333'
+            ),
+            'C' => array (
+              'content' => '',
+              'font-size' => 10,
+              'font-style' => 'B',
+              'font-family' => 'serif',
+              'color'=>'#000000'
+            ),
+            'R' => array (
+              'content' => 'Page {PAGENO} of {nb}',
+              'font-size' => 9,
+              'font-style' => '',
+              'font-family' => 'serif',
+              'color'=>'#333'
+            ),
+            'line' => 1,
+          ),
+          'even' => array()
+        );
+
+        $this->Mpdf->SetFooter($footer);
+        $this->Mpdf->WriteHTML($html);
+        $this->Mpdf->Output($ename.' Plan_'.$user.'-'.$date.'.pdf', 'D');
         
+        //$this->redirect(array('controller'=>'tasks', 'action'=>'userPrint'));
+        $this->layout=false;
+        $this->render(false);
     }
 
 
-////////////////////////OLD/DEPRECATED FUNCTIONS/////////////////////////////////
 
-  
-/////END DEPRECATED//////////////////////////////// 
- 
-
+/*
+    public function test(){
+        $rs = $this->zoneTeamCodeList();
+        $data['ztcl'] = $rs;
+        
+        $rs2 = $this->teamIdCodeList();
+        $data['tidcl'] = $rs2;
+        $this->set('data', $data);
+	   $this->render('/Elements/debug');
+    } 
+*/
 ///////// EOF
 }
 ///////// EOF

@@ -4,12 +4,11 @@
 ?>
 <html lang="en">
     <head>
+        
         <?php echo $this->Html->charset(); ?>
-        <title><?php //
-        //echo Configure::read('EventShortName').': '.$title_for_layout;
-        echo Configure::read('EventShortName').' Compiler: '.$title_for_layout; 
-        ?></title>
+        <title><?php echo Configure::read('EventShortName').' Compiler: '.$title_for_layout;?></title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
     <?php
         echo $this->Html->meta('icon');
         echo $this->fetch('meta');
@@ -22,7 +21,7 @@
         echo $this->Html->css('libs/daterangepicker');
 		echo $this->Html->css('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css');
 		//echo $this->Html->css('libs/select2.min'); 
-		//echo $this->Html->css('libs/select2-bootstrap.min');
+		echo $this->Html->css('libs/select2-bootstrap.min');
 		
  
         echo $this->Html->css('libs/summernote');
@@ -41,17 +40,12 @@
     <noscript><div style="position: fixed; top: 0px; left: 0px; z-index: 3000; height: 100%; width: 100%; background-color: #FFFFFF"><div class="alert alert-danger"><h1>Sorry, the compiler requires Javascript</h1><span><br/><br/><br/><br/><strong>Notice: </strong> JavaScript is not enabled. The use of this site requires a browser that supports Javascript, which you currently don't have.  If you use a browser extension to block JavaScript, please add this website to the "white list". Otherwise, please try another device, or another browser.  <a href="http://enable-javascript.com/" class="alert-link">You can learn about enabling JavaScript in your browser here.</a></span><br/><br/><br/><br/><br/></div></div></noscript>
     </head>
     <body>
-        <div class="container hidden-print">
-            <div id="header" class="row">
-                <?php echo ($urid)? $this->element('menu/authorized_app_menu'): $this->element('menu/unauthorized_app_menu'); ?>
-       		</div>
-        </div>
+        <?php echo ($urid)? $this->element('menu/authorized_app_menu'): $this->element('menu/unauthorized_app_menu'); ?>
 
         <div id="flash" class="container hidden-print">
             <div class="row">
-                <div class="col-sm-8 col-sm-offset-2">
-                    <a href="#" id="back-to-top" class="back-to-top"><i class="fa fa-2x fa-arrow-circle-o-up"></i> <span class="h4">Top</span></a>
-                    <?php echo $this->Session->flash(); ?>
+                <div class="col-sm-8 col-sm-offset-2"><?php echo $this->Session->flash(); ?>
+                    <?php //echo $this->Session->flash('auth'); ?>
                 </div>
             </div>
         </div>
@@ -62,16 +56,13 @@
         
         <footer class="footer">
             <div class="container">
-                <div class="row" style="padding-top:20px;">
-                    <div class="col-xs-6">
-                        <p class="text-muted">&copy; 2013-2016 Yee Hong Foundation</p>
-                    </div>
-                    <div class="col-xs-6 text-align-right">
-                        <a href="<?php echo $this->Html->url(array('controller'=>'pages', 'action'=>'version'));?>">Version History</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="<?php echo $this->Html->url(array('controller'=>'pages', 'action'=>'legalnotes'));?>">Legal Notes</a>
-                    </div>
+                <div class="row lg-top-marg">
+                    <div class="col-xs-6"><p class="text-muted">&copy; 2013-2016 Yee Hong Foundation</p></div>
+                    <div class="col-xs-6 text-align-right"><a href="<?php echo $this->Html->url(array('controller'=>'pages', 'action'=>'version'));?>">Version History</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="<?php echo $this->Html->url(array('controller'=>'pages', 'action'=>'legalnotes'));?>">Legal Notes</a></div>
                 </div>
             </div>
         </footer>
+        <a href="#" id="back-to-top" class="back-to-top"><i class="fa fa-2x fa-arrow-circle-o-up"></i> <span class="h4">Top</span></a>
     <?php
         //echo $this->Filepicker->scriptTag(); 
         echo $this->Html->script('libs/moment.min');
@@ -82,6 +73,8 @@
         echo $this->Html->script('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js');
         echo $this->Html->script('libs/summernote.min');
         echo $this->Html->script('ops');
+        //echo $this->Html->script('ops.php?');
+        
         echo $this->fetch('scriptBottom');
         echo $this->Js->writeBuffer();   
      ?>

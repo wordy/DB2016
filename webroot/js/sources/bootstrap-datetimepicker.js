@@ -576,7 +576,7 @@
 				
 				/*@DBOPS VARIABLE*/
 				
-				eday = new Date(dbEventDate);
+				eday = new Date(DB_EVENT_DATE);
 				//eday = new Date(<?php echo Configure::read('AppShortName'); ?>);
 			this.picker.find('.datetimepicker-days thead th:eq(1)')
 				.text(dates[this.language].months[month] + ' ' + year);
@@ -918,7 +918,7 @@
 								break;
 								/*@DBOPS VARIABLE*/
 							case 'eday':
-								var date = new Date(dbEventDate);
+								var date = new Date(DB_EVENT_DATE);
 								date = UTCDate(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), 0);
 
 								// Respect startDate and endDate.

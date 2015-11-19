@@ -175,7 +175,7 @@ class TeamsController extends AppController {
     public function teamIdCodeList(){
         $rs = $this->Team->teamIdCodeList(); 
         if(!empty($this->request->params['requested'])){ 
-            return array('teamIdCodeList'=> $rs);
+            return $rs;
         }
     }
 
@@ -190,11 +190,11 @@ class TeamsController extends AppController {
             }
         }
         
-        $ztlist = $this->Team->Zone->zoneTeamList();
-        $zoneTeamCodeList = Hash::combine($ztlist, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone');
-        $zoneNameTeamCodeList = Hash::combine($ztlist, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone_name');
-        $this->set('zoneTeamCodeList', $zoneTeamCodeList);
-        $this->set('zoneNameTeamCodeList', $zoneNameTeamCodeList);
+        //$ztlist = $this->Team->Zone->zoneTeamList();
+        //$zoneTeamCodeList = Hash::combine($ztlist, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone');
+        //$zoneNameTeamCodeList = Hash::combine($ztlist, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone_name');
+        $this->set('zoneCodeTeamCodeList', $this->Team->Zone->listZoneCodeTeamIdTeamCode());
+        $this->set('zoneNameTeamCodeList', $this->Team->Zone->listZoneNameTeamIdTeamCode());
         
 
         if(!empty($team_code) && $this->Team->existsByTeamCode($team_code)){
@@ -211,8 +211,16 @@ class TeamsController extends AppController {
         }    
         //$this->render('/Elements/task/open_req');
   }
-  
-  
+/*
+public function test()
+{
+    $rs = $this->Team->teamIdCodeList();
+    $rs2 = $this->Team->zoneTeamList();
+    $data = array('team'=>$rs, 'zone'=>$rs2);
+    $this->set('data', $data);
+	$this->render('/Elements/debug');
+}  
+*/
 
 
 //EOF

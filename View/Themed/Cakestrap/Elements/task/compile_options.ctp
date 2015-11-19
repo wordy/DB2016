@@ -30,16 +30,21 @@
         autoApply: true,
         locale: { format: 'YYYY-MM-DD' },
         ranges: {
-            'All': [moment(c_start), moment(c_end)],
-            'Today to Event': [moment(), moment(dbEventDate).endOf('day')],
-            'Event': [moment(dbEventDate).startOf('day'), moment(dbEventDate).endOf('day')],
-            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            '".Configure::read('EventShortName')."': [moment(c_start), moment(c_end)],
+            'Today to Event': [moment(), moment(DB_EVENT_DATE).add(1, 'day').endOf('day')],
+            'Event Day': [moment(DB_EVENT_DATE).startOf('day'), moment(DB_EVENT_DATE).add(1, 'day').endOf('day')],
+            //'Last Week': [moment().subtract(6, 'days'), moment()],
+            'Last Two Weeks': [moment().subtract(14, 'days'), moment()],
             'This Month': [moment().startOf('month'), moment().endOf('month')],
             'Next Month': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')],
             'DB2015': [moment('2014-11-01').startOf('day'), moment('2015-03-31').endOf('day')],
         } 
     });
+    
+    
+       
+    
+    
         
     ");
     
@@ -111,22 +116,22 @@
                         <label><b>Filter Type</b></label><br>
                         <div id="coViewList" class="btn-group xs-bot-marg" data-toggle="buttons">
                             <label class="btn btn-primary xs-bot-marg  <?php echo ($view_type == 1)? 'active':null; ?>">
-                                <input type="radio" name="data[Compile][view_type]" value="1" id="option2" autocomplete="off" <?php echo ($view_type == 1)? 'checked':null; ?>> Rundown
+                                <input type="radio" name="data[Compile][view_type]" value="1" id="opt1" autocomplete="off" <?php echo ($view_type == 1)? 'checked':null; ?>><i class="fa fa-gears"></i> Rundown
                             </label>
                             <label class="btn btn-darkgrey xs-bot-marg  <?php echo ($view_type == 10)? 'active':null; ?>">
-                                <input type="radio" name="data[Compile][view_type]" value="10" id="option3" autocomplete="off" <?php echo ($view_type == 10)? 'checked':null; ?>> Lead
+                                <input type="radio" name="data[Compile][view_type]" value="10" id="opt10" autocomplete="off" <?php echo ($view_type == 10)? 'checked':null; ?>><i class="fa fa-bookmark-o"></i> Lead
                             </label>
                             <label class="btn btn-danger xs-bot-marg  <?php echo ($view_type == 30)? 'active':null; ?>">
-                                <input type="radio" name="data[Compile][view_type]" value="30" id="option3" autocomplete="off" <?php echo ($view_type == 30)? 'checked':null; ?>> Owing
+                                <input type="radio" name="data[Compile][view_type]" value="30" id="opt30" autocomplete="off" <?php echo ($view_type == 30)? 'checked':null; ?>><i class="fa fa-life-saver"></i> Owing
                             </label>
                             <label class="btn btn-danger xs-bot-marg  <?php echo ($view_type == 31)? 'active':null; ?>">
-                                <input type="radio" name="data[Compile][view_type]" value="31" id="option3" autocomplete="off" <?php echo ($view_type == 31)? 'checked':null; ?>> Waiting
+                                <input type="radio" name="data[Compile][view_type]" value="31" id="opt31" autocomplete="off" <?php echo ($view_type == 31)? 'checked':null; ?>><i class="fa fa-hourglass-half"></i> Waiting
                             </label>
                             <label class="btn btn-yh xs-bot-marg  <?php echo ($view_type == 500)? 'active':null; ?>">
-                                <input type="radio" name="data[Compile][view_type]" value="500" id="option3" autocomplete="off" <?php echo ($view_type == 500)? 'checked':null; ?>> Action Items
+                                <input type="radio" name="data[Compile][view_type]" value="500" id="opt500" autocomplete="off" <?php echo ($view_type == 500)? 'checked':null; ?>><i class="fa fa-flag"></i> Action Items
                             </label>
                             <label class="btn btn-success xs-bot-marg  <?php echo ($view_type == 100)? 'active':null; ?>">
-                                <input type="radio" name="data[Compile][view_type]" value="100" id="option3" autocomplete="off" <?php echo ($view_type == 100)? 'checked':null; ?>> Recent
+                                <input type="radio" name="data[Compile][view_type]" value="100" id="opt100" autocomplete="off" <?php echo ($view_type == 100)? 'checked':null; ?>><i class="fa fa-refresh"></i> Recent
                             </label>
                         </div>
                     </div>
@@ -139,7 +144,7 @@
                 <div class="row">
                     <div class="col-xs-12" id="coViewOpts">
                         <label><b>View Options</b></label>
-                        <a class="helpTTs" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="View Options" data-content="These options control how tasks are displayed. If you 'Compile Tasks' after setting View Options, they will be remembered until you change your Compile & View Options. <br><br><b>View Rundown (Default)</b><br> Shows each task individually. Emphasizes timing and order of tasks<br><br><b>View Threaded</b><br>Emphasizes relationships between tasks, regardless of when they occur.<br><br><b>View/Hide Linkages</b><br>Show or hide linkages (i.e. linked tasks). <br><br><b>View/Hide Details</b><br>Show/hide task details."><i class="fa fa-question-circle text-info"></i></a><br>
+                        <a class="helpTTs" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="View Options" data-content="These are advanced controls over how tasks are displayed. <br><br><b>View Rundown (Default)</b><br> Shows each task individually. Emphasizes timing and order of tasks<br><br><b>View Threaded</b><br>Shows only top-level tasks and direct links to them. Emphasizes relationships between tasks, regardless of when they occur.<br><br><b>View/Hide Linkages</b><br>Show or hide linkages (linked tasks). <br><br><b>View/Hide Details</b><br>Show/hide task details."><i class="fa fa-question-circle text-info"></i></a><br>
                         <button type="button" data-checked="<?php echo (!empty($view_threaded))? 1:0?>" id="coViewThreadedBut" class="btn btn-primary <?php echo ($view_threaded)? 'showing_threaded':'showing_rundown'; ?>">
                             <?php 
                                 echo ($view_threaded)? '<i class="fa fa-list-ol"></i> View Rundown':'<i class="fa fa-indent"></i> View Threaded'; ?>                                   
@@ -181,6 +186,12 @@
             </div>
         </div>
     </div>   
+    <?php 
+        if(isset($single_task) && $single_task != 0){
+            echo '<div class="alert alert-info"><i class="fa fa-hand-o-right"></i> <b>Single Task Mode</b> When viewing a single task, changing any Compile &amp; View Options will redirect you to your compiled tasks.</div>';
+        }
+    
+    ?>
         <?php //echo $this -> Form -> submit('Compile Tasks', array('id' => 'co_compile-submit-button', 'class' => 'btn btn-large btn-yh pull-left'));?> 
 </div>
              
