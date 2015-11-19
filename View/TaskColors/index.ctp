@@ -1,82 +1,5 @@
-<?php
-$this->Js->buffer("
-
-    $('.tc-add-button').on('click', function(event){
-        //var tid = $(this).data('tid');
-        
-        var add_button = $(this);
-        
-        
-        var spinner = $('".$this->Html->image('ajax-loader-small.gif', array('id' => 'spinner'))."');
-        //var ebtd = eb.closest('td');
-        
-        //var ebtdid = ebtd.attr('id');
-        
-        //var ebtr = eb.closest('tr');
-        
-        
-
-        
-        
-        
-        $.ajax( {
-            url:'/task_colors/ajaxAdd/,
-           
-           
-            beforeSend:function () {
-                add_button.text('Saving...');
-                //$(this).dropdown('toggle');
-                var ahid = add.hide();
-                ebtd.append(ahid);                
-                spinner.fadeIn();
-                //$('#spinner').fadeIn();
-            },
-
-            success:function(data, textStatus) {
-                //$('#ajax-edit-load').html(data).hide();
-                new_edit.slideDown('slow');
-                
-                //var_new_edit = ebtr.after(new_row).hide();
-                
-                //new_tr.addClass('ajax-edit-tr');
-                //new_tr.
-                
-                //)
-                //ebtr.after('<tr class=\"ajax-edit-tr\"><td colspan=\"6\">'+data+'</td></tr>');
-                
-                //$('#ajax-edit-load').slideDown('slow');
-                
-              
-                
-                
-            },
-            
-            complete:function (XMLHttpRequest, textStatus) {
-                spinner.fadeOut();
-                //$('#input-conteam-select').select2();
-                
-            }, 
-            type: 'get',
-            dataType:'html',
-          });
-          return false;
-    });
-    
-    
-    
-    
-    
-    
-    
-    
-    
-");
-
-
-?>
-
 <div id="page-container" class="row">
-    <div id="add-new-content" class="col-sm-8 col-sm-offset-2 well">
+    <div id="add-new-content" class="col-sm-10 col-sm-offset-1 well">
         <div class="taskColors form">
             <?php echo $this->Form->create('TaskColor', array(
                 'controller'=>'task_color',
@@ -85,13 +8,10 @@ $this->Js->buffer("
                     'label' => false), 
                 'role' => 'form')); ?>
             <fieldset>
-                <h2><?php echo __('Add Task Color'); ?></h2>
-                <p>
-                    Colors are used to group tasks in free-form ways.  Add colors here to allow more choices.
-                </p>
+                <h1><?php echo __('Add Task Color'); ?></h1>
+                <p>Colors are used to group tasks in free-form ways.  Add colors here to allow more choices.</p>
 <?php echo $this->Form->input('name', array(
-                            'format' => array(
-                                'label', 'between', 'before', 'input', 'after', 'error'),
+                            
                             'type'=>'text',
                             'label'=>'Friendly Name of Colour*',
                             'between'=>'',
@@ -99,17 +19,14 @@ $this->Js->buffer("
                             'placeholder'=>'Choose a Name',
                             'after'=>'<p class="help-block">E.g. Lime Green or Navy Blue</p>',
                             'class'=>'form-control',
-                            'error' => array(
-                                'attributes' => array(
-                                    'wrap' => 'span', 
-                                    'class' => 'help-inline text-danger bolder')))); ?>
+                            )); ?>
                 <div class="form-group">
                     <?php echo $this->Form->label('code', 'Hex Color Code');?>
                     <?php echo $this->Form->input('code', array('class' => 'form-control')); ?>
                     <p class="help-block">6-Character Hex value, starting with #.  E.g. #CCCCCC</p>
                 </div><!-- .form-group -->
             </fieldset>
-            <?php echo $this->Form->submit('Submit', array('class' => 'btn btn-large btn-primary')); ?>
+            <?php echo $this->Form->submit('Save Colour', array('class' => 'btn btn-large btn-yh')); ?>
             <?php echo $this->Form->end(); ?>
         </div><!-- /.form -->
     </div><!-- /#page-content .col-sm-9 -->
@@ -124,7 +41,7 @@ $this->Js->buffer("
 
 		<div class="taskColors index">
 		
-			<h2><?php echo __('Task Colors'); ?></h2>
+			<h1><?php echo __('Task Colors'); ?></h1>
 			
 			<div class="table-responsive">
 				<table cellpadding="0" cellspacing="0" class="table table-striped table-bordered">

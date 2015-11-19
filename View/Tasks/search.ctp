@@ -27,21 +27,26 @@
 <div class="row">
     <div class="col-xs-12">        
         <a href="#" class="back-to-top"><i class="fa fa-2x fa-arrow-circle-o-up"></i> <span class="h4">Top</span></a>
-        <h1>Search Results <?php echo 'for "'.strtoupper($search_term).'"'; ?></h1>
+        <h1><i class="fa fa-search"></i> Search Results <?php echo 'for "'.strtoupper($search_term).'"'; ?></h1>
         <div class="alert alert-info" role="alert">
             <div class="row">
-                <div class="col-md-9">Viewing search results from <b>ANY</b> date ordered by <b>ascending</b> start time.</div>
-                <div class="col-md-3 hidden-print">
-                    <a href="<?php echo $this->Html->url(array('controller'=>'tasks', 'action'=>'compile'))?>" class="btn btn-default ai_hidden pull-right">
-                        <i class="fa fa-gears"></i> Back to Compiled Tasks                                   
-                    </a>
+                <div class="col-md-7">Viewing search results for <b>"<?php echo $search_term; ?>"</b> from <b><?php echo date('M j', strtotime($start_date));?></b> to <b><?php echo date('M j', strtotime($end_date));?></b> ordered by <b>ascending</b> start time.</div>
+                <div class="col-md-5 hidden-print">
+                    <div class="pull-right">
+                        <a href="<?php echo $this->Html->url(array('controller'=>'tasks', 'action'=>'compile'))?>" class="btn btn-default ai_hidden">
+                            <i class="fa fa-gears"></i> Back to Compiled Tasks                                   
+                        </a>
+                        <a href="<?php echo $this->Html->url(array('controller'=>'tasks', 'action'=>'pdfFromSearch', $search_term))?>" class="btn btn-primary ai_hidden">
+                            <i class="fa fa-file-pdf-o"></i> Download Results as PDF                                   
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
         
         <div id="page-content" class="row">
             <div class="col-xs-12">
-                <?php echo $this->element('task/task_search',array('tasks'=>$tasks)); ?>
+                <?php echo $this->element('task/task_search', array('tasks'=>$tasks)); ?>
             </div>
         </div>
     </div>    

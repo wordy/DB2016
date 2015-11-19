@@ -41,16 +41,11 @@
         $dateDurr = date('H:i:s', mktime(0, 0, $iDurr));
         $strDurr = '(<b>Duration: '.$dateDurr.'</b>)';    
     }
-    elseif ($iDurr > 86400){
-        $strDurr = '(<b>Duration: >1 Day</b>)';
-    }
-    else{
-        $strDurr = '(<b>Duration: None</b>)';
-    }
+    elseif ($iDurr > 86400){    $strDurr = '(<b>Duration: >1 Day</b>)';}
+    else{   $strDurr = '(<b>Duration: None</b>)';}
 
 
     $this->Js->buffer("
-    
         $('#eaStartTime".$tid."').datetimepicker({
             sideBySide: true,
             showTodayButton: true,
@@ -72,23 +67,9 @@
             format: 'YYYY-MM-DD', 
         });
         
-        $('#eaInputDetails".$tid."').summernote({
-            height: 150,
-            toolbar: [
-                ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
-                ['para', ['ul', 'ol']],
-                ['insert', ['link']],
-                ['misc', ['undo','redo','help']],
-            ]
-        });
+        
+        bindSummernoteStd('#eaInputDetails".$tid."');
 
-        /*        
-        $('.helpTTs').popover({
-            container: 'body',
-            html:true,
-        });
-
-        */
         $('.inputStartTime').on('dp.change', function(){
             //console.log('got dp-dp.change change from tab_edit');
             var startTime = $(this).data('DateTimePicker').date();
@@ -168,13 +149,25 @@
             'label' => false), 
         'role' => 'form')); 
     ?>
+    <?php echo $this->Form->input('id', array('id'=>'input-task-id_'.$tid, 'type'=>'hidden')); ?>
+    
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="eaValidationContent" id="validation_content_<?php echo $tid?>"></div>
+        </div>
+    </div>
+
+    
+    
+    
+    
+    
     <div class="row" id="eaTask<?php echo $tid;?>">
         <div class="col-md-9">
             
             <div>
-                <?php echo $this->Form->input('id', array(
-                    'id'=>'input-task-id_'.$tid,
-                    'type'=>'hidden')); ?>
+                
 
                 <div class="row">
                     <span class="hiddenTaskId" style = "display:none;"><?php echo $task['Task']['id'];?></span>
@@ -395,6 +388,39 @@
         </div><!--col-md-9-->
         
         <div class="col-md-3">
+                        <div class="well">
+
+                <div class="row">
+        
+        <div class="col-sm-6 col-md-12">        
+            <?php 
+                echo $this->Form->button('<i class="fa fa-save"></i>&nbsp; Save Task', array(
+                    'type' => 'submit',
+                    'id'=>'eaSubmitButton_'.$tid,
+                    
+                    'class' => 'btn btn-yh btn-block eaSubmitButton sm-bot-marg',
+                    'escape' => false
+                ));
+                ?>
+            </div>
+            <div class="col-sm-6 col-md-12">
+                
+            <?php
+            //echo '&nbsp;&nbsp;';
+                echo $this->Form->button('<i class="fa fa-close"></i>&nbsp;Cancel', array(
+                    'class' => 'btn btn-default btn-block eaCancelBut sm-bot-marg',
+                    'id'=>'eaCancelBut'.$tid,
+                    'escape' => false
+                ));
+
+                echo '<span class="eaSpinner" style="display: none; margin-left: 5px; vertical-align: middle;">';
+                echo '<span class="tr_spin"><i class="fa fa-cog fa-spin"></i></span>';
+                echo '</span>'; 
+           ?>
+           </div>
+        </div>
+    </div>  
+            
             <div class="row">
                 <div class="col-sm-12">
                               <div class="panel panel-dark">
@@ -539,59 +565,7 @@
         
         </div><!--col-md-3-->
     </div><!--row-->
-        <div class="panel-footer">
-            <div class="row">
-                    <div class="col-xs-12">
-                        <div class="eaValidationContent" id="validation_content_<?php echo $tid?>"></div>
-                    </div>
-                </div>
-            <div class="row">
-        <div class="col-sm-12">
-            <?php 
-            
-            
-                //echo '<span class="pull-right">';
-                /*
-                echo $this->Form->submit('<i class="fa fa-save"></i> Save Changes', array(
-                    'id'=>'eaSubmitButton_'.$tid, 
-                    'div'=>false, 
-                    'escape'=>false,
-                    'class' => 'eaSubmitButton submit btn btn-large btn-success'));
-            
-            */
-             
-
-            echo $this->Form->button('<i class="fa fa-save"></i>&nbsp; Save Task', array(
-                'type' => 'submit',
-                'id'=>'eaSubmitButton_'.$tid,
-                
-                'class' => 'btn btn-yh',
-                'escape' => false
-            ));
-            
-            
-                echo '&nbsp;&nbsp;';
-
-            echo $this->Form->button('<i class="fa fa-close"></i>&nbsp;Cancel', array(
-                'class' => 'btn btn-default eaCancelBut',
-                'id'=>'eaCancelBut'.$tid,
-                'escape' => false
-            ));
-
-
-/*
-
-
-                echo $this->Html->link('<i class="fa fa-close"></i>&nbsp; Cancel', array('action'=>'compile'), array('escape'=>false, 'class'=>'btn btn-large btn-danger'));
-                echo '&nbsp;&nbsp;';*/
-                echo '<span class="eaSpinner" style="display: none; margin-left: 5px; vertical-align: middle;">';
-                //echo $this->Html->image('ajax-loader.gif', array('id' => 'spinner_img', ));
-                echo $this->Html->image('ajax-loader_old.gif');
-                echo '</span>'; 
-           ?>
-        </div>
-        </div>
-        </div>
+        
 
 
 <?php

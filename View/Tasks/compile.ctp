@@ -35,6 +35,7 @@
         
     $this->Js->buffer("
     var cURL = '".$cURL."';
+    //console.log(cURL);
     
     // Back To Top
     var offset = 420;

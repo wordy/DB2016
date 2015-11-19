@@ -4,7 +4,8 @@
  */
 	// @DBOPS Settings
 	// This must be set to the event date in ISO format YYYY-MM-DD 00:00:00 
-	var dbEventDate = "2016-02-29 00:00:00";
+	var DB_EVENT_DATE = "2016-02-06 00:00:00";
+	
 
 
 
@@ -153,13 +154,13 @@ function multiselect_toggle($el, $btn) {
 	  		$('body').append( '<script> window.location = "/users/login/" </script>' );
 		}
 		else if(request.status !== 200){
-			$('#ajax-content-load').append('<div class="well highlighter">If you\'re seeing this, an error has occurred on the server. This information will be really useful to help track it down.<br/><ul><li>Error: '+request.status+' (' +request.statusText+ ')</li><li>URL: '+settings.url+'</li></ul></div>');	
+				$('#ajax-content-load').append('<div class="well" style="background-color: #d9edf7;">If you\'re seeing this, an error was reported on your last connection to the server. This error message will help track it down.<br/><ul><li>Error: '+request.status+' (' +request.statusText+ ')</li><li>URL: '+settings.url+'</li></ul></div>');	
 		}
 	});
 	
 
 
-    $('div.flash-success').delay(3000).fadeOut();
+    //$('div.flash-success').delay(3000).fadeOut();
 
 
             

@@ -1,9 +1,9 @@
 <?php
     $monday = strtotime('last monday', strtotime('tomorrow'));
-    $wk_start = date('F dS', $monday);
+    $wk_start = date('F jS', $monday);
 ?>
 
-<h2><?php echo Configure::read('EventShortName'); echo ' '.$team_code;?> Compiler Updates (Wk of <?php echo date('M dS',$monday);?>)</h2>
+<h2><?php echo Configure::read('EventShortName'); echo ' '.$team_code;?> Compiler Updates (Wk of <?php echo date('M jS',$monday);?>)</h2>
 <?php 
 
     if(empty($next_meeting) && empty($recent_request) && empty($recent_links)){

@@ -85,29 +85,50 @@ class Zone extends AppModel {
 		)
 	);
     
-    public function zoneTeamList(){
-        $rs = $this->find('all', array(
-            'contain'=>array('Team')
-        ));
-    
-        return $rs;
+    public function getZonesTeams(){
+        $result = Cache::read('get_zones_teams', 'short');
+        
+        if (!$result) {
+            $result = $this->find('all', array('contain'=>array('Team')));
+            Cache::write('get_zones_teams', $result, 'short');
+        }
+        return $result;
     }
     
     public function zoneTeamUserList(){
-        $rs = $this->find('all', array(
-            'contain'=>array(
-                'Team',
-                'Team.TeamsUser.User'
-            ))
-        );
-    
-        return $rs;
+        $result = Cache::read('zone_zone_team_user_list', 'short');
+        
+        if (!$result) {
+            $result = $this->find('all', array('contain'=>array('Team', 'Team.TeamsUser.User')));
+            Cache::write('zone_zone_team_user_list', $result, 'short');
+        }
+        return $result;
     }
     
     
+    public function listZoneCodeTeamIdTeamCode(){
+        $result = Cache::read('zone_code_team_id_team_code_list', 'short');
+
+        if (!$result) {
+            $rs = $this->getZonesTeams();
+            $result = Hash::combine($rs, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone');
+
+            Cache::write('zone_code_team_id_team_code_list', $result, 'short');
+        }        
+        return $result;
+    }    
     
-    
-    
+    public function listZoneNameTeamIdTeamCode(){
+        $result = Cache::read('zone_name_team_id_team_code_list', 'short');
+
+        if (!$result) {
+            $rs = $this->getZonesTeams();
+            $result = Hash::combine($rs, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone_name');
+
+            Cache::write('zone_name_team_id_team_code_list', $result, 'short');
+        }        
+        return $result;
+    }    
     
     
     

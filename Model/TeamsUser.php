@@ -71,8 +71,7 @@ class TeamsUser extends AppModel {
     }
 
     public function beforeSave($options = array()) {
-        
-        // TODO: Upgrade to uniquekey someday.  For now, ensures only 1 assocaition between user and team.
+        // TODO: Upgrade to uniquekey.  For now, ensures only 1 assocaition between user and team.
         $conditions = array(
             'user_id'=>$this->data['TeamsUser']['user_id'],
             'team_id'=>$this->data['TeamsUser']['team_id']);
@@ -91,14 +90,14 @@ class TeamsUser extends AppModel {
         
         $this->deleteAll(array(
             'TeamsUser.team_id'=>$team_id
-        ), 
-        false, true);
+            ), 
+            false, 
+            true
+        );
         return true;    
     }
 
     public function getTeamsByUser($user_id){
-//        $this->resursive=1;
-        
         $rs = $this->find('all', array(
             'conditions'=>array(
                 'TeamsUser.user_id'=>$user_id),
@@ -135,7 +134,6 @@ class TeamsUser extends AppModel {
             'contain'=> array(
                 'User'=>array(
                     'conditions'=>array('User.user_role_id'=>10)
-                
                 )
             ),
             'order'=>array('TeamsUser.team_id ASC')));
@@ -147,11 +145,8 @@ class TeamsUser extends AppModel {
         return array();
     }
 
-
-
-    
     public function getControlledTeamsList($user_id){
-    $this->resursive=1;
+        $this->resursive=1;
         
         $rs = $this->find('all', array(
             'conditions'=>array(
@@ -168,7 +163,6 @@ class TeamsUser extends AppModel {
     }
     
     public function getControlledTeamsTidList($user_id){
-    //$this->resursive=1;
         $rs = $this->find('all', array(
             'conditions'=>array(
                 'TeamsUser.user_id'=>$user_id),
@@ -186,7 +180,6 @@ class TeamsUser extends AppModel {
     
     
     public function getTeamCodesByUser($user){
-//        $this->resursive=1;
         $rs = $this->find('all', array(
             'conditions'=>array(
                 'TeamsUser.user_id'=>$user),
@@ -199,11 +192,6 @@ class TeamsUser extends AppModel {
         
         return array();
     }
-    
-    
-    
-    
-    
     
     public function addUserToTeam($user_id=null, $team_id=null){
         if($user_id && $team_id){
@@ -222,36 +210,44 @@ class TeamsUser extends AppModel {
     //1113
     public function removeUserFromTeam($user_id, $team_id){
         if($user_id && $team_id){
-            $conditions = array('conditions'=>array('team_id'=>$team_id, 'user_id'=>$user_id));    
-        
-        $tu_rs = $this->find('first', $conditions);
-        
-        $this->delete($tu_rs['TeamsUser']['id'], false);
-        
+            $conditions = array(
+                'conditions'=>array(
+                    'team_id'=>$team_id, 
+                    'user_id'=>$user_id
+                )
+            );    
+            $tu_rs = $this->find('first', $conditions);
+            $this->delete($tu_rs['TeamsUser']['id'], false);
         }
     }
     
     public function existsByTeamUser($team, $user){
         $rs = $this->find('first', array('TeamsUser.team_id'=>$team, 'TeamsUser.user_id'=>$user));      
+        return (!empty($rs))? true: false;
+    }
+/**
+ * Gets users subscribed to receive digest, indexed by team
+ * @param {Array} $teams list of teams to fetch for. Default = ALL
+ * @return {Array} $users List of users [team]=>[n]=>[user]
+ * @since 2015
+ * TODO: Supports only sending digest to TLs
+ **/
+    public function getDigestUsersByTeam($teams = array()){
+        $conditions = array(
+            'User.user_role_id' => 10, 
+            'User.pref_digest' => true,
+            'User.email <> ""',
+        );
         
-        if(!empty($rs)){
-            return true;
+        if(!empty($teams)){
+            $c2 = array('TeamsUser.team_id' => $teams);
+            $conditions = array_merge($conditions, $c2);
         }
         
-        else{ return false; }
-        
-    }
-    
-    // 2015
-    public function getDigestUsersByTeam(){
         $rs = $this->find('all', array(
-            'conditions'=>array('User.user_role_id'=>10, 'User.pref_digest'=>true),
-            'contain'=>array(
-                'User'=>array(
-                    'conditions'=>array('User.email <> ""')
-                ),  
-            ),
-        ));
+            'conditions'=>$conditions,
+            'contain'=>array('User'))
+        );
         
         $rs = Hash::combine($rs, '{n}.TeamsUser.user_id', '{n}', '{n}.TeamsUser.team_id');
         
@@ -264,12 +260,11 @@ class TeamsUser extends AppModel {
                     'user_handle'=>$user['TeamsUser']['user_handle'],
                     'team_code'=>$user['TeamsUser']['team_code'],
                     'team_id'=>$user['TeamsUser']['team_id'],
+                    'last_digest'=>$user['User']['last_digest'],
                 );    
             }
-            
         }
         return $rs2;
-        
     }
         
     

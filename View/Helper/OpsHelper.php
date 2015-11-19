@@ -222,7 +222,7 @@ class OpsHelper extends AppHelper {
 
         
         foreach ($tt_l as $tid => $tcode){
-            $buttons13.= '<span class="btn btn-ttrid1 btn-xxs"> '.$tcode.' </span>';    
+            $buttons13.= '<span class="btn btn-ttrid1 btn-xxs"> '.$tcode.' </span> ';    
         }                                    
 
         if(count($tt_nl) > 10){
@@ -230,7 +230,8 @@ class OpsHelper extends AppHelper {
         }
         else{
             foreach ($tt_nl as $tid => $tcode){
-                $buttons13.= '<span class="btn btn-xxs btn-default"> '.$tcode.' </span>';    
+                //$buttons13.= '<span class="btn btn-xxs btn-default"> '.$tcode.' </span>&nbsp;';
+                $buttons13.= '<span style="border: 1px solid #ddd;"> '.$tcode.' </span> ';    
             }
         }
         
@@ -1468,8 +1469,8 @@ class OpsHelper extends AppHelper {
         }
         // Important seconds
         elseif($diff < 60){
-            $dur = ($show_dur)? '<br/>('.$diff.'s)':'';
-            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).$dur;
+            $dur = ($show_dur)? ' ('.$diff.'s)':'';
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' -<br>'.$this->Time->format('g:i:s A', $end).$dur;
         }
         // < hr
         elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
@@ -1484,14 +1485,15 @@ class OpsHelper extends AppHelper {
         elseif($diff >= 3600 && $diff < 86400){
             $s = ($dh > 1)? 's':'';
             $a = ($m1 != $m2)? 'A':'';  // Show only if meridian changed (e.g. 10am-12pm but 10-12pm)
+            $br = !empty($a)? ' -<br>':' - ';
              
             if($dm == 0){
                 $dur = ($show_dur)? '<br/>('.$dh.' hr'.$s.')':'';
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).$dur;
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
             }
             else{
                 $dur = ($show_dur)? '<br/>('.$dh.' hr'.$s.', '.$dm.' min)':'';
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).$dur;
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
             }
         }
         // >1 day or spans days

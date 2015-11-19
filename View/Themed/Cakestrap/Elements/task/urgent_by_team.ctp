@@ -27,7 +27,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
     ?>
         <div class="row">
             <div class="col-md-12">
-                <h2>Next Ops Meeting</h2>
+                <h3>Next Ops Meeting</h3>
                 <?php 
                     $dueBut = '';
                     $viewBut = $this->Html->link('<i class="fa fa-eye"></i> View', array(
@@ -51,7 +51,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
             <div class="row astHeading" data-tid="'.$dtask['Task']['id'].'">
                 <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j\<\b\r\>g:i A', strtotime($dtask['Task']['start_time'])).'</div>
                 <div class="col-xs-3 col-sm-4 col-md-3"><strong>'.$dtask['Task']['task_type'].'</strong><br/>
-                <strong>'.$this->Ops->makeTeamsSigNoPush($dtask['TasksTeam'], $zoneTeamCodeList).'</strong></div> 
+                <strong>'.$this->Ops->makeTeamsSigNoPush($dtask['TasksTeam'], $zoneCodeTeamCodeList).'</strong></div> 
                 <div class="col-xs-5 col-sm-4 col-md-5">'.$dtask['Task']['short_description'].'</div>
                 <div class="col-xs-2 col-sm-2 col-md-2">
                     <div class="pull-right">
@@ -72,7 +72,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
         <div class="col-md-12">
         <?php
             if(!empty($due_tasks)){
-                echo '<h2>Due Soon</h2>';
+                echo '<h3>Due Soon</h3>';
             }
             
             foreach($due_tasks as $dtask){
@@ -101,7 +101,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
             <div class="row astHeading" data-tid="'.$dtask['Task']['id'].'">
                 <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j\<\b\r\>g:i A', strtotime($dtask['Task']['start_time'])).'</div>
                 <div class="col-xs-3 col-sm-4 col-md-3"><strong>'.$dtask['Task']['task_type'].'</strong><br/>
-                <strong>'.$this->Ops->makeTeamsSigNoPush($dtask['TasksTeam'], $zoneTeamCodeList).'</strong></div> 
+                <strong>'.$this->Ops->makeTeamsSigNoPush($dtask['TasksTeam'], $zoneCodeTeamCodeList).'</strong></div> 
                 <div class="col-xs-5 col-sm-4 col-md-5">'.$dtask['Task']['short_description'].'</div>
                 <div class="col-xs-2 col-sm-2 col-md-2">
                     <div class="pull-right">
@@ -115,7 +115,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
     }
 
     if(!empty($nodue_tasks)){
-        echo '<h2>Ending Soon</h2>';
+        echo '<h3>Ending Soon</h3>';
     }
 
         foreach($nodue_tasks as $ndtask){
@@ -137,7 +137,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
                 <div class="row astHeading" data-tid="'.$ndtask['Task']['id'].'">
                     <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j\<\b\r\>g:i A', strtotime($ndtask['Task']['start_time'])).'</div>
                     <div class="col-xs-3 col-sm-4 col-md-3"><strong>'.$ndtask['Task']['task_type'].'</strong><br/>
-                    <strong>'.$this->Ops->makeTeamsSigNoPush($ndtask['TasksTeam'], $zoneTeamCodeList).'</strong></div> 
+                    <strong>'.$this->Ops->makeTeamsSigNoPush($ndtask['TasksTeam'], $zoneCodeTeamCodeList).'</strong></div> 
                     <div class="col-xs-5 col-sm-4 col-md-5">'.$ndtask['Task']['short_description'].'</div>
                     <div class="col-xs-2 col-sm-2 col-md-2"><div class="pull-right">'.$viewBut.'</div></div>
                 </div>
@@ -146,7 +146,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
         }
 
         if(empty($nodue_tasks) && empty($due_tasks)){
-            echo '<h2>Due or Ending Soon</h2><div class="alert alert-success sm-bot-marg" role="alert">
+            echo '<h3>Due or Ending Soon</h3><div class="alert alert-success sm-bot-marg" role="alert">
                 <i class="fa fa-lg fa-thumbs-o-up"></i>&nbsp; <b>Nice! </b>There are no upcoming items due for the team(s) selected.
             </div>';
         }

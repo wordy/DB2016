@@ -30,10 +30,17 @@ class TaskType extends AppModel {
 	);
     
     public function makeListByCategory(){
-        $rs = $this->find('list', array(
-            'fields'=>array('TaskType.id','TaskType.name', 'TaskType.grouping')));
+        $result = Cache::read('task_types_list', 'short');
         
-        return $rs;
+        if(!$result){
+            $result = $this->find('list', array(
+                'fields'=>array('TaskType.id','TaskType.name', 'TaskType.grouping'))
+            );
+            
+            Cache::write('task_types_list', $result, 'short');
+        }
+        
+        return $result;
     }
 
 }

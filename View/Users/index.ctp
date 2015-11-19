@@ -22,13 +22,6 @@
                     <h4 class="list-group-item-heading"><i class="fa fa-newspaper-o"></i> Send Digest to All</h4>
                     <p class="list-group-item-text">Sends digest to all team leads who are subscribed.</p>
                 </a>
-
-                <a href="/users/resetPassword" class="list-group-item">
-                    <h4 class="list-group-item-heading"><i class="fa fa-refresh"></i> Password Reset</h4>
-                    <p class="list-group-item-text">Help users that have forgotten their passwords by resetting.</p>
-                </a>
-
-
             </div>
         </div>
     </div>
@@ -137,6 +130,7 @@
 			<?php echo $this->Html->link(__('View'), array('action' => 'view', $user['User']['id']), array('class' => 'btn btn-default btn-xs')); ?>
 			<?php echo $this->Html->link(__('Profile'), array('action' => 'profile', $user['User']['id']), array('class' => 'btn btn-default btn-xs')); ?>
 			<?php echo $this->Html->link(__('Edit'), array('action' => 'edit', $user['User']['id']), array('class' => 'btn btn-default btn-xs')); ?>
+			<?php echo $this->Html->link(__('Welcome Email'), array('action' => 'resendWelcomeEmail', $user['User']['id']), array('class' => 'btn btn-default btn-xs')); ?>
 			<?php echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $user['User']['id']), array('class' => 'btn btn-default btn-xs'), __('Are you sure you want to delete # %s?', $user['User']['id'])); ?>
 		</td>
 	</tr>

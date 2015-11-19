@@ -43,51 +43,10 @@
     
     $cntCtrl = (!empty($ateams))? count($uControlledATeams): 0;    
 
-    
+/*    
     $this->Js->buffer("
         var lpt_id = ".$task['Task']['team_id'].";
-    /*
-    $('button.addTask').on('click', function(e){
-        e.preventDefault();
-        var stime = $(this).parents('.task-panel').find('.task-panel-heading').data('stime');
-        addNewTask(stime);
-    });
-    
-    $('button.addLink').on('click', function(e){
-        var tid = $(this).parents('.task-panel').find('.task-panel-heading').data('tid');
-        var tm_id = $(this).parents('.task-panel').find('.task-panel-heading').data('team_id');
-        var jsonCIN = $(this).parents('.task-panel').find('.jsonCIN').html();
-        var jqCIN = $.parseJSON(jsonCIN);
-        var opts = '';
-
-        $('#teamAddLinkedModal').find('span.hiddenParentId').html(tm_id);
-        $('#teamAddLinkedModal').find('span.hiddenTid').html(tid);
-        
-        // TODO: This apparently fails in IE<9
-        var numCIN = Object.keys(jqCIN).length;
-
-        if(numCIN == 1){
-            var from_team = Object.keys(jqCIN)[0];
-            addNewLinkedTask(tid, from_team, tm_id); 
-        }      
-        else{
-            $.each(jqCIN, function(i,e){
-                opts += '<option value=\"'+i+'\">'+e+'</option>';
-            });
-        
-            $('#selectLinkedTeam').html(opts);
-            $('#teamAddLinkedModal').modal('show');
-        }
-    });        
-        
-        $('.helpTTs').popover({
-            container: 'body',
-            html:true,
-        });
-        */
-        
-            
-    ");
+    ");*/
 
     //Figure out current team contributions
     /*

@@ -50,13 +50,19 @@ $uStatuses = array(
             var spos = txt.indexOf("Strong");
             var form = this;
             var match_txt = $('.matchMsg').text();
+            var curr_pass = $('#userCurrentPass').val();
+            //alert(curr_pass);
             $(form).find('.chooseError').remove();
 
-            if(match_txt != 'Passwords match.'){
+            if (!curr_pass || curr_pass.length === 0){
+                $html = '<div class="alert alert-danger chooseError"><b>Enter Current Password: </b>Please enter your current password.</div>';
+                $('#choosePassErrorMsg').html($html).fadeIn('fast');
+            }
+            else if(match_txt != 'Passwords match.'){
                 $html = '<div class="alert alert-danger chooseError"><b>Password Mismatch: </b>Please re-enter password and confirmation.</div>';
                 $('#choosePassErrorMsg').html($html);
             }
-            else if (txt && spos != -1 && match_txt == 'Passwords match.'){
+            else if (txt && spos != -1 && match_txt == 'Passwords match.' && curr_pass){
                 form.submit();    
             }
             else{
@@ -100,7 +106,7 @@ $uStatuses = array(
     });
 </script>
 <div id="page-container" class="container">
-    <h1><?php echo 'Preferences for '.$user['User']['handle']; ?></h1>
+    <h1>Preferences <?php if(isset($user['User']['handle'])){echo 'for '.$user['User']['handle'];} ?></h1>
     <p>Set preferences related to your compiler account.</p>
     
 
@@ -108,6 +114,8 @@ $uStatuses = array(
 
     	<div class="users form well">
     		<?php echo $this->Form->create('User', array(
+                'action'=>'prefs',
+            
     			 'inputDefaults' => array(
     			     'label' => false), 
     		     'role' => 'form',
@@ -177,7 +185,7 @@ $uStatuses = array(
                     <div class="col-xs-6">
                        <div class="form-group">
                     <?php echo $this->Form->label('current_pass', 'Current Password*');?>
-                    <?php echo $this->Form->input('current_pass', array('type'=>'password', 'class' => 'form-control')); ?>
+                    <?php echo $this->Form->input('current_pass', array('id'=>'userCurrentPass','type'=>'password', 'class' => 'form-control')); ?>
                     <p class="help-block">Enter your current password.</p>
                 </div><!-- .form-group -->
                     </div>

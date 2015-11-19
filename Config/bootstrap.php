@@ -22,8 +22,30 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 // Setup a 'default' cache configuration for use in the application.
 Cache::config('default', array('engine' => 'File'));
+
+Cache::config('short', array(
+    'engine' => 'File',
+    //'duration' => '+1 hours',
+	'duration' => '+1 hours',
+    'path' => CACHE,
+    'prefix' => 'cake_short_'
+));
+
 
 /**
  * The settings below can be used to set additional paths to models, views and controllers.
@@ -130,10 +152,10 @@ CakePlugin::load('Filepicker');
 //  Dragon Ball Specific Global Vars
 
 // Event Vars
-Configure::write('EventLongDate','February 29, 2016');
+Configure::write('EventLongDate','February 6, 2016');
 Configure::write('EventLongName','Dragon Ball 2016');
 Configure::write('EventShortName','DB2016');
-Configure::write('EventDate','2016-02-29');
+Configure::write('EventDate','2016-02-06');
 
 // Compiler Specific Variables
 Configure::write('AppShortName','DB2016');
