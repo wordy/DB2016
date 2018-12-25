@@ -32,17 +32,18 @@ class AssignmentsController extends AppController {
         }
         
         // The owner of a task can edit and delete it
+        /*
         if (in_array($this->action, array(
                 'edit', 
                 'delete',
             ))){
                 $task_id = $this->request->params['pass'][0];
             
-            if ($this->Task->isControlledBy($task_id, $user)) {
+            if ($this->Assignment->isControlledBy($task_id, $user)) {
                 return true;
             }
         }
-
+*/
         return parent::isAuthorized($user);
     }
 

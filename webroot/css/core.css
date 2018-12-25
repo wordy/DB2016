@@ -82,8 +82,8 @@ body {
 .mm35, .mml35{left:57.6%;}
 .mm40, .mml40{left:66.1%;}
 .mm45, .mml45{left:74.2%;}
-.mm50, .mml50{left:81.9%;}
-.mm55, .mml55{left:90.5%;}
+.mm50, .mml50{left:82.1%;}
+.mm55, .mml55{left:90.72%;}
 .mm60, .mml60{left:96.7%;}
 
 
@@ -549,7 +549,7 @@ hr.inSubtask{
 	padding: 3px 4px;
 	line-height: 1;
 	border-radius: 0px;
-	margin: 0px 0px 3px 0px;
+	margin: 0px 2px 3px 0px;
 }
 
 .btn-xxxs {

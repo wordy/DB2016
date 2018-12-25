@@ -590,28 +590,6 @@ class Task extends AppModel {
                 $this->Change->setParent($this->id, $after['Task']['parent_id']);
             }
         }
-/*
-        if(!empty($this->data['Task']['Assignments'])){
-            //$this->log('hit aftersave in Task');
-            $new_ass = $this->data['Task']['Assignments'];
-            $task = $this->data['Task']['id'];
-            $tba = array_diff($new_ass, $this->old_assignments);
-            $tbd = array_diff($this->old_assignments, $new_ass);
-            
-            foreach($tba as $add){
-                $this->Assignment->assignActorToTask($task, $add);    
-            }
-            
-            foreach($tbd as $del){
-                $this->Assignment->deleteByTaskAndActor($task, $del);
-            }
-        }
-*/
-
-
-
-
-
     }
 
     public function beforeDelete($cascade=true){
@@ -1267,7 +1245,7 @@ class Task extends AppModel {
     /*******************************
      * View Types
      * 1: Rundown
-     * 2: Hourly By Actor
+     * 2: Timeline
      * 10: Lead Only
      * 30: Incoming Open Request
      * 31: Outgoing Open Request
@@ -1282,7 +1260,7 @@ class Task extends AppModel {
             $useSubquery = true;
         }
 
-        // Hourly by Actor
+        // Hourly Event Timeline
         if($view_type == 2){
             $limit = 500;
             //$date_event= Configure::read('EventDate');

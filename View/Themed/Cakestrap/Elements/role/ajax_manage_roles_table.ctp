@@ -23,7 +23,7 @@
 				?>
             	<tr>
             		<td><?php echo ($doPrint)? '<b>'.h($role['Team']['code']).'</b>':''; ?>&nbsp;</td>
-            		<td><?php echo '<button type="button" class="btn btn-xs btn-darkgrey">@'.h($role['Role']['handle']).'</button>'; ?>
+            		<td><?php echo '@'.h($role['Role']['handle']); ?>
                     <?php if($userRole >=5000000000):?>
                     <td>
                         <?php echo $this->Html->link(__('Edit'), array('action' => 'edit', $role['Role']['id']), array('class' => 'btn btn-primary btn-xs')); ?>

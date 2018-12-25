@@ -77,6 +77,21 @@ class Assignment extends AppModel {
         //$this->virtualFields['priority_date'] = sprintf('LEAST((GREATEST(0, DATE(%s.due_date))), DATE(%s.end_time))', $this->alias, $this->alias);
     }
 
+/*
+    public function isControlledBy($id, $user){
+        $owner = $this->field('team_id', array('id' => $id)); 
+        $user_teams = $user['Teams'];
+        
+        if(in_array($owner, $user_teams)){
+            return true;
+        }
+        return false;
+    }
+*/
+
+
+
+
     public function beforeSave($options=array()) {
         //$this->log($this->data);
         $role_id = ($this->data['Assignment']['role_id'])?: null;

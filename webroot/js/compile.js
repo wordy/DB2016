@@ -31,7 +31,7 @@ $(document).ready(function () {
 	            	spinner.fadeIn('fast');
                 },
                 success:function(data, textStatus) {
-                    tbody_div.html(data).addClass('is_vis').slideDown(300);
+                    tbody_div.html(data).addClass('is_vis').slideDown(250);
                     tdheading_div.addClass('fetched');
                     var new_lpts = tbody_div.find('.linkableParentSelect');
                     bindToSelect2(new_lpts);
@@ -46,7 +46,7 @@ $(document).ready(function () {
             });
         }  
         else {  // Details are visible
-            tbody_div.removeClass('is_vis').slideUp(300);
+            tbody_div.removeClass('is_vis').slideUp(250);
         }
         return false;
     });

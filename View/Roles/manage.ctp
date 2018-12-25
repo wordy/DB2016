@@ -75,9 +75,6 @@
                                 'after' => '<span class="input-group-addon"><i class="fa fa-id-badge"></i></span>', 
                                 'class' => 'form-control'));
                             ?>
-                            <div class="alert alert-info slim-alert stHelpWhenTC collapse">
-                                <i class="fa fa-clock-o"></i> <b>Time Sync: </b> Start time is controlled by the linked task &amp; Offset.
-                            </div>
                         </div>
                         
                         <div class="row">

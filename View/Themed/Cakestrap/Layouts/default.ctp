@@ -37,7 +37,8 @@
         //echo $this->Html->script('libs/bootstrap-multiselect');
         //echo $this->Html->script('libs/jquery-1.10.2.min');
         //echo $this->Html->script('libs/bootstrap.min');
-        echo $this->Html->script('https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js');
+        //echo $this->Html->script('https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js');
+        echo $this->Html->script('https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js');
         echo $this->Html->script('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js');
         echo $this->fetch('script');
         echo $this->fetch('scriptTop');
