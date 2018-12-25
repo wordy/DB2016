@@ -281,4 +281,9 @@
 </div>    
 
 
+<?php 
+echo Inflector::pluralize('event_information');
+
+
+?>
 

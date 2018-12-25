@@ -8,7 +8,13 @@
             </button>
 		<?php echo $this->Html->Link(Configure::read('AppShortName').' Operations Comittee', '/', array('class' => 'navbar-brand')); ?>
 	</div><!-- /.navbar-header -->
-
+        <?php
+        /*
+        <ul class="nav navbar-nav">
+            <li><?php echo $this->Html->link(__('<i class="fa fa-info-circle"></i> Event Information'), array('controller'=>'event_infos', 'action'=>'info'), array('escape'=>false));?></li>
+       </ul>
+         */
+         ?>
     <div class="collapse navbar-collapse navbar-ex1-collapse">
         <?php /*
         <ul class="nav navbar-nav">

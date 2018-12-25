@@ -38,10 +38,13 @@ class ActionableType extends AppModel {
 	);
     
     public function makeList(){
-        $rs = $this->find('list', array(
-            'fields'=>array('ActionableType.id','ActionableType.name')));
-
-        return $rs;
+        $result = Cache::read('actionable_types_list', 'short');
+        
+        if(!$result){
+            $result = $this->find('list', array('fields'=>array('ActionableType.id','ActionableType.name')));
+            Cache::write('actionable_types_list', $result, 'short');
+        }
+        return $result;
     }
     
 }

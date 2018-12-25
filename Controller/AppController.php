@@ -22,8 +22,6 @@
  */
 App::uses('Controller', 'Controller');
     
-
-
 /**
  * Application Controller
  *
@@ -43,17 +41,13 @@ class AppController extends Controller {
         'Auth' => array(
             'loginRedirect' => array('controller' => 'tasks', 'action' => 'compile'),
             'logoutRedirect' => array('controller' => 'users', 'action' => 'login'),
-            'authError' => 'You will need to sign in to view that page',
-            //'authError'=> null,
+            'authError' => 'You will need to sign in to view that page (Error: Auth Denied Access)',
             'authorize' => array('Controller'),
             'ajaxLogin' => '/Elements/user/unauth_ajax_redirect',
         ),
-        
     );
     
-	public $helpers = array(
-		'Session', 'Html', 'Js', 'Form', 'Ops', 'Filepicker.Filepicker',
-	);
+	public $helpers = array('Session', 'Html', 'Js', 'Form', 'Ops');
 
    public function isAuthorized($user) {
         // Admin can access every action
@@ -67,28 +61,23 @@ class AppController extends Controller {
             return true;
         }*/
 
-// Default deny
+        // Default deny
         if($this->request->is('ajax')) {
             $this->response->type('json');
             $this->response->statusCode(401);
             return json_encode(array('status' => 'ERROR', 'message' => 'Unauthorized'));
-            //$this->response->send();
-            //$this->_stop();
+            //$this->response->body(json_encode(array('status' => 'ERROR', 'message' => 'Unauthorized')));
         }        
         
-        $this->Session->setFlash(__('Your permissions don\'t allow you to access that.'), 'flash/auth_error');
-        //$this->Auth->authError(__('Whoops, it looks like your permissions don\'t allow you to access that.'));
+        $this->Session->setFlash(__('Your permissions don\'t allow you to access that (Error: Not Authorized).'), 'flash/auth_error');
         return false;
     }
    
     public function beforeFilter(){
-        //parent::beforeFilter();
+        parent::beforeFilter();
         
         // Allow All to see the root index (for example)
-        $this->Auth->allow('display','info');
-          
-        
-        //$this->Auth->autoRedirect = false;
+        $this->Auth->allow('display');
         
         if ($this->request->is('ajax')) {
             Configure::write('debug', 0);
@@ -96,38 +85,23 @@ class AppController extends Controller {
             $this->layout = 'ajax';
         }
                 
-$this->Auth->flash['key']='auth';
-$this->Auth->flash['element']='auth_error';
-        
+        $this->Auth->flash['key']='auth';
+        $this->Auth->flash['element']='auth_error';
     }
-    /*
-    public function redirect($url, $status = null, $exit = true) {
-        // this statement catches not authenticated or not authorized ajax requests
-        // AuthComponent will call Controller::redirect(null, 403) in those cases.
-        // with this we're making sure that we return valid JSON responses in all cases
-        if($this->request->is('ajax') && $status == 403) {
-            $this->response = new CakeResponse(array('code' => 'code'));
-            $this->response->send();
-            return $this->_stop();
-        }
-        return parent::redirect($url, $status, $exit);
-    }
-*/
-
-
+   
     public function sayHello(){
         $rs =  $this->Task->Team->find('list');
-        
         return $rs;
-        
     }
-
-
-
-
-
-
-
-
-
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
+//EOF
 }

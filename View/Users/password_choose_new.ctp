@@ -3,12 +3,12 @@
     
     $uid = null;
     
-    
+    /*
     $this->Js->buffer("
     
 
     ");
-    
+    */
     echo $this->Form->create('User', array(
         'action'=>'chooseNewPass',
         //'url'=>'/users/chooseNewPass/'.$reset_token,
@@ -85,10 +85,25 @@
 <div class="row">
     <div class="col-xs-12 col-md-12">
         <h1>Choose New Password</h1>
-            <ul>
-                <li>Please ensure you choose a strong password (7+ characters with a mix of letters, numbers and special characters).</li>
-                <li>If you forget your password again later, you can reset it from the login page.</li>
-            </ul>
+        <ul>
+            <li>You will need to set at least a "Strong" password, though "Very Strong" is preferred!</li>
+            <li>If you forget your password, you can reset it from the login page.</li>
+        </ul>
+        
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1 col-xs-12">
+        <div class="alert alert-info">
+            <h4><i class="fa fa-thumbs-o-up"></i> Tips for Choosing a Strong Password</h4>
+                <ul>
+                    <li>7+ Characters, mix LEtTeR cAsEs, include numbers and/or special characters (%$^@*#!)</li>
+                    <li>OR: try a passphrase - "I HATE remembering passwords!!!" is a secure password that's easy to remember.</li>
+                </ul>
+            
+        </div>
+                
+            </div>
+        </div>
+            
         <div class="well">
 
             <div class="row" id="pwd-container">

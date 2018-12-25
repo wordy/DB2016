@@ -110,7 +110,7 @@ class ZonesController extends AppController {
 		$this->redirect(array('action' => 'index'));
 	}
     
-    
+/*    
     public function ztlist(){
         $rs = $this->Zone->find('all', array(
             'contain'=>array('Team'),
@@ -123,8 +123,20 @@ class ZonesController extends AppController {
     }
     
 
+public function test()
+{
+    $rs = $this->Zone->getZonesTeams();
+    $rs2 = $this->Zone->listZoneCodeTeamIdTeamCode();
+    $rs3 = $this->Zone->listZoneNameTeamIdTeamCode();
     
+    $data = array('team'=>$rs, 'second'=>$rs2, 'thirs'=>$rs3);
+    $this->set('data', $data);
+    $this->render('/Elements/debug');
+}  
+
+
     
+    */
     
     
     

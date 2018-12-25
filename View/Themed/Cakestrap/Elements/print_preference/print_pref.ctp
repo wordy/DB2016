@@ -83,7 +83,7 @@
             data: data,
             url: '/print_prefs/changePref',
             beforeSend:function () {
-                cp_title.append('<span class=\"tr_spin\">".$this->Html->image('ajax-loader_old.gif')."</span>');
+                cp_title.append('<span class=\"tr_spin\"><i class=\"fa fa-cog fa-spin\"></i></span>');
             },
             success:function(data, textStatus) {
                 par_div.find('span.cpPrint i').data('hide_task', data.hide_task);

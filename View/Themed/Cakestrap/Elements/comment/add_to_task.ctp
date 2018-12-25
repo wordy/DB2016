@@ -15,6 +15,13 @@
             var subBut = $(this).find('.acSubmitButton');
             var valCont = $(this).find('.acValidationContent');
             var spinner = $(this).find('.acSpinner');
+            var comment = $(this).find('.comment-text');
+            var comment_text = comment.code();
+            
+            if(comment_text == '' || comment_text == '<p><br></p>'){
+                return false;    
+            }
+            
             
             $.ajax( {
                 url: $(this).attr('action'),
@@ -129,10 +136,7 @@
                                     'id'=>'cBox'.$tid,
                                     'class'=>'clear-comment btn btn-large btn-danger'));
                             echo '&nbsp;&nbsp;';
-                            echo '<span class="acSpinner" style="display: none; margin-left: 5px; vertical-align: middle;">';
-                            //echo $this->Html->image('ajax-loader.gif', array('id' => 'spinner_img', ));
-                            echo $this->Html->image('ajax-loader_old.gif');
-                            echo '</span>'; 
+                            echo '<span class="acSpinner" style="display: none;"><i class="fa fa-cog fa-lg fa-spin"></i></span>'; 
                        ?>
                     </div>
                     <div class="col-xs-12 col-md-5">

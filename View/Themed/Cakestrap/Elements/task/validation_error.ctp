@@ -5,7 +5,7 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
             
             <?php 
-                echo $message.'<br/>';
+                echo '<b>'.$message.'</b><br/>';
                 echo $this->Html->nestedList($errors, array(), array(), 'ol');
             ?>   
         </div>

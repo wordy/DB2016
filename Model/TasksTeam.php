@@ -1,6 +1,7 @@
 <?php
 App::uses('AppModel', 'Model');
-/**
+
+ /**
  * TasksTeam Model
  *
  * @property Task $Task
@@ -8,53 +9,26 @@ App::uses('AppModel', 'Model');
  * @property TaskRole $TaskRole
  */
 class TasksTeam extends AppModel {
-
-/**
- * Display field
- *
- * @var string
- */
 	public $displayField = 'id';
     public $order = array('TasksTeam.task_role_id ASC', 'TasksTeam.team_code ASC');
 
- public function __construct($id = false, $table = null, $ds = null) {
+    public function __construct($id = false, $table = null, $ds = null) {
         parent::__construct($id, $table, $ds);
-        //Team Code
-         $this->virtualFields['team_code'] = 
-        sprintf('SELECT `Team`.`code` from `teams` as `Team` WHERE `Team`.`id` = %s.team_id', $this->alias);
-    /*
-         $this->virtualFields['task_role'] = 
-        sprintf('SELECT `TaskRole`.`description` from `task_roles` as `TaskRole` WHERE `TaskRole`.`id` = %s.task_role_id', $this->alias);
-        */
+        $this->virtualFields['team_code'] = sprintf('SELECT `Team`.`code` from `teams` as `Team` WHERE `Team`.`id` = %s.team_id', $this->alias);
     }
-	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
-/**
- * belongsTo associations
- *
- * @var array
- */
 	public $belongsTo = array(
 		'Task' => array(
 			'className' => 'Task',
 			'foreignKey' => 'task_id',
-			'conditions' => '',
-			//'fields' => array('Task.id'),
-			'order' => ''
 		),
 		'Team' => array(
 			'className' => 'Team',
 			'foreignKey' => 'team_id',
-			'conditions' => '',
-			'fields' => '',
-			'order' => ''
 		),
 		'TaskRole' => array(
 			'className' => 'TaskRole',
 			'foreignKey' => 'task_role_id',
-			'conditions' => '',
-			'fields' => '',
-			'order' => ''
 		)
 	);
     
@@ -131,7 +105,7 @@ class TasksTeam extends AppModel {
         $task_id = $this->data['TasksTeam']['task_id'];
 
         // Trigger update of Task's modified date
-        $this->Task->updateModifiedDate($task_id);
+        $this->Task->updateLastModifiedDate($task_id);
 
         if($created==true){
             // If we created a new linkage, record Change in the Task
@@ -165,11 +139,6 @@ class TasksTeam extends AppModel {
     public function beforeDelete($cascade=true){
         $predelete = $this->findById($this->id);
         $this->predelete = $predelete;
-        
-        // Prevent deletion if you're removing the only task lead
-        //if(($this->getCountOfLeadTeamsByTask($predelete[$this->alias]['task_id']) == 1) && ($predelete[$this->alias]['task_role_id'] == 1)){
-        //    return false;
-        //}
         return true;
     }
     
@@ -177,21 +146,15 @@ class TasksTeam extends AppModel {
         $team_id = $this->predelete['TasksTeam']['team_id'];
         $task_role_id = $this->predelete['TasksTeam']['task_role_id'];
         $task_id = $this->predelete['TasksTeam']['task_id'];
-        
-        // This prevents saving a change when the task has already been deleted
-        // Relevant in cascading after delete callbacks etc.  in `Task` set flag truthy
-        // when delete starts. Basically only used here...
-        
-        // Record the change only if the task still exists, and the team doesn't have a role
-        // If they DO still have a role, it's recorded as `Team` role changed from X -> Y
-        // Which is more relevant than saying they were removed as Pushed
         $has_role = $this->getTeamRoleByTask($team_id, $task_id);
+
+        // This prevents saving a change when the task has already been deleted
+        // Only remove if team has NO role (i.e. role wasn't just changed)
         if(!$this->Task->isDeleted($task_id) && !$has_role){
             $this->Task->Change->removeTeamRole($task_id, $team_id);    
         }
         
-        // Since team was removed, unlink any tasks they may have already linked
-        // @TODO: record change if unlinked from here...
+        // Team was removed. Unlink any tasks they may have already linked
         $this->Task->resetPidTcToByParentAndTeam($task_id, $team_id);
             
         return true;
@@ -199,10 +162,7 @@ class TasksTeam extends AppModel {
     
     // Updated 2015.  Generic adding function. Updates if team already had a role.
     public function addTeam($task, $team, $task_role_id){
-        //$this->log("got to addTeam in TT model");
         $old_role = $this->getTeamRoleByTask($team, $task);
-        
-        //$this>log($old_role);
         
         // Old Role == New role --> prevent duplicate
         if($old_role == $task_role_id){
@@ -211,21 +171,15 @@ class TasksTeam extends AppModel {
         // Old role != new role. Save field & record changed role
         elseif (($old_role) && ($old_role != $task_role_id)){
             $rs = $this->findByTaskIdAndTeamId($task, $team);
-            //$this->log('old role and new is diff');
-            //$this->log($rs);
-            //$id = $rs['TasksTeam']['id'];
             $rs['TasksTeam']['task_role_id'] = $task_role_id;
             unset($rs['TasksTeam']['created']);
             unset($rs['TasksTeam']['team_code']);
-            //$this->id = $id;
             if($this->save($rs)){
-                //$this->Task->Change->changeTeamRole($task, $team, $old_role, $task_role_id);
                 return true;
             }
         }
         // New assignment
         elseif(!$old_role){
-            //$this->log('got to old role was empty--save new');
             $data = array(
                 'task_id'=>$task,
                 'team_id'=>$team,
@@ -233,7 +187,7 @@ class TasksTeam extends AppModel {
             );
                 
             $this->create();
-            if ($this->save($data)){
+            if($this->save($data)){
                 return true;
             }
         }        
@@ -286,23 +240,6 @@ class TasksTeam extends AppModel {
         return $rs;
     }
 
-    /*
-    public function makeTeamListByTaskAndRole($task_id, $task_role_id){
-        $rs = $this->find('all',array(
-            'conditions'=>array(
-                'TasksTeam.task_id'=>$task_id,
-                'TasksTeam.task_role_id'=>$task_role_id),
-            'fields'=>array('TasksTeam.team_id'),
-            'order'=>array('TasksTeam.team_id ASC')));
-        
-        $rs = Hash::extract($rs, '{n}.TasksTeam.team_id');
-        
-        if(!empty($rs)){
-            
-        return $rs;    
-        }
-    }
-    */
     public function getAllByTask($task_id){
         $rs = $this->find('all', array(
             'conditions'=>array('TasksTeam.task_id'=>$task_id)));
@@ -320,32 +257,6 @@ class TasksTeam extends AppModel {
         else{ return false; }
     }
     
-    /*
-    public function getOpenRequestByTask($task_id){
-        if(!$task_id){
-            return false;
-        }
-        
-        $rs = $this->find('all', array(
-            'conditions'=>array(
-                'task_id'=>$task_id,
-                'task_role_id'=>3,
-            )
-        
-        ));
-        
-        $teams = Hash::extract($rs, '{n}.TasksTeam.team_id');
-        
-        if(!empty($teams)){
-            return $teams;
-        }
-        else{return array();}
-        
-        
-    }
-     
-     */
-      
     //2016
     public function getClosedAssistingByTask($task_id){
         if(!$task_id){
@@ -403,15 +314,6 @@ class TasksTeam extends AppModel {
         return $rs;
     }
     
-    function getTasksByTeamsAndRoles($teams=array(), $roles=array()){
-        $options['conditions'] = array(
-            'team_id'=>$teams,
-            'task_role_id'=>$roles);
-            
-        $rs = $this->find('all', $options);
-        
-    }
-    
     // 2015
     /**
     * getTeamRoleByTask method
@@ -433,8 +335,6 @@ class TasksTeam extends AppModel {
 
         return false;    
     }
-    
-    
     
     //2015:
     public function getLinkableParentsByTeam($team){
@@ -458,12 +358,11 @@ class TasksTeam extends AppModel {
     public function getPossibleRolesByTask($lead = null, $task = null){
         $teams = $this->Team->listTeams();
         
-        //$allowTRoles = array_fill(0, 3, array());
-            $allowTRoles[0] = array();
-            $allowTRoles[1] = array();
-            $allowTRoles[2] = array();
-            $allowTRoles[3] = array();
-            $allowTRoles[4] = array();
+        $allowTRoles[0] = array();
+        $allowTRoles[1] = array();
+        $allowTRoles[2] = array();
+        $allowTRoles[3] = array();
+        $allowTRoles[4] = array();
         
         if(!$task){
             foreach($teams as $tmid=>$tcode){
@@ -491,7 +390,6 @@ class TasksTeam extends AppModel {
                 $allowTRoles[0][$tmid] = $tcode;
             }
         }
-    
         return $allowTRoles;
     }    
 
@@ -549,7 +447,6 @@ class TasksTeam extends AppModel {
                         )
                     )
                 )
-                
             ),
             'limit'=>$limit,
         
@@ -560,78 +457,6 @@ class TasksTeam extends AppModel {
         return $rs;
     }
 
-/*
-    public function openRequestsByTeam($team){
-        $rs = $this->find('all', array(
-            'conditions'=>array(
-                $this->alias.'.team_id'=>$team,
-                $this->alias.'.task_role_id'=>3,
-            )
-        ));
-        
-        $tids = Hash::extract($rs, '{n}.TasksTeam.task_id');
-        
-        return $tids;
-    }    
-*/    
-
-    
-    /*
-    public function setLeadTeam($task_id, $team_id){
-        $to_add = array(
-            'task_id'=>$task_id,
-            'team_id'=>$team_id,
-            'task_role_id'=>1);
-            
-        $this->create();
-        
-        if($this->save($to_add)){             
-            return true;
-        }
-    }
-
-    //2015
-    public function setPushTeam($task_id, $team_id){
-        $to_add = array(
-            'task_id'=>$task_id,
-            'team_id'=>$team_id,
-            'task_role_id'=>2);
-            
-        $this->create();
-        
-        if($this->save($to_add)){             
-            return true;
-        }
-    }
-
-    //2016
-    public function setOpenTeam($task_id, $team_id){
-        $to_add = array(
-            'task_id'=>$task_id,
-            'team_id'=>$team_id,
-            'task_role_id'=>3);
-            
-        $this->create();
-
-        if($this->save($to_add)){             
-            return true;
-        }
-    }
-
-    //2016
-    public function setClosedTeam($task_id, $team_id){
-        $to_add = array(
-            'task_id'=>$task_id,
-            'team_id'=>$team_id,
-            'task_role_id'=>4);
-            
-        $this->create();
-
-        if($this->save($to_add)){             
-            return true;
-        }
-    }
-    */
     // Used in Task->afterSave()
     public function changeLeadTeam($task_id=null, $new_lead_team_id=null){
         // Can only have one lead... find and destroy (in case) first
@@ -641,7 +466,6 @@ class TasksTeam extends AppModel {
         }
     }
     
-
     // DeleteAll ($conditions=array, $cascade=true, $callbacks=false)
     // Always returns true --> Either deletes the record, or none existed
     public function deleteAllByTaskAndTeam($task, $team){
@@ -653,14 +477,15 @@ class TasksTeam extends AppModel {
         return true;    
     }
     
-    
     public function deleteAllNonLeadByTaskTeam($task, $team){
         $this->deleteAll(
             array(
                 'TasksTeam.task_id'=>$task,
                 'TasksTeam.team_id'=>$team,
                 'TasksTeam.task_role_id != 1'), 
-                false, true);
+            false, 
+            true
+        );
         return true;    
     }
     
@@ -670,9 +495,7 @@ class TasksTeam extends AppModel {
         }
         
         $this->deleteAll(
-            array(
-                'TasksTeam.team_id'=>$team
-            ),
+            array('TasksTeam.team_id'=>$team),
             false,
             true);
         
@@ -696,8 +519,6 @@ class TasksTeam extends AppModel {
     }
 
     public function deleteOpenTeamByTask($task = null, $team = null){
-        
-        //$this->log('got to TT model');
         $this->deleteAll(array(
             'TasksTeam.task_id'=> $task,
             'TasksTeam.team_id'=> $team,
@@ -710,8 +531,6 @@ class TasksTeam extends AppModel {
     }
     
     public function deleteClosedTeamByTask($task = null, $team = null){
-        
-        //$this->log('got to TT model');
         $this->deleteAll(array(
             'TasksTeam.task_id'=> $task,
             'TasksTeam.team_id'=> $team,

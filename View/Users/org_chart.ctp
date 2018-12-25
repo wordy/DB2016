@@ -19,7 +19,10 @@
         foreach($zone['Team'] as $m => $team){
             foreach($team['TeamsUser'] as $k =>$usr){
                 if(substr($usr['User']['handle'], 0 ,4) == 'TEST'){continue;}
-                if($usr['User']['id'] == $zone['Zone']['gm_user_id']){$orgChart[$zone['Zone']['id']]['GM'][$usr['User']['id']]=$usr['User']['handle'];}
+                if(($usr['User']['id']) == ($zone['Zone']['gm_user_id'])){
+                    //echo $usr['User']['handle'];
+                    $orgChart[$zone['Zone']['id']]['GM'][$usr['User']['id']] = $usr['User']['handle'];
+                }
                 if($usr['User']['user_role_id'] == 200 && $usr['team_code'] !='CHR'){continue;}
                 if($usr['User']['user_role_id'] >=200){
                     $orgChart[111]['Teams']['Compiler Editors'][$usr['User']['id']] = $usr['User']['handle'];    
@@ -37,9 +40,8 @@
         }
     }
     
-   // debug($orgChart);
-
     ksort($orgChart);
+    //debug($orgChart);
 ?>
 
 <div class="row">
@@ -100,7 +102,9 @@
                 $gm_nom = array_values($orgChart[20]['GM']);
                 echo '<h5 class="lg-bot-marg"><b>GM </b>';
                 echo $this->Html->link($gm_nom[0], array('controller'=>'users', 'action'=>'profile', $gm_id[0]));
-                echo '</h5>';              }
+                echo '</h5>';
+            }
+            else{ echo "<p>&nbsp;</p>";}
 
             foreach($orgChart[20]['Teams'] as $name=>$users){
                 echo '<h4><b>'.$name.'</b></h4>';

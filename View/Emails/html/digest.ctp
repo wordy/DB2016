@@ -1,6 +1,6 @@
 <?php
     $monday = strtotime('last monday', strtotime('tomorrow'));
-    $wk_start = date('F dS', $monday);
+    $wk_start = date('F jS', $monday);
 ?>
 
 <h1>Recent Compiler Updates for <?php echo $team_code;?></h1>

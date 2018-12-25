@@ -217,10 +217,10 @@ class Team extends AppModel {
             'fields'=>array('Team.id','Team.code', 'Team.zone', 'Team.zone_id'),
             'order'=>array('Team.zone_id ASC','Team.zone ASC', 'Team.code ASC')));
                         
-            $tlist = array();
-            foreach ($list as $team){
-                $tlist[$team['Team']['zone']][$team['Team']['id']] = $team['Team']['code'];    
-            }
+        $tlist = array();
+        foreach ($list as $team){
+            $tlist[$team['Team']['zone']][$team['Team']['id']] = $team['Team']['code'];    
+        }
         
         return $tlist;
     }
@@ -239,6 +239,7 @@ class Team extends AppModel {
         return $list;
     }
     
+    /*
     public function listTeamsExclude($teams=array()){
         $rs = $this->find('all', array(
             'conditions'=>array(    
@@ -259,7 +260,7 @@ class Team extends AppModel {
         
         return $rs;
     }
-
+*/
     public function listLeadAndPotentialAssist($leadteam){
         if(!$leadteam){
             return false;
@@ -390,26 +391,49 @@ class Team extends AppModel {
         return $aic_teams;
     }
     
-    function teamIdCodeList(){
-        $tlist = $this->zoneTeamList();
-
-        $teamIdCodeList = array();
-        foreach ($tlist as $zcode => $zteams){
-            foreach ($zteams as $tid =>$tcode){
-                $teamIdCodeList[$tid] = $tcode;   
-            }
+    function teamIdCodeListByZoneCode(){
+        $result = Cache::read('team_id_code_list_by_zone', 'short');
+        
+        if (!$result) {
+            $rs = $this->Zone->getZonesTeams();
+            $result = Hash::combine($rs, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone');
+            Cache::write('team_id_code_list_by_zone', $result, 'short');
         }
-        return $teamIdCodeList;
+        return $result;
     }
 
+    function teamIdCodeList(){
+        $result = Cache::read('team_id_code_list', 'short');
+        
+        if (!$result) {
+            $rs = $this->Zone->listZoneCodeTeamIdTeamCode();
+            
+            $result = array();
+            foreach($rs as $z_code =>$team){
+                foreach($team as $tid =>$tcode){
+                    $result[$tid] = $tcode;
+                }
+            }
+            
+            Cache::write('team_id_code_list', $result, 'short');
+        }
+        return $result;
+    }
+ 
+    /*
     // Returns like 'PRS'=>array([n]=>array('id','CODE'))
     public function zoneTeamList(){
-        $rs = $this->Zone->zoneTeamList();
-        $rs = Hash::combine($rs, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone');
-        return $rs;
+        $result = Cache::read('team_zone_team_list', 'short');
+        
+        if (!$result) {
+            $rs = $this->Zone->zoneTeamList();
+            $result = Hash::combine($rs, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone');
+            Cache::write('team_zone_team_list', $result, 'short');
+        }
+        return $result;
     }
-
-    
+*/
+    /*
     function zoneTeamCodeList(){
         $tlist = $this->zoneTeamList();
 
@@ -422,43 +446,48 @@ class Team extends AppModel {
         return $zoneTeamCodeList;
     }
 
+
     function zoneNameTeamCodeList(){
-        $tlist = $this->zoneNameTeamList();
+        $result = Cache::read('team_zone_name_team_code_list', 'short');
         
-        $zoneNameTeamCodeList = array();
-        foreach ($tlist as $zone => $tids){
-            foreach ($tids as $tid => $tcode){
-                $zoneNameTeamCodeList[$zone][$tid] = $tcode;    
+        if (!$result) {
+            $tlist = $this->zoneNameTeamList();
+            $result = array();
+            foreach ($tlist as $zone => $tids){
+                foreach ($tids as $tid => $tcode){
+                    $result[$zone][$tid] = $tcode;    
+                }
             }
+            Cache::write('team_zone_name_team_code_list', $result, 'short');
         }
-        return $zoneNameTeamCodeList;
+        return $result;
     }
 
+     
     // Returns like 'Production Support'=>array([n]=>array('id','CODE'))
     public function zoneNameTeamList(){
-        $rs = $this->Zone->zoneTeamList();
-        $rs = Hash::combine($rs, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone_name');
-        return $rs;
+        $result = Cache::read('team_zone_name_team_list', 'short');
+        
+        if (!$result) {
+            $rs = $this->Zone->zoneTeamList();
+            $result = Hash::combine($rs, '{n}.Team.{n}.id', '{n}.Team.{n}.code', '{n}.Team.{n}.zone_name');
+            Cache::write('team_zone_name_team_list', $result, 'short');
+        }
+        return $result;
     }
+
+*/
 
     
     // Deprecated
 
     
-/*    
-     public function getNotificationCountByTeam($team=null){
-         return $this->NotificationReceived->getInboxCountByTeam($team);
-     }
-*/
-    
 
 
 
 
 
 
-
-
-
-
+//EOF
 }
+// EOF

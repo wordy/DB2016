@@ -27,6 +27,7 @@
 	//Router::connect('/', array('controller' => 'pages', 'action' => 'display', 'home'));
     Router::connect('/team/*', array('controller' => 'teams', 'action' => 'home'));
     Router::connect('/', array('controller' => 'pages', 'action' => 'display', 'unauthorized_home'));
+    Router::connect('/event/info', array('controller' => 'event_infos', 'action'=>'info'));
     
 /**
  * ...and connect the rest of 'Pages' controller's URLs.
