@@ -719,8 +719,25 @@ class Change extends AppModel {
     }    
     */
     
-    
-    
+    /**
+     * deleteAllByTeam Method
+     * Deletes all changes involving a team. Used in Team->afterDelete()
+     * @param $team_id int team_id to delete
+     * @return boolean
+     */
+    public function deleteAllByTeam($team_id){
+        if(!$team_id){
+            return false;
+        }
+        
+        $this->deleteAll(array(
+            'Change.team_id'=>$team_id
+            ), 
+            false, 
+            true
+        );
+        return true;    
+    }    
     
     
     

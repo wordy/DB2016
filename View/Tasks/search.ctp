@@ -28,6 +28,7 @@
     <div class="col-xs-12">        
         <a href="#" class="back-to-top"><i class="fa fa-2x fa-arrow-circle-o-up"></i> <span class="h4">Top</span></a>
         <h1><i class="fa fa-search"></i> Search Results <?php echo 'for "'.strtoupper($search_term).'"'; ?></h1>
+        <?php if(!empty($tasks)): ?>
         <div class="alert alert-info" role="alert">
             <div class="row">
                 <div class="col-md-7">Viewing search results for <b>"<?php echo $search_term; ?>"</b> from <b><?php echo date('M j', strtotime($start_date));?></b> to <b><?php echo date('M j', strtotime($end_date));?></b> ordered by <b>ascending</b> start time.</div>
@@ -43,7 +44,7 @@
                 </div>
             </div>
         </div>
-        
+        <?php endif;?>
         <div id="page-content" class="row">
             <div class="col-xs-12">
                 <?php echo $this->element('task/task_search', array('tasks'=>$tasks)); ?>

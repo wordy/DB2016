@@ -55,372 +55,374 @@
     ?> 
         <div class="row">
             <div class="timeline-centered">
-                <?php 
-                    foreach ($changes as $change_arr):
-                        $change = $change_arr['Change'];
-                        // Task Detail Chanages
-                        if($change['change_type_id'] < 200 && ($change['change_type_id']>100)){
-                            if($change['change_type_id'] == 101){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-info"><i class="fa fa-lg fa-clock-o"></i></div>
-                                        <div class="timeline-label"><p><b>Task Start Time</b><br/>
-                                                <?php 
-                                                    if (isset($change['old_val']) && isset($change['new_val'])){
-                                                        echo 'Changed from <b>'.date('M j H:i:s', strtotime($change['old_val'])).'</b> to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
-                                                    }
-                                                    elseif(!isset($change['old_val']) && isset($change['new_val'])){
-                                                        echo 'Set to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
-                                                    }
-                                                    elseif(!isset($change['new_val'])){
-                                                        echo 'Removed.';
-                                                    }
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>        
-                <?php       }
-                            // Short Desc
-                            elseif($change['change_type_id'] == 102){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-info"><i class="fa fa-lg fa-list-ul"></i></div>
-                                        <div class="timeline-label"><p><b>Task Description Changed</b><br>
-                                                <?php 
-                                                    echo '<small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>        
-                    <?php   } 
+    <?php 
+        foreach ($changes as $change_arr):
+            $change = $change_arr['Change'];
+            // Task Detail Chanages
+            if($change['change_type_id'] < 200 && ($change['change_type_id']>100)){
+                if($change['change_type_id'] == 101){ ?>
+                    <article class="timeline-entry">
+                        <div class="timeline-entry-inner">
+                            <div class="timeline-icon bg-info"><i class="fa fa-lg fa-clock-o"></i></div>
+                            <div class="timeline-label"><p><b>Task Start Time</b><br/>
+                                    <?php 
+                                        if (isset($change['old_val']) && isset($change['new_val'])){
+                                            echo 'Changed from <b>'.date('M j H:i:s', strtotime($change['old_val'])).'</b> to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
+                                        }
+                                        elseif(!isset($change['old_val']) && isset($change['new_val'])){
+                                            echo 'Set to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
+                                        }
+                                        elseif(!isset($change['new_val'])){
+                                            echo 'Removed.';
+                                        }
+                                        echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                        if($show_user){
+                                            echo ' by '.$change['user_handle'];
+                                        }
+                                        echo '</small>';
+                                    ?>
+                                </p>
+                            </div>
+                        </div>
+                    </article>        
+                <?php       
+                }
+                // Short Desc
+                elseif($change['change_type_id'] == 102){ ?>
+                    <article class="timeline-entry">
+                        <div class="timeline-entry-inner">
+                            <div class="timeline-icon bg-info"><i class="fa fa-lg fa-list-ul"></i></div>
+                            <div class="timeline-label"><p><b>Task Description Changed</b><br>
+                                    <?php 
+                                        echo '<small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                        if($show_user){
+                                            echo ' by '.$change['user_handle'];
+                                        }
+                                        echo '</small>';
+                                    ?>
+                                </p>
+                            </div>
+                        </div>
+                    </article>        
+        <?php   } 
 
-                            // Linked to Parent
-                            elseif($change['change_type_id'] == 141){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-link"></i></div>
-                                        <div class="timeline-label"><p><b>Added Linked Task</b><br/>
-                                                <?php 
-                                                    if ((!empty($change['var1'])) && (!empty($change['var2']))){
-                                                        echo 'Linked to <b>('.$change['var1'].')</b> '.$change['var2'].'</b>.';
-                                                    }
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>        
-                    <?php   }                    
-                            // UNlinked to Parent
-                            elseif($change['change_type_id'] == 142){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-link"></i></div>
-                                        <div class="timeline-label"><p><b>Removed Linked Task</b><br/>
-                                                <?php 
-                                                    if ((!empty($change['var1'])) && (!empty($change['var2']))){
-                                                        echo 'Removed link to <b>('.$change['var1'].')</b> '.$change['var2'].'</b>.';
-                                                    }
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>        
-                    <?php   }                    
-                            
-                            // Actionable Type
-                            elseif($change['change_type_id'] == 150){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-flag"></i></div>
-                                        <div class="timeline-label"><p><b>Action Item Status: </b>
-                                                <?php 
-                                                    if ((!empty($change['old_val'])) && (!empty($change['new_val']))){
-                                                        echo 'Changed from <b>'.$change['old_val'].'</b> to <b>'.$change['new_val'].'</b>.';
-                                                    }
-                                                    elseif(empty($change['old_val']) && !empty($change['new_val'])){
-                                                        echo 'Set to <b>'.$change['new_val'].'</b>.';
-                                                    }
-                                                    elseif(empty($change['new_val'])){
-                                                        echo 'Removed from Action Item list.';
-                                                    }
-                                                    
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>        
-                    <?php   }
-                            // Due Date
-                            elseif($change['change_type_id'] == 160){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner ">
-                                        <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-bell-o"></i></div>
-                                        <div class="timeline-label success"><p><b>Due Date: </b>
-                                                <?php 
-                                                    if (isset($change['old_val']) && isset($change['new_val'])){
-                                                        echo 'Changed from <b>'.date('M j', strtotime($change['old_val'])).'</b> to <b>'.date('M j', strtotime($change['new_val'])).'</b>.';
-                                                    }
-                                                    elseif(!isset($change['old_val']) && isset($change['new_val'])){
-                                                        echo 'Set to <b>'.date('M j', strtotime($change['new_val'])).'</b>.';
-                                                    }
-                                                    elseif(!isset($change['new_val'])){
-                                                        echo 'Removed.';
-                                                    }
-        
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>                                
-                                        </div>
-                                    </div>
-                                </article> 
-                                 
-                    <?php   }
-                            // Moved due to time linked parent move
-                            elseif($change['change_type_id'] == 170){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-danger"><i class="fa fa-lg fa-clock-o"></i></div>
-                                        <div class="timeline-label"><p><b>Start Time Changed By Time Linked Task</b><br/>
-                                            <?php 
-                                                if (isset($change['old_val']) && isset($change['new_val'])){
-                                                    echo 'Moved from <b>'.date('M j H:i:s', strtotime($change['old_val'])).'</b> to <b>'.date('M j H:i:s', strtotime($change['new_val'])).
-                                                    '</b> due to change in time linked task <b>('.$change['var1'].')</b> '.
-                                                    $change['var2'];
-                                                }
-                                                elseif(!isset($change['old_val']) && isset($change['new_val'])){
-                                                    echo 'Set to <b>'.date('M j', strtotime($change['new_val'])).'</b>.';
-                                                }
-                                                elseif(!isset($change['new_val'])){
-                                                    echo 'Removed.';
-                                                }
-    
-                                                echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                if($show_user){
-                                                    echo ' by '.$change['user_handle'];
-                                                }
-                                                echo '</small>';
-                                            ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>        
-                    <?php   }
-                        }
+                    // Linked to Parent
+                    elseif($change['change_type_id'] == 141){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-link"></i></div>
+                                <div class="timeline-label"><p><b>Added Linked Task</b><br/>
+                                        <?php 
+                                            if ((!empty($change['var1'])) && (!empty($change['var2']))){
+                                                echo 'Linked to <b>('.$change['var1'].')</b> '.$change['var2'].'</b>.';
+                                            }
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>        
+            <?php   }                    
+                    // UNlinked to Parent
+                    elseif($change['change_type_id'] == 142){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-link"></i></div>
+                                <div class="timeline-label"><p><b>Removed Linked Task</b><br/>
+                                        <?php 
+                                            if ((!empty($change['var1'])) && (!empty($change['var2']))){
+                                                echo 'Removed link to <b>('.$change['var1'].')</b> '.$change['var2'].'</b>.';
+                                            }
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>        
+            <?php   }                    
                     
-                        if($change['change_type_id'] < 300 && ($change['change_type_id']>200)){
-                            if($change['change_type_id'] == 210){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-lead"><i class="fa fa-lg fa-group"></i></div>
-                                        <div class="timeline-label"><p>Team Role: 
-                                                <?php 
-                                                    echo $this->Ops->chgMessage($change); 
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>                                
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   }
-                            elseif($change['change_type_id'] == 220){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-default"><i class="fa fa-lg fa-group"></i></div>
-                                        <div class="timeline-label"><p><b>Team Role:</b> 
-                                                <?php 
-                                                    echo $this->Ops->chgMessage($change);
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   }
-                            elseif($change['change_type_id'] == 230){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-secondary"><i class="fa fa-lg fa-group"></i></div>
-                                        <div class="timeline-label"><p><b>Team Role:</b> 
-                                                <?php 
-                                                    echo $this->Ops->chgMessage($change);
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-        
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   }
-                            elseif($change['change_type_id'] == 240){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-success"><i class="fa fa-lg fa-group"></i></div>
-                                        <div class="timeline-label"><p><b>Team Role:</b> 
-                                                <?php 
-                                                    echo $this->Ops->chgMessage($change);
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   }
-                            elseif($change['change_type_id'] == 299){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-norole"><i class="fa fa-lg fa-group"></i></div>
-                                        <div class="timeline-label"><p><b>Team Role:</b> 
-                                                <?php 
-                                                    echo $this->Ops->chgMessage($change);
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   }
-                        } // End team role section
-        
-                        if($change['change_type_id'] < 400 && ($change['change_type_id']>300)){
-                             
-                            if($change['change_type_id'] == 301){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-info"><i class="fa fa-lg fa-plus"></i></div>
-                                        <div class="timeline-label"><p><b>New Task Linkage</b><br/> 
-                                                <?php 
-                                                    if ((!empty($change['var1'])) && (!empty($change['var2']))){
-                                                        echo '<b>'.$change['var1'].'</b> linked a new task "'.$change['var2'].'".';
-                                                    }
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   } 
-         
-                            elseif($change['change_type_id'] == 302){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-info"><i class="fa fa-lg fa-minus"></i></div>
-                                        <div class="timeline-label"><p><b>Linkage Removed</b><br/> 
-                                                <?php 
-                                                    if ((!empty($change['var1'])) && (!empty($change['var2']))){
-                                                        echo '<b>'.$change['var1'].'</b> unlinked task "'.$change['var2'].'".';
-                                                    }
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   }                    
-                                        
-                            elseif($change['change_type_id'] == 310){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-info"><i class="fa fa-lg fa-minus"></i></div>
-                                        <div class="timeline-label"><p><b>Task Role Cancelled</b><br/> 
-                                                <?php 
-                                                    if ((!empty($change['var1'])) && (!empty($change['var2']))){
-                                                        echo 'Linked Task removed because <b>'.$change['var1'].'</b> cancelled team\'s role in "'.$change['var2'].'".';
-                                                    }
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>   
-                    <?php   } 
-                        } // End Linkage section
-                        
-                        if(($change['change_type_id'] < 500) && ($change['change_type_id']>400)){   
-                            if($change['change_type_id'] == 401){ ?>
-                                <article class="timeline-entry">
-                                    <div class="timeline-entry-inner">
-                                        <div class="timeline-icon bg-info"><i class="fa fa-lg fa-comment-o"></i></div>
-                                        <div class="timeline-label"><p><b>New Comment: </b> 
-                                                <?php 
-                                                    if (!empty($change['var1'])){
-                                                        echo '<b>'.$change['var1'].'</b> posted a comment.';
-                                                    }
-                                                    echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
-                                                    if($show_user){
-                                                        echo ' by '.$change['user_handle'];
-                                                    }
-                                                    echo '</small>';
-                                                ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </article>   
-                <?php   }        
-                    }   // Comments
-                    endforeach;
-                ?>
+                    // Actionable Type
+                    elseif($change['change_type_id'] == 150){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-flag"></i></div>
+                                <div class="timeline-label"><p><b>Action Item Status: </b>
+                                        <?php 
+                                            if ((!empty($change['old_val'])) && (!empty($change['new_val']))){
+                                                echo 'Changed from <b>'.$change['old_val'].'</b> to <b>'.$change['new_val'].'</b>.';
+                                            }
+                                            elseif(empty($change['old_val']) && !empty($change['new_val'])){
+                                                echo 'Set to <b>'.$change['new_val'].'</b>.';
+                                            }
+                                            elseif(empty($change['new_val'])){
+                                                echo 'Removed from Action Item list.';
+                                            }
+                                            
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>        
+            <?php   }
+                    // Due Date
+                    elseif($change['change_type_id'] == 160){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner ">
+                                <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-bell-o"></i></div>
+                                <div class="timeline-label success"><p><b>Due Date: </b>
+                                        <?php 
+                                            if (isset($change['old_val']) && isset($change['new_val'])){
+                                                echo 'Changed from <b>'.date('M j', strtotime($change['old_val'])).'</b> to <b>'.date('M j', strtotime($change['new_val'])).'</b>.';
+                                            }
+                                            elseif(!isset($change['old_val']) && isset($change['new_val'])){
+                                                echo 'Set to <b>'.date('M j', strtotime($change['new_val'])).'</b>.';
+                                            }
+                                            elseif(!isset($change['new_val'])){
+                                                echo 'Removed.';
+                                            }
+
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>                                
+                                </div>
+                            </div>
+                        </article> 
+                         
+            <?php   }
+                    // Moved due to time linked parent move
+                    elseif($change['change_type_id'] == 170){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-danger"><i class="fa fa-lg fa-clock-o"></i></div>
+                                <div class="timeline-label"><p><b>Start Time Changed By Time Linked Task</b><br/>
+                                    <?php 
+                                        if (isset($change['old_val']) && isset($change['new_val'])){
+                                            echo 'Moved from <b>'.date('M j H:i:s', strtotime($change['old_val'])).'</b> to <b>'.date('M j H:i:s', strtotime($change['new_val'])).
+                                            '</b> due to change in time linked task <b>('.$change['var1'].')</b> '.
+                                            $change['var2'];
+                                        }
+                                        elseif(!isset($change['old_val']) && isset($change['new_val'])){
+                                            echo 'Set to <b>'.date('M j', strtotime($change['new_val'])).'</b>.';
+                                        }
+                                        elseif(!isset($change['new_val'])){
+                                            echo 'Removed.';
+                                        }
+
+                                        echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                        if($show_user){
+                                            echo ' by '.$change['user_handle'];
+                                        }
+                                        echo '</small>';
+                                    ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>        
+            <?php   }
+                }
+            
+                if($change['change_type_id'] < 300 && ($change['change_type_id']>200)){
+                    //if(!$change['team_code']){ continue;}
+                    if($change['change_type_id'] == 210){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-lead"><i class="fa fa-lg fa-group"></i></div>
+                                <div class="timeline-label"><p>Team Role: 
+                                        <?php 
+                                            echo $this->Ops->chgMessage($change); 
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>                                
+                                </div>
+                            </div>
+                        </article>   
+            <?php   }
+                    elseif($change['change_type_id'] == 220){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-default"><i class="fa fa-lg fa-group"></i></div>
+                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                        <?php 
+                                            echo $this->Ops->chgMessage($change);
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>   
+            <?php   }
+                    elseif($change['change_type_id'] == 230){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-secondary"><i class="fa fa-lg fa-group"></i></div>
+                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                        <?php 
+                                            echo $this->Ops->chgMessage($change);
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+
+                                </div>
+                            </div>
+                        </article>   
+            <?php   }
+                    elseif($change['change_type_id'] == 240){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-success"><i class="fa fa-lg fa-group"></i></div>
+                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                        <?php 
+                                            echo $this->Ops->chgMessage($change);
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>   
+            <?php   }
+                    elseif($change['change_type_id'] == 299){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-norole"><i class="fa fa-lg fa-group"></i></div>
+                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                        <?php 
+                                            echo $this->Ops->chgMessage($change);
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>   
+            <?php   }
+                } // End team role section
+
+                if($change['change_type_id'] < 400 && ($change['change_type_id']>300)){
+                     
+                    if($change['change_type_id'] == 301){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-info"><i class="fa fa-lg fa-plus"></i></div>
+                                <div class="timeline-label"><p><b>New Task Linkage</b><br/> 
+                                        <?php 
+                                            if ((!empty($change['var1'])) && (!empty($change['var2']))){
+                                                echo '<b>'.$change['var1'].'</b> linked a new task "'.$change['var2'].'".';
+                                            }
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>   
+            <?php   } 
+ 
+                    elseif($change['change_type_id'] == 302){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-info"><i class="fa fa-lg fa-minus"></i></div>
+                                <div class="timeline-label"><p><b>Linkage Removed</b><br/> 
+                                        <?php 
+                                            if ((!empty($change['var1'])) && (!empty($change['var2']))){
+                                                echo '<b>'.$change['var1'].'</b> unlinked task "'.$change['var2'].'".';
+                                            }
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>   
+            <?php   }                    
+                                
+                    elseif($change['change_type_id'] == 310){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-info"><i class="fa fa-lg fa-minus"></i></div>
+                                <div class="timeline-label"><p><b>Task Role Cancelled</b><br/> 
+                                        <?php 
+                                            if ((!empty($change['var1'])) && (!empty($change['var2']))){
+                                                echo 'Linked Task removed because <b>'.$change['var1'].'</b> cancelled team\'s role in "'.$change['var2'].'".';
+                                            }
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>   
+            <?php   } 
+                } // End Linkage section
+                
+                if(($change['change_type_id'] < 500) && ($change['change_type_id']>400)){   
+                    if($change['change_type_id'] == 401){ ?>
+                        <article class="timeline-entry">
+                            <div class="timeline-entry-inner">
+                                <div class="timeline-icon bg-info"><i class="fa fa-lg fa-comment-o"></i></div>
+                                <div class="timeline-label"><p><b>New Comment: </b> 
+                                        <?php 
+                                            if (!empty($change['var1'])){
+                                                echo '<b>'.$change['var1'].'</b> posted a comment.';
+                                            }
+                                            echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
+                                            if($show_user){
+                                                echo ' by '.$change['user_handle'];
+                                            }
+                                            echo '</small>';
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </article>   
+        <?php   }        
+            }   // Comments
+            endforeach;
+        ?>
             </div>
         </div>
 <?php
@@ -446,7 +448,4 @@
     </div>
 </div><!-- end panelsuccess-->
 <!-- Timeline: http://www.bootsnipp.com/snippets/featured/single-column-timeline-dotted -->
-
-
-
 <?php  echo $this->Js->writeBuffer(); //Necessary cuz we don't use a layout ?>

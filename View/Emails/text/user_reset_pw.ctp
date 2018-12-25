@@ -5,7 +5,7 @@ Someone (hopefully you) recently requested that your password for the compiler b
 If you would like to continue, please follow this link:
 
 <?php 
-    echo 'http://db.thebws.com/users/chooseNewPass/'.$user['User']['pass_reset_token'];
+    echo 'http://ops.yhdragonball.com/users/chooseNewPass/'.$user['User']['pass_reset_token'];
 ?>
 
 If you're having difficulty clicking on the link above, you can also paste the URL directly into your browser.

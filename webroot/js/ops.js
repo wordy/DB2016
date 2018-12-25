@@ -1,14 +1,9 @@
-/* 
- * Global variables
- * 
- */
-	// @DBOPS Settings
+/*********************
+ * Global DBOPS variables
+ *********************/
 	// This must be set to the event date in ISO format YYYY-MM-DD 00:00:00 
-	var DB_EVENT_DATE = "2016-02-06 00:00:00";
+	var DB_EVENT_DATE = "2019-02-09 00:00:00";
 	
-
-
-
 
 /**
  * Bootstrap Multiselect
@@ -19,61 +14,61 @@
  * @param {jQuery} $el
  * @returns {bool}
  */
-function multiselect_selected($el) {
-	var ret = true;
-	$('option', $el).each(function(element) {
-		if (!!!$(this).prop('selected')) {
-			ret = false;
-		}
-	});
-	return ret;
-}
+	function multiselect_selected($el) {
+		var ret = true;
+		$('option', $el).each(function(element) {
+			if (!!!$(this).prop('selected')) {
+				ret = false;
+			}
+		});
+		return ret;
+	}
 
 /**
  * Selects all the options
  * @param {jQuery} $el
  * @returns {undefined}
  */
-function multiselect_selectAll($el) {
-	$('option', $el).each(function(element) {
-		$el.multiselect('select', $(this).val());
-	});
-}
+	function multiselect_selectAll($el) {
+		$('option', $el).each(function(element) {
+			$el.multiselect('select', $(this).val());
+		});
+	}
 
 /**
  * Deselects all the options
  * @param {jQuery} $el
  * @returns {undefined}
  */
-function multiselect_deselectAll($el) {
-	$('option', $el).each(function(element) {
-		$el.multiselect('deselect', $(this).val());
-	});
-}
+	function multiselect_deselectAll($el) {
+		$('option', $el).each(function(element) {
+			$el.multiselect('deselect', $(this).val());
+		});
+	}
 
 /**
  * Clears all the selected options
  * @param {jQuery} $el
  * @returns {undefined}
  */
-function multiselect_toggle($el, $btn) {
-	if (multiselect_selected($el)) {
-		multiselect_deselectAll($el);
-		$btn.text('All');
-	} else {
-		multiselect_selectAll($el);
-		$btn.text('None');
+	function multiselect_toggle($el, $btn) {
+		if (multiselect_selected($el)) {
+			multiselect_deselectAll($el);
+			$btn.text('All');
+		} else {
+			multiselect_selectAll($el);
+			$btn.text('None');
+		}
 	}
-}
 
 
 	$('.boot-popover').hover(function () {
 	    $(this).popover({
             html: true
         }).popover('show');
-            }, function () {
-                $(this).popover('hide');
-            });
+    }, function () {
+        $(this).popover('hide');
+    });
             
 
 
@@ -158,11 +153,7 @@ function multiselect_toggle($el, $btn) {
 		}
 	});
 	
-
-
     //$('div.flash-success').delay(3000).fadeOut();
-
-
             
     // Accordion toggle for menu   
     function toggleCaChevron(e) {

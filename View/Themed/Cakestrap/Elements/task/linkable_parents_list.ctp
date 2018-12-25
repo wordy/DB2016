@@ -57,8 +57,11 @@
         </div><!-- .form-group -->
 <?php 
     }
+    elseif (isset($team) && empty($linkable)){
+        echo '<div class="alert alert-info" role="alert"><i class="fa fa-info-circle"></i> Selected lead team has no linkable tasks.</div>';
+    }
     else{
-        echo '<div class="alert slim-alert alert-info" role="alert">Select a lead team first</div>';
+        echo '<div class="alert alert-info" role="alert"><i class="fa fa-info-circle"></i> Select a lead team first</div>';
     }
 
     echo $this->Js->writeBuffer(); 

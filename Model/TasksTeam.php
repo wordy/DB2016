@@ -21,10 +21,12 @@ class TasksTeam extends AppModel {
 		'Task' => array(
 			'className' => 'Task',
 			'foreignKey' => 'task_id',
+            'dependent' => true
 		),
 		'Team' => array(
 			'className' => 'Team',
 			'foreignKey' => 'team_id',
+            'dependent' => true
 		),
 		'TaskRole' => array(
 			'className' => 'TaskRole',
@@ -75,7 +77,7 @@ class TasksTeam extends AppModel {
         
         // Duplicates. Also prevents saving if the team is already lead on the task
         if ($this->existsByTaskTeamRole($task_id, $team_id, $task_role_id) || $this->existsByTaskTeamRole($task_id, $team_id, 1)){
-            $this->log('prevented TT save because of duplicate or already lead');
+            //$this->log('prevented TT save because of duplicate or already lead');
             return false;
         }
 
@@ -105,7 +107,7 @@ class TasksTeam extends AppModel {
         $task_id = $this->data['TasksTeam']['task_id'];
 
         // Trigger update of Task's modified date
-        $this->Task->updateLastModifiedDate($task_id);
+        //$this->Task->updateLastModifiedDate($task_id);
 
         if($created==true){
             // If we created a new linkage, record Change in the Task
@@ -199,12 +201,9 @@ class TasksTeam extends AppModel {
             'conditions'=>array(
                 'TasksTeam.task_id'=>$task_id,
                 'TasksTeam.team_id'=>$team_id,
-                'TasksTeam.task_role_id'=>$task_role_id)));
-        if (empty($rs)){
-                return false;
-                }
-        else {
-             return true;}
+                'TasksTeam.task_role_id'=>$task_role_id
+            )));
+        return (!empty($rs))? true:false;
     }
 
     //2016 only one role allowed
@@ -212,12 +211,9 @@ class TasksTeam extends AppModel {
         $rs = $this->find('all',array(
             'conditions'=>array(
                 'TasksTeam.task_id'=>$task_id,
-                'TasksTeam.team_id'=>$team_id)));
-        if (!empty($rs)){
-            return true;
-        }
-        
-        return false;
+                'TasksTeam.team_id'=>$team_id
+            )));
+        return (!empty($rs))? true:false;
     }
 
     // NOTE: compatible with >2 roles
@@ -227,8 +223,7 @@ class TasksTeam extends AppModel {
                 'TasksTeam.task_id'=>$task_id,
                 'TasksTeam.team_id'=>$team_id)));
                 
-        if($rs){ return true; }
-        else { return false; } 
+        return (!empty($rs))? true:false; 
     }
 
     // 2016 Used in TasksTeam::beforeSave to ensure there's always >= 1 team lead per task
@@ -236,25 +231,25 @@ class TasksTeam extends AppModel {
         $rs = $this->find('count',array(
             'conditions'=>array(
                 'TasksTeam.task_id'=>$task_id,
-                'TasksTeam.task_role_id'=>1)));
+                'TasksTeam.task_role_id'=>1
+            )));
         return $rs;
     }
 
     public function getAllByTask($task_id){
         $rs = $this->find('all', array(
-            'conditions'=>array('TasksTeam.task_id'=>$task_id)));
-        if ($rs){          
-           return $rs;}
-        else{ return false;}
+            'conditions'=>array(
+                'TasksTeam.task_id'=>$task_id
+            )));
+        return $rs;
     }
     
-    public function getLeadTeamByTask($task=null) {
-        if(!empty($task)){
-            $rs = $this->findByTaskId($task);
-            $lead = $rs['TasksTeam']['team_code'];
-            return $lead;
+    public function getLeadTeamByTask($task) {
+        $rs = $this->findByTaskId($task);
+        if(empty($rs)){
+            return false;
         }
-        else{ return false; }
+        return $rs['TasksTeam']['team_code'];
     }
     
     //2016

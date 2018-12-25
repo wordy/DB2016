@@ -1,5 +1,5 @@
     <?php echo $this->Form->create('User', array(
-        'action'=>'forgotPassword',
+        'url'=>array('action'=>'forgotPassword'),
         'class'=>'formResetPW',
         'type'=>'post',
         'novalidate' => true,

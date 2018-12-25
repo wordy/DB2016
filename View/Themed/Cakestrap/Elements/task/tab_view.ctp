@@ -163,7 +163,7 @@
                                 </div>
                                 <div class="col-xs-4">
                                     <strong>Time Link (Offset)</strong><br/>
-                                    <?php echo ($task['Task']['time_control']==1)? '<i class="fa fa-check text-success"></i>('.$this->Ops->offsetToMmss($task['Task']['time_offset']).')':'<i class="fa fa-times text-danger"></i>'; ?>
+                                    <?php echo ($task['Task']['time_control']==1)? '<i class="fa fa-check text-success"></i>('.$task['Task']['time_offset'].'s)':'<i class="fa fa-times text-danger"></i>'; ?>
                                 </div>
                             </div>
                             <?php

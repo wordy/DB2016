@@ -103,8 +103,10 @@
     <div class="panel-body" id="tsBody">
         <div class="row">
             <div class="col-md-9">
-                <h1>Time Shift Tasks</h1>
-                <p>Allows you to pick up groups of tasks from your compiled plan and shift their times by a fixed amount.  If an end time is specified, it is also moved accordingly.</p>
+                <h1><i class="fa fa-arrows"></i> Time Shift Tasks</h1>
+                <p>Allows you to pick up groups of tasks from your compiled plan and shift their times by a fixed amount. For example, shift a group of related tasks back 30 minutes due to a change in the schedule.
+                    </p>
+                    <p><b>Note:</b> Tasks that are Time Linked cannot be moved using this function.</p>
                 <br/>
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2" id="tsErrorStatus">
@@ -118,10 +120,10 @@
                 <h3>Shift All Tasks</h3>
                 <p class="help-block">Shift forward/backwards in time by using positive/negative numbers.</p>
                         <label>Minutes
-                            <input id="tsMin" type="number" name = "data[Shift][min]" class="form-control" min="-300" max="300" placeholder="Minutes">
+                            <input id="tsMin" type="number" name = "data[Shift][min]" class="form-control" min="-300" max="300" placeholder="Min">
                         </label>
                         <label>Seconds
-                            <input id="tsSec" type="number" name = "data[Shift][sec]" class="form-control" default="0" min="-60" max="60" placeholder="Seconds">
+                            <input id="tsSec" type="number" name = "data[Shift][sec]" class="form-control" default="0" min="-60" max="60" placeholder="Sec">
                         </label>
                     <?php
                         echo $this -> Form -> submit('Time Shift Tasks', array('id' => 'co_compile-submit-button', 'class' => 'btn btn-large btn-success pull-left'));

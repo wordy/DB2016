@@ -1,18 +1,26 @@
 $(document).ready(function () {
-		
+
+/*
+    $('.inputAssignments').select2({
+        theme:'bootstrap',
+        placeholder: 'Assign To',
+        multiple: true,
+        minimumResultsForSearch: Infinity,
+    });
+ */   
     $('#ajax-content-load').find('.boot-popover, .helpTTs').popover({
         html: true,
         container: 'body',
     });
-      
+
 	// Fetch task details
     $('#ajax-content-load').on('click', '.task-panel-heading', function(e){
-        e.preventDefault();
-        e.stopPropagation();
         var tdheading_div = $(this);
         var tid = $(this).attr('data-tid');
         var tbody_div = $(this).parent('.task-panel').find('.taskPanelBody');
-        tdheading_div.find('.tr_spin').remove();
+        var spinner = $('#global-busy-indicator');
+
+		spinner.fadeOut('fast');
 
         if (!tbody_div.hasClass('is_vis')){
             $.ajax({
@@ -20,7 +28,7 @@ $(document).ready(function () {
                 type: 'post',
                 dataType:'html',
                 beforeSend:function () {
-                    tdheading_div.append('<span class="tr_spin"><i class="fa fa-cog fa-spin fa-lg"></i></span>');
+	            	spinner.fadeIn('fast');
                 },
                 success:function(data, textStatus) {
                     tbody_div.html(data).addClass('is_vis').slideDown(300);
@@ -29,11 +37,11 @@ $(document).ready(function () {
                     bindToSelect2(new_lpts);
                 },
                 complete:function (XMLHttpRequest, textStatus) {
-                    tdheading_div.find('.tr_spin').remove();
+	            	spinner.fadeOut('fast');
                 },
                 error: function(xhr, statusText, err){
-                    var msg = '<div class=\"alert alert-danger\" role=\"alert\"><b>Error: </b>'+err+'</div>';
-                    $('#cErrorStatus').html(msg).fadeIn('fast').delay(3000).fadeOut();
+                    //var msg = '<div class=\"alert alert-danger\" role=\"alert\"><b>Error: </b>'+err+'</div>';
+                    //$('#cErrorStatus').html(msg).fadeIn('fast').delay(3000).fadeOut();
                 },
             });
         }  
@@ -43,13 +51,174 @@ $(document).ready(function () {
         return false;
     });
 
+/*
+ * Quick Add
+ */
+    
+    $('#qaStartTime, #qaEndTime').datetimepicker({
+        sideBySide: true,
+        showTodayButton: true,
+        allowInputToggle: true,
+        format: 'YYYY-MM-DD HH:mm:ss', 
+    });    
+    
+	$('#qaDueDate').datetimepicker({
+        sideBySide: true,
+        showTodayButton: true,
+        allowInputToggle: true,
+        format: 'YYYY-MM-DD', 
+    });   
+    
+	$('#qaInputDetails').summernote({
+		height: 150,
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+            ['para', ['ul', 'ol']],
+            ['insert', ['link']],
+            ['misc', ['undo','redo','help']],
+        ]
+    });    
+    
+	$('#qaPushAllBut').on('click', function(){
+        if($(this).prop('disabled') == false){
+            if($(this).text() == 'Push ALL'){
+                $('#qaReqAllBut').text('Request ALL');
+                $(this).text('Push NONE');
+                $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
+                    $(this).data('tr_id', 2).removeClass('btn-danger btn-success btn-ttrid0').addClass('btn-ttrid2');
+                });
+            }
+            else {
+                $(this).text('Push ALL');
+                $('#qaReqAllBut').text('Request ALL');
+                $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
+                    $(this).data('tr_id', 0).removeClass('btn-danger btn-success btn-default btn-ttrid2').addClass('btn-ttrid0');
+                });
+            }
+        }
+    });
+            
+    $('#qaReqAllBut').on('click', function(){
+        if($(this).prop('disabled') == false){
+            if($(this).text() == 'Request ALL'){
+                $(this).text('Request NONE');
+                $('#qaPushAllBut').text('Push ALL');
+                $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
+                    $(this).data('tr_id', 3).removeClass('btn-default btn-success btn-ttrid0 btn-ttrid2').addClass('btn-danger');
+                });
+            }
+            else {
+                $(this).text('Request ALL');
+                $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
+                    $(this).data('tr_id', 0).removeClass('btn-danger btn-success btn-default btn-ttrid2').addClass('btn-ttrid0');
+                });
+            }
+        }
+    });
+    
+    // Disables PushALL and RequestAll buttons when no lead team is selected
+    $('#qaReqAllBut, #qaPushAllBut').on('change', function(){
+        lteam = $('#qaLeadTeamSelect').val();
+        if(!lteam){
+            $(this).attr('disabled', 'disabled');
+        }else{
+            $(this).removeAttr('disabled');
+        }
+    });        
+
+	// Add new task
+	$('#qaForm').on('submit', function(e){
+        e.preventDefault();
+        var subBut = $(this).find('.qaSubmitButton');
+        var valCont = $(this).find('.qaValidationContent');
+        var spinner = $('#global-busy-indicator');
+        var pageNum = $('body').find('.pageNum').html();
+        var to_min = $('#inputOffMin').val();
+        var to_sec = $('#inputOffSec').val();
+        var to_sign = $('#inputOffSign').val();
+    
+        $('#qaNewTeamsList').find('.tt-btn').each(function(){
+            var nteam = $(this).data('team_id');
+            var ntr = $(this).data('tr_id');
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'data[TeamRoles]['+nteam+']',
+                value: ntr,
+            }).appendTo('#qaForm');
+        });
+        
+        /*
+        $('#qaAssignSelect').find('option:selected').each(function(){
+        	console.log($(this));
+        	var sel = $(this);
+            //var nteam = $(this).data('team_id');
+            //var ntr = $(this).data('tr_id');
+            $('<input>').attr({
+                type: 'hidden',
+                //name: 'data[Assignments]['+nteam+']',
+                name: 'data[Assignments][]',
+                //value: ntr,
+                value: sel.val(),
+            }).appendTo('#qaForm');
+        });
+*/
+        
+        $.ajax( {
+            url: $(this).attr('action'),
+            type: 'post',
+            data: $(this).serialize(),
+            dataType:'html',
+            beforeSend:function () {
+                subBut.html('<i class="fa fa-cog fa-spin"></i> Saving...').attr('disabled', true);
+                valCont.fadeOut('fast');                
+                spinner.fadeIn('fast');
+            },
+            success:function(data, textStatus) {
+                $('#qaForm').trigger('reset');
+                $('#qaInputDetails').code('');
+                var dstr = moment().format('YYYY-MM-DD HH:00:00');
+                var dmom = moment(dstr, 'YYYY-MM-DD HH:mm:ss');
+                $('#qaStartTime').data('DateTimePicker').date(moment(dmom));
+                $('#qaEndTime').data('DateTimePicker').date(moment(dmom));
+                $('#qaLeadTeamSelect').trigger('change');
+              	$('#qaForm').find('.linkableParentSelect').val(0).trigger('change');
+                $('#cErrorStatus').html(data).fadeIn().delay(3000).fadeOut('fast');
+                
+                var is_single = $.urlParam('task'); 
+                if(is_single){
+            		//window.location = '/tasks/compile/';
+            		var get_url = '/tasks/compile?task='+is_single;	
+            	}
+            	else{
+            		var get_url = '/tasks/compile?scr=action';
+            	}
+                
+                // Refresh tasks list
+                $('#taskListWrap').load(get_url, function(response, status, xhr){
+                    if(status == 'success'){
+                        $('#taskListWrap').html(response);
+                    }
+                });
+            },
+            error: function(xhr, statusText, err){
+                valCont.html(xhr.responseText).fadeIn('fast');
+            },                
+            complete:function (XMLHttpRequest, textStatus) {
+                subBut.html('<i class="fa fa-plus"></i> Add New Task').prop('disabled', false);
+                spinner.fadeOut('fast');
+            },
+        });
+    });
+
     // Edit Task
     $('body').on('submit','form.formEditTask', function(e){
         e.preventDefault();
         var thisform = $(this);
         var subBut = thisform.find('.eaSubmitButton');
         var valCont = $(this).find('.eaValidationContent');
-        var spinner = $(this).find('.eaSpinner');
+        var spinner = $('#global-busy-indicator');
+        //console.log('form edit task'); console.log(spinner);
+        
         var pageNum = $('#pageNum').html();
         var viewSingle = $('#singleTask').html();
 
@@ -77,8 +246,8 @@ $(document).ready(function () {
             dataType:'html',
             beforeSend:function () {
                 subBut.html('<i class="fa fa-cog fa-spin"></i> Saving...').attr('disabled', true);
-                valCont.fadeOut('fast');                
-                //spinner.fadeIn();
+                spinner.fadeIn('fast');
+                valCont.fadeOut('fast');              
             },
             success:function(data, textStatus) {
                 spinner.fadeOut('fast');
@@ -94,87 +263,33 @@ $(document).ready(function () {
                 valCont.html(xhr.responseText).fadeIn('fast');
             },                
             complete:function (XMLHttpRequest, textStatus) {
-                //spinner.fadeOut('fast');
                 subBut.html('<i class="fa fa-save"></i> Save Task').attr('disabled', false);
             },
         });
         return false;
     });
-    
-	// Add new task
-	$('#qaForm').on('submit', function(e){
-        e.preventDefault();
-        var subBut = $(this).find('.qaSubmitButton');
-        var valCont = $(this).find('.qaValidationContent');
-        var spinner = $(this).find('.qaSpinner');
-        var pageNum = $('body').find('.pageNum').html();
-        var to_min = $('#inputOffMin').val();
-        var to_sec = $('#inputOffSec').val();
-        var to_sign = $('#inputOffSign').val();
-    
-        $('#qaNewTeamsList').find('.tt-btn').each(function(){
-            var nteam = $(this).data('team_id');
-            var ntr = $(this).data('tr_id');
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'data[TeamRoles]['+nteam+']',
-                value: ntr,
-            }).appendTo('#qaForm');
-        });
+
+    // Delete Task  
+    $('#ajax-content-load').on('click', '.eaTaskDeleteButton', function(){
+        var tid = $(this).data('tid');
+        var desc = $(this).data('desc');
+        var del_mod = $(this).parents('#ajax-content-load').find('#deleteTaskModal');
+        var tdesc = del_mod.find('.deleteTaskDesc');
+        var thidid = del_mod.find('#deleteTaskId');
+        var pageNum = $('#pageNum').html();
         
-        $.ajax( {
-            url: $(this).attr('action'),
-            type: 'post',
-            data: $(this).serialize(),
-            dataType:'html',
-            beforeSend:function () {
-                subBut.html('<i class="fa fa-cog fa-spin"></i> Saving...').attr('disabled', true);
-                valCont.fadeOut('fast');                
-                //spinner.fadeIn();
-            },
-            success:function(data, textStatus) {
-                $('#qaForm').trigger('reset');
-                $('#qaInputDetails').code('');
-                var dstr = moment().format('YYYY-MM-DD HH:mm:00');
-                var dmom = moment(dstr, 'YYYY-MM-DD HH:mm:ss');
-                $('#qaStartTime').data('DateTimePicker').date(moment(dmom));
-                $('#qaLeadTeamSelect').trigger('change');
-              	$('#qaForm').find('.linkableParentSelect').val(0).trigger('change');
-                spinner.fadeOut('fast');
-                $('#cErrorStatus').html(data).fadeIn().delay(3000).fadeOut('fast');
-                
-                var is_single = $.urlParam('task'); 
-                if(is_single){
-            		//window.location = '/tasks/compile/';
-            		var get_url = '/tasks/compile?task='+is_single;	
-            	}
-            	else{
-            		var get_url = '/tasks/compile?scr=action';
-            	}
-                
-                // Refresh tasks list
-                $('#taskListWrap').load(get_url, function(response, status, xhr){
-                    if(status == 'success'){
-                        $('#taskListWrap').html(response);
-                    }
-                });
-            },
-            error: function(xhr, statusText, err){
-                valCont.html(xhr.responseText).fadeIn('fast');
-            },                
-            complete:function (XMLHttpRequest, textStatus) {
-                //spinner.fadeOut('fast');
-                subBut.html('<i class="fa fa-plus"></i> Add New Task').prop('disabled', false);
-            },
-        });
+        tdesc.html('<b>'+desc+'</b>');
+        thidid.html(tid);
+        del_mod.modal('show');
     });
 
 	$('#taskListWrap').on('mouseenter', '.task-panel-heading' , function(e){
         var ucon_inv = $(this).data('uconinv');
-        var addHtml = $('<span class=\"actButs\"><button style=\"margin:0px 5px 0px 0px;\" class=\"btn btn-yh btn-xs addTask\"><i class=\"fa fa-plus-circle\"> </i> &nbsp;Add</button></span>');
-        var linkHtml = $('<span class=\"actButs\"><button style=\"margin:0px 0px 0px 0px;\" class=\"btn btn-yh btn-xs addLink\"><i class=\"fa fa-link\"> </i> &nbsp;Link</button></span>');
+        //var addHtml = $('<span class=\"actButs noProp\"><button style=\"margin:0px 5px 0px 0px;\" class=\"btn btn-yh btn-xs addTask\"><i class=\"fa fa-plus-circle\"> </i> &nbsp;Add</button></span>');
+        var addHtml = $('<span class=\"actButs noProp\" style=\"margin:-45px 0px -40px 0px;\"><button class=\"btn btn-yh btn-xxxs addTask\"><i class=\"fa fa-plus-circle\"> </i> &nbsp;Add</button></span>');
+        var linkHtml = $('<span class=\"actButs noProp\" style=\"margin:-45px 0px -40px 0px;\"><button class=\"btn btn-yh btn-xxxs addLink\"><i class=\"fa fa-link\"> </i> &nbsp;Link</button></span>');
+        //var linkHtml = $('<span class=\"actButs noProp\"><button style=\"margin:0px 0px 0px 0px;\" class=\"btn btn-yh btn-xs addLink\"><i class=\"fa fa-link\"> </i> &nbsp;Link</button></span>');
         var tsDiv = $(this).find('.taskTs').parent();
-        //var tsDiv = $(this).parent('.task-panel').find('.task-buttons');
         addHtml.hide().appendTo(tsDiv).fadeIn('fast');
         if(ucon_inv){
             linkHtml.hide().appendTo(tsDiv).fadeIn('fast'); 
@@ -219,41 +334,13 @@ $(document).ready(function () {
         }
     });
     
-	$('#taskListWrap').on('click', 'div.task-panel-heading button', function(e){
+	$('#taskListWrap').on('click', '.noProp', function(e){
         e.stopPropagation();
     });
     
     // Time Shifting
-    $('#taskListWrap').on('click', '.taskTs', function(event){
-        event.stopPropagation();
-    });
-    
-    $('#taskListWrap').on('click', 'input.tsCheck', function(event){
-        var this_check = $(this);
-        var tid = $(this).data('tid');
-        var act = 'addShift';
-        
-        if($(this).hasClass('checked')){
-            act = 'remShift';
-        }
-
-        $.ajax( {
-            url: '/tasks/'+act,
-            type: 'post',
-            dataType:'json',
-            data: {task: +tid},
-            success:function(data, textStatus) {
-                if(data.success){
-                    $('#userTimeshiftCount').html(data.ts_count).css({opacity: 0});
-                    $('#userTimeshiftCount').animate({opacity:1},700);
-                    this_check.toggleClass('checked');    
-                }
-            },
-            error: function(xhr, statusText, err){
-                var msg = '<div class=\"alert alert-danger\" role=\"alert\"><b>Error: </b>'+err+'</div>';
-                $('#cErrorStatus').stop().html(msg).fadeIn('fast').delay(3000).fadeOut('fast');
-            }
-        });
+    $('#taskListWrap').on('click', '.taskTs', function(e){
+        e.stopPropagation();
     });
 
     // Offset Sec to Min Rollover    
@@ -261,11 +348,11 @@ $(document).ready(function () {
         var form = $(this).parents('form');
         var off_min = form.find('.inputOffMin');
         var off_sec = form.find('.inputOffSec');
-        var off_sign = form.find('.inputOffSign');
+        //var off_sign = form.find('.inputOffSign');
 
         if(off_sec.val()==60){
             var old_val = parseInt(off_min.val());
-            if(!old_val){old_val = 0;}
+            if(!old_val){ old_val = 0;}
             off_sec.val(0);    
             if(old_val >=0){
                 off_min.val(old_val+1);
@@ -287,29 +374,54 @@ $(document).ready(function () {
     });
     
     // Offset
-    $('#ajax-content-load').on('change', '.inputOffSec, .inputOffMin, .inputOffSign', function(){
-        //console.log('got input change');
+    $('#ajax-content-load').on('change', '.inputOffSec, .inputOffMin, .inputOffType', function(){
+    	//console.log("got chg of inoff");
         var form = $(this).parents('form');
         var in_off_min = form.find('.inputOffMin');
         var in_off_sec = form.find('.inputOffSec');
-        var in_off_sign = form.find('.inputOffSign');
-        var o_m = in_off_min.val();
-        var o_s = in_off_sec.val();
-        var o_sign = in_off_sign.val();
+        var in_off_type = form.find('.inputOffType');
+
+        var to_min = in_off_min.val();
+        var to_sec = in_off_sec.val();
+        var to_type = in_off_type.val();
+
+        //console.log('o_sign: '+o_sign);
+        //console.log('to_type: '+to_type);
+
         var timeCtrl = form.find('.inputTC');
         var timeOffset = $(this);
         var startTime = form.find('.inputStartTime');
         var endTime = form.find('.inputEndTime');
-        var toVal = getOffset(o_m, o_s, o_sign);
+        var toVal =  60*parseInt(to_min) + parseInt(to_sec);
+
+        //console.log('toval ' +toVal);
         var parentTask = form.find('.linkableParentSelect');
         var pt_sel = parentTask.find('option:selected');
-        var pt_start_val = pt_sel.data('stime');
+	    var pt_start_val = pt_sel.data('stime');
+        var pt_end_val = pt_sel.data('etime');
         var ost = moment(startTime.val(), 'YYYY-MM-DD HH:mm:ss');
         var oet = moment(endTime.val(), 'YYYY-MM-DD HH:mm:ss');
         var odur = oet.diff(ost);
         var opst = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss');
-        var nst = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s');
-        var net = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s').add(odur, 'ms');
+        
+        // 4 cases for offset type: 1) -1: BEFORE linked task STARTS, 2) -2: BEFORE linked task ENDS, 3) 1: AFTER linked task STARTS, 4) 2: AFTER linked task ENDS
+        if(to_type ==-1){
+	        var nst = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').subtract(toVal,'s');
+	        var net = moment(nst).add(odur, 'ms');
+        }
+        else if (to_type == -2) {
+	        var nst = moment(pt_end_val, 'YYYY-MM-DD HH:mm:ss').subtract(toVal,'s');
+	        var net = moment(nst).add(odur, 'ms');
+        }
+        else if (to_type == 1){
+	        var nst = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s');
+	        var net = moment(nst).add(odur, 'ms');
+        }
+        else if(to_type == 2){
+	        var nst = moment(pt_end_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s');
+	        var net = moment(nst).add(odur, 'ms');
+        }
+
         var isTc = timeCtrl.prop('checked');
         
         if(isTc){
@@ -320,27 +432,55 @@ $(document).ready(function () {
 
     //Time Ctrl
     $('#ajax-content-load').on('change', '.inputTC', function(){
-        //console.log('TC change in compile');
+    	//console.log('got chg of inputTTC');
         var form = $(this).parents('form');
         var startTime = form.find('.inputStartTime');
         var endTime = form.find('.inputEndTime');
-        var to_min = form.find('.inputOffMin');
-        var to_sec = form.find('.inputOffSec');
-        var to_sign = form.find('.inputOffSign');
-        var toVal = getOffset(to_min.val(),to_sec.val(),to_sign.val());
+        var in_off_min = form.find('.inputOffMin');
+        var in_off_sec = form.find('.inputOffSec');
+        var in_off_type = form.find('.inputOffType');
+        var to_min = in_off_min.val();
+        var to_sec = in_off_sec.val();
+        var to_type = in_off_type.val();
+        //console.log('to_type: '+to_type);
+        //var toVal = getOffset(to_min.val(),to_sec.val(),to_sign.val());
+        var toVal = 60*parseInt(to_min) + parseInt(to_sec);
+        //toVal = abs(toVal);
         var ost = moment(startTime.val());
         var parentTask = form.find('.linkableParentSelect');
         var pt_sel = parentTask.find('option:selected');
-        var pt_start_val = null;
-        
-        if(pt_sel.data('stime')){
-            pt_start_val = pt_sel.data('stime');    
-        }
+        //console.log(pt_sel);
+        var pt_start_val = pt_end_val =  null;
         var ost = moment(startTime.val(), 'YYYY-MM-DD HH:mm:ss');
         var oet = moment(endTime.val(), 'YYYY-MM-DD HH:mm:ss');
         var odur = oet.diff(ost)
-        var nst = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s');
-        var net = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s').add(odur, 'ms');
+
+        if(pt_sel.data('stime')){
+            pt_start_val = pt_sel.data('stime');    
+        }
+
+        //console.log('ptstartval: '+pt_start_val);
+        if(pt_sel.data('etime')){
+            pt_end_val = pt_sel.data('etime');    
+        }
+
+        if(to_type ==-1 || to_type ==0){
+	        var nst = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').subtract(toVal,'s');
+	        var net = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').subtract(toVal,'s').add(odur, 'ms');
+        }
+        else if (to_type == -2) {
+	        var nst = moment(pt_end_val, 'YYYY-MM-DD HH:mm:ss').subtract(toVal,'s');
+	        var net = moment(pt_end_val, 'YYYY-MM-DD HH:mm:ss').subtract(toVal,'s').add(odur, 'ms');
+        }
+        else if (to_type == 1){
+	        var nst = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s');
+	        var net = moment(pt_start_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s').add(odur, 'ms');
+        }
+        else if(to_type == 2){
+	        var nst = moment(pt_end_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s');
+	        var net = moment(pt_end_val, 'YYYY-MM-DD HH:mm:ss').add(toVal,'s').add(odur, 'ms');
+        }
+        
         var stHelp = form.find('.stHelpWhenTC');
         
         if($(this).prop('checked') && pt_start_val){
@@ -348,15 +488,15 @@ $(document).ready(function () {
             startTime.prop('readonly', true);
             startTime.data('DateTimePicker').date(moment(nst));
             endTime.data('DateTimePicker').minDate(moment(nst)).date(moment(net));
-            to_min.prop('disabled', false);
-            to_sec.prop('disabled', false);
-            to_sign.prop('disabled', false);
+            in_off_min.prop('disabled', false);
+            in_off_sec.prop('disabled', false);
+            in_off_type.prop('disabled', false);
             stHelp.removeClass('collapse');
         }
         else{
-            to_min.val(0).prop('disabled', true);
-            to_sec.val(0).prop('disabled', true);
-            to_sign.val('-').prop('disabled', true);
+            in_off_min.val(0).prop('disabled', true);
+            in_off_sec.val(0).prop('disabled', true);
+            in_off_type.prop('disabled', true);
             startTime.prop('readonly', false);
             stHelp.addClass('collapse');
         }
@@ -445,20 +585,6 @@ $(document).ready(function () {
         }
     });
     
-    // Delete Task  
-    $('#ajax-content-load').on('click', '.eaTaskDeleteButton', function(){
-        var tid = $(this).data('tid');
-        var desc = $(this).data('desc');
-        var del_mod = $(this).parents('#ajax-content-load').find('#deleteTaskModal');
-        var tdesc = del_mod.find('.deleteTaskDesc');
-        var thidid = del_mod.find('#deleteTaskId');
-        var pageNum = $('#pageNum').html();
-        
-        tdesc.html('<b>'+desc+'</b>');
-        thidid.html(tid);
-        del_mod.modal('show');
-    });
-    
     //Change lead
     $('#ajax-content-load').on('change','.inputLeadTeam', function(){
         //console.log('got lead change in compile');
@@ -470,22 +596,60 @@ $(document).ready(function () {
         var partask_list = form.find('.linkedParentDiv');
         var ea_tlist = form.find('.teamsList');
         var curPID =  form.find('.hiddenParId').text();
-        var curTID =  form.find('.hiddenTaskId').text();    
+        var curTID =  form.find('.hiddenTaskId').text();
+        var asgns = form.find('.inputAssignments');
+        var spinner = $('#global-busy-indicator');
 
+        //Update role list
+        /*
+        $.ajax( {
+            url: '/assignments/getByUser?team='+leadt,
+            type: 'post',
+            dataType:'json',
+            beforeSend:function () {
+                spinner.fadeIn('fast');
+            },
+            success:function(data, textStatus) {
+        		asgns.empty();
+            		
+        	    asgns.select2({
+    				theme:'bootstrap',
+			       	tags:true,    
+			       	allowClear: true,
+    				placeholder: {
+      					id: 0,
+      					text:"Select a role",
+      					selected:'selected'
+    				},
+            		//placeholder: 'Select an option',
+    				//multiple: false,
+				    minimumResultsForSearch: Infinity,
+    				data: data
+				});
+            },
+            error: function(xhr, statusText, err){
+                var msg = '<div class=\"alert alert-danger\" role=\"alert\"><b>Error: </b>'+err+'</div>';
+                $('#eaErrorStatus').stop().html(msg).fadeIn('fast').delay(3000).fadeOut('fast');
+            },                
+            complete:function (XMLHttpRequest, textStatus) {
+                spinner.fadeOut('fast');
+            },
+        });
+*/
         $.ajax( {
             url: '/tasks_teams/updateSig/',
             data: {team:leadt},
             type: 'post',
             dataType:'html',
             beforeSend:function () {
-                lead_label.append('<span class="tr_spin"><i class="fa fa-cog fa-spin fa-lg"></span>');
+                spinner.fadeIn('fast');
             },
             success:function(data, textStatus) {
                 ea_tlist.html(data).fadeIn('fast');
                 $('#qaReqAllBut, #qaPushAllBut').trigger('change');
                 if(leadt){
                     updateLinkableParents(leadt, partask_list, curPID, curTID);
-                    console.log('updating sig due to lead change in compile.js'); 
+                    //console.log('updating sig due to lead change in compile.js'); 
                 }
             },
             error: function(xhr, statusText, err){
@@ -493,7 +657,7 @@ $(document).ready(function () {
                 $('#eaErrorStatus').stop().html(msg).fadeIn('fast').delay(3000).fadeOut('fast');
             },                
             complete:function (XMLHttpRequest, textStatus) {
-                lead_label.find('.tr_spin').remove();
+                spinner.fadeOut('fast');
             },
         });
     });    
@@ -545,10 +709,9 @@ $(document).ready(function () {
         var team_id = this_but.data('teamid');
         var role_id = '';
         var tbody_div = tdheading_div.parent('.task-panel').find('.taskPanelBody');
+        var spinner = $('#global-busy-indicator');
 
-        
 
-            
         if(this_but.hasClass('openTeam')){
             role_id = 4;
             this_but.removeClass('btn-danger openTeam').addClass('btn-success closeTeam');
@@ -569,7 +732,7 @@ $(document).ready(function () {
                 type: 'post',
                 dataType:'json',
                 beforeSend:function () {
-                    tdheading_div.append('<span class="tr_spin"><i class="fa fa-cog fa-spin fa-lg"></span>');
+                    spinner.fadeIn('fast');
                 },
 				success: function(){
 					// If task details are visible, refresh to reflect changed state
@@ -578,7 +741,7 @@ $(document).ready(function () {
         			}
 				},
                 complete:function (XMLHttpRequest, textStatus) {
-                    tdheading_div.find('.tr_spin').remove();
+                    spinner.fadeOut('fast');
                 },
                 error: function(xhr, statusText, err){
                     var res_j = $.parseJSON(xhr.responseText);
@@ -610,10 +773,6 @@ $(document).ready(function () {
         buttonWidth: '100%',
         numberDisplayed: 5,
         maxHeight: 200,
-        onChange: function(element, checked) {
-            //$('#coStartDate').trigger('change');
-            //updateCo();
-        }
     });
     
     $('#coDateRange').on('apply.daterangepicker', function(ev, picker) {
@@ -630,13 +789,18 @@ $(document).ready(function () {
         var help_str = '';
         //$('#coViewType').val($(this).val()).trigger('change');
         if($(this).val() == 1){
-            help_str+= '<b>Rundown View</b><ul><li>Default setting. Shows any tasks involving the selected Teams, sorted by ascending or descending Start Time.</li>';
-            help_str+= '<li>Use View Options to control what\'s shown.</li><li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>';
+            help_str+= '<b>Rundown View</b><ul><li>Default setting. Shows any tasks involving the selected Teams in any role.</li>';
+            help_str+= '<li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>';
             sortState('enable');        
         }
+        else if($(this).val() == 2){
+            help_str+= '<b>Event Day Timeline</b><ul><li>Shows a 24 hour timeline from <b>6AM event day</b> to <b>6AM the next day</b> of tasks involving the selected Teams.</li>';
+            help_str+= "<li>Separated by Team's roles and ordered by <u>ascending</u> Start Time</li></ul>";
+            sortState('disable'); 
+        }
         else if($(this).val() == 10){
-            help_str+= '<b>Lead Only</b><ul><li>Shows only tasks where the selected Team(s) are the lead.</li>';
-            help_str+= '<li>Hides tasks from all other teams.</li><li>Useful for focusing on a single team\'s tasks.</li><li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>';
+            help_str+= '<b>Lead Only</b><ul><li>Shows only tasks where the selected Teams are the lead.</li>';
+            help_str+= "<li>Useful for focusing on a single team's tasks.</li><li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>";
             sortState('enable');        
         }
         else if($(this).val() == 30){
@@ -645,13 +809,13 @@ $(document).ready(function () {
             sortState('enable');        
         }
         else if($(this).val() == 31){
-            help_str+= '<b>Open Requests <u>To</u> Other Teams (Waiting)</b><ul><li>Tasks where selected Teams requested help from other teams, and request is still Open.</li>';
+            help_str+= '<b>Open Requests <u>To</u> Other Teams (Waiting)</b><ul><li>Tasks where selected Teams requested help from other teams and the request is still Open.</li>';
             help_str+= '<li>Useful for tracking what other teams owe your team.</li><li>Fetches tasks from <u>all dates</u>.</li><li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>';
             sortState('enable');        
         }
         else if($(this).val() == 100){
             help_str+= '<b>Recently Modified</b><ul><li>Shows most recently modified tasks.</li>';
-            help_str+= '<li>Useful to see recent changes to your team\'s plan.</li><li>Fetches tasks from <u>all dates</u>.</li><li>Ordered by <u>descending modified date</u> (most recently changed first).</li></ul>';
+            help_str+= '<li>Useful for seeing recent changes to tasks involving your Team.</li><li>Fetches tasks from <u>all dates</u>.</li><li>Ordered by <u>descending modified date</u> (most recently changed first).</li></ul>';
             sortState('disable');
         }
         else if($(this).val() == 500){
@@ -664,7 +828,384 @@ $(document).ready(function () {
     
     $('#coViewList input:checked').trigger('change');
     $('#cForm').on('change', 'input:not(.coDateRange)', updateCo);
+
     
+	
+/***************
+ * Modals
+ ***************/
+   
+	$('#teamAddLinkedModal').on('show.bs.modal', function(e) {
+	    var parent_id = $(this).find('span.hiddenParentId').html();
+        var tid = $(this).find('span.hiddenTid').html();
+        var l_modal = $(this);
+        var doLink = $(this).find('.btn-doLink');
+        
+        doLink.on('click', function(e){
+            var team_sel = l_modal.find('#selectLinkedTeam option:selected');
+            addNewLinkedTask(tid, team_sel.val(), parent_id);
+            l_modal.modal('hide');
+            $( this ).off(e);
+        });
+    });      
+
+    $('#deleteTaskModal').on('show.bs.modal', function(e) {
+    	//console.log('hit show modal');
+	        //e.preventDefault();
+	        e.stopPropagation();
+
+        var doDel = $(this).find('.btn-doDelete');
+        var task_id_span = $(this).find('#deleteTaskId');
+        var task_id = task_id_span.html();
+        //var pageNum = $('body').find('#pageNum').html();
+        
+        //console.log('doDel, task id');
+        //console.log(doDel);
+        //console.log(task_id);
+        
+        doDel.on('click', function(e){
+        	//alert('tried to delete');
+        	//console.log('got delete click');
+            if(task_id>0){
+                deleteTask(task_id);
+                $('#deleteTaskModal').modal('hide');
+            }
+            return false;
+        });
+    });
+
+	$('#deleteTaskModal').on('hidden.bs.modal', function () {
+    	//$(this).data('bs.modal', null);
+	      $(this).data('bs.modal', null)
+	      $('#deleteTaskModal').removeData();
+
+    	//alert('hi');
+    	$('#deleteTaskId').html('');
+	});
+ 
+
+/*
+ * Comments
+ * 
+ */    
+	function deleteComment(cid){
+    	if(cid !=null){        
+	        $.ajax( {
+	            url: '/comments/delete/',
+	            data: {cid:cid},
+	            type: 'post',
+	            dataType:'json',
+	            success:function(data, textStatus) {
+	                var tid = $('#ajax-content-load').find('#commentBody'+cid).data('tid');
+	                $('#ajax-content-load').find('#commentBody'+cid).fadeOut();
+	                $('#ajax-content-load').find('#commentBody'+cid).parents('.panel-tcom').parents('row').remove();
+	                var cbody = $('#ajax-content-load').find('#commentBody'+cid).parents('.panel-body').find('.panel-tcom');
+	            },
+	        });
+		}    
+    }
+	
+    
+    
+// EO Document.Ready();    
+    
+
+});
+
+
+	function updateLinkableParents(team, update_div, current, child){
+		//console.log('got up link par in c.js');
+        $.ajax( {
+            url: '/tasks/linkable/',
+            data: {team:team, current:current, child:child},
+            type: 'post',
+            dataType:'html',
+            success: function(data, textStatus){
+                update_div.html(data).fadeIn('fast');
+                var new_lps = update_div.find('.linkableParentSelect');
+                bindToSelect2(new_lps);
+                new_lps.val(current);
+                new_lps.trigger('change');
+            },
+        });
+    }
+
+    function deleteTask(tid){
+        if(tid>0){
+	        $.ajax( {
+	            url: '/tasks/delete/'+tid,
+	            type: 'post',
+	            dataType:'json',
+	            beforeSend:function () {
+	                $('#ajaxProgress').fadeIn('fast');
+	            },
+	            success:function(data, textStatus) {
+	                var msg_html = '<div class=\"alert alert-success\" role=\"alert\">'+data.message+'</div>';
+	                $('#taskListWrap').load('/tasks/compile?src=ajax', function(response, status, xhr){
+	                    if(status == 'success'){
+	                    	console.log('doing refresh after delete');
+	                        $('#taskListWrap').html(response);
+	                    }
+	                });
+		            $('#cErrorStatus').html(msg_html).fadeIn().delay(3000).fadeOut('fast');
+	            },
+	            complete:function (XMLHttpRequest, textStatus) {
+	                $('#ajaxProgress').fadeOut('fast');
+	            }, 
+	        });        
+        }
+        
+        return false;
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function updateSignature(team, in_lead, pushed){
+    	//console.log('hit update sig in c.js');
+    	if(!team || !in_lead){return false;}
+
+        var lead_label = $(in_lead).parents('div.form-group').find('label');
+        var partask_label = $(in_lead).parents('form').find('.linkedParentDiv').parents('div.form-group').find('label');
+        var partask_list = $(in_lead).parents('form').find('.linkedParentDiv');
+        var ea_tlist = $(in_lead).parents('form').find('.teamsList');
+        var spinner = $('#global-busy-indicator');
+
+    	$.ajax( {
+            url: '/tasks_teams/updateSig/',
+            data: {team:team},
+            type: 'post',
+            dataType:'html',
+            beforeSend:function () {
+            	spinner.fadeIn('fast');
+                //lead_label.append('<span class=\"ajaxSmSpin\"><img src=\"/img/ajax-sm.gif\"/></span>');
+            },
+            success:function(data, textStatus) {
+                ea_tlist.html(data).fadeIn('fast');
+                $('#qaReqAllBut, #qaPushAllBut').trigger('change');
+                
+                if(pushed){
+                	setParentTeamAsPushed(pushed, $('#qaNewTeamsList'));	
+                }
+	            
+
+            },
+            error: function(xhr, statusText, err){
+                var msg = '<div class=\"alert alert-danger\" role=\"alert\"><b>Error: </b>'+err+'</div>';
+                $('#eaErrorStatus').stop().html(msg).fadeIn('fast').delay(3000).fadeOut('fast');
+            },                
+            complete:function (XMLHttpRequest, textStatus) {
+                //lead_label.find('.ajaxSmSpin').remove();
+                spinner.fadeOut('fast');
+            },
+        });
+    }
+
+    function addNewLinkedTask(parent, team, parent_team){
+    	//console.log('anlt in c.js');
+        if(!parent || !team){ return false; }
+        
+        var leadTeam = $('#qaLeadTeamSelect');
+        var lpTeam = $('#qaLinkedParentDiv').find('.linkableParentSelect');
+        var qaTC = $('#qaTimeCtrl');
+        leadTeam.val(team);
+        
+        updateSignature(team, leadTeam, parent_team);
+        updateLinkableParents(team, $('#qaLinkedParentDiv'), parent);
+        lpTeam.trigger('change');
+        qaTC.trigger('change');
+        
+        if(!$('#colAdd').hasClass('in')){
+            $('#colAddHeading').trigger('click');
+        }
+
+        $('html, body').animate({
+            scrollTop: $('#ajax-content-load').offset().top
+        }, 800);
+    }
+
+    function addNewTask(start){
+        //console.log('called add new task from c.js');
+        if(!start){return false;}
+        var startTime = $(document).find('#qaStartTime');
+        var endTime = $(document).find('#qaEndTime');
+        var col_add = $(document).find('#colAdd');
+        var col_add_head = $(document).find('#colAddHeading');
+
+        startTime.data('DateTimePicker').date(moment(start));
+        endTime.data('DateTimePicker').date(moment(start));
+        $(document).find('#qaLeadTeamSelect').trigger('change');
+        
+        if(!col_add.hasClass('in')){
+            col_add_head.trigger('click');
+            //console.log('got to col_add had class collapse');
+        }
+
+        $('html, body').animate({
+            scrollTop: $(document).find('#ajax-content-load').offset().top
+        }, 800);        
+    }
+
+
+	function resetAfterChangeParents(lp_select){
+        var advpid = lp_select.parents('form').find('.advancedParent');
+        var sel_par = lp_select.val('');
+        var start = lp_select.parents('form').find('.inputStartTime');
+        var tc = lp_select.parents('form').find('.inputTC');
+        var stHelp = lp_select.parents('form').find('.stHelpWhenTC');
+        var to_min = lp_select.parents('form').find('.inputOffMin');
+        var to_sec = lp_select.parents('form').find('.inputOffSec');
+        var to_sign = lp_select.parents('form').find('.inputOffSign');
+        
+        to_min.val(0).prop('disabled', true);
+        to_sec.val(0).prop('disabled', true);        
+        to_sign.prop('disabled', true);
+        tc.prop('checked', false);
+        stHelp.addClass('collapse');
+        start.prop('readonly', false);
+        
+		lp_select.val(null);        
+    	tc.prop('disabled', true);
+    	advpid.addClass('collapse');
+        
+        
+	}
+
+	function bindToSelect2(element, placeholder){
+		$(element).select2({
+			theme: 'bootstrap',
+			'width':'100%',
+			//'allowClear': true,
+			placeholder: placeholder,
+       });
+	}
+	
+    function getOffset(min,sec,sign){
+        var offset = 60*parseInt(min) + parseInt(sec);
+        if (sign == '-'){
+            offset = (-1)*parseInt(offset);
+        }
+        return offset;
+    }
+
+    function setParentTeamAsPushed(par_team_id, tlist){
+        var lpt_but = $(tlist).find('span[data-team_id='+par_team_id+']');
+        if(lpt_but.hasClass('btn-ttrid0')){
+            lpt_but.removeClass('btn-ttrid0').addClass('btn-ttrid2').data('tr_id', 2); 
+        }
+    }
+
+	// Awesome: http://stackoverflow.com/a/25359264/1279639
+	$.urlParam = function(name){
+	    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	    if (results==null){
+	       return null;
+	    }
+	    else{
+	       return results[1] || 0;
+	    }
+	}
+
+	// Generic Refresh of Tasks after Compile Options change
+    function updateCo(){
+        var form = $('#cForm');
+        var form_data = form.serialize();
+        var spinner = $('#global-busy-indicator');
+
+		if(form){
+	        $.ajax( {
+	            url: '/tasks/compile/',
+	            data: form_data,                
+	            type: 'post',
+	            dataType:'html',
+	            beforeSend: function(){
+	            	spinner.fadeIn('fast');
+	            },
+	            success:function(data, textStatus){
+	            	var single_task = $.urlParam('task');
+	            	if(single_task){
+	            		window.location = '/tasks/compile/';
+	            	}
+	            	else{
+	            		$('#taskListWrap').html(data).fadeIn('fast');	
+	            	}
+	            },
+	            complete: function(){
+	            	spinner.fadeOut('fast');
+	            }
+	        });
+		}
+    }
+
+	function updateTaskDetails(tid, tbody_div){
+		if(tid && tbody_div){
+            $.ajax({
+            	url: '/tasks/details/'+tid,
+                type: 'post',
+                dataType:'html',
+                success:function(data, textStatus) {
+                    tbody_div.html(data).fadeIn('fast');
+                    var new_lpts = tbody_div.find('.linkableParentSelect');
+                    bindToSelect2(new_lpts);
+                },
+            });
+		}
+	}
+
+	function bindSummernoteStd(in_details){
+		if(in_details){
+			var this_in = $(in_details);
+			this_in.summernote({
+				//disableDragAndDrop: true,
+	            height: 150,
+	            toolbar: [
+	                ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+	                ['para', ['ul', 'ol']],
+	                ['insert', ['link']],
+	                ['misc', ['undo','redo','help']],
+	            ]
+			});
+		}
+	}
+	
+	
+	/**
+	 * taskStartEnd Function
+	 * Logic when changing task start/end
+	 * @param in_start Object jq of start time input
+	 * @param end Object jq end time input
+	 * @param type String What's changing? Valid: "start", "end"
+	 * @param old_val Object moment of old value
+	 * @return Void
+	 */
+	function taskStartEnd(in_start, start_m, in_end, end_m, type, dur){
+		var start = start_m;
+		var end = end_m;
+		
+		if(type == 'start'){
+			if(start.diff(end) > 0){
+				in_end.data('DateTimePicker').minDate(start);
+			}
+		}
+		if(type == 'end'){
+			// Enforce end after start
+			if(start_m.diff(end_m) > 0){
+			}
+		}
+	}
+
+/*    
 	$('#coViewDetailsBut').on('click', function(){
         var in_vl = $('#coViewDetails');
         var this_val = $(this).data('checked');
@@ -695,12 +1236,13 @@ $(document).ready(function () {
         }
     });
                     
+
     $('#coViewThreadedBut').on('click', function(){
         var in_vl = $('#coViewThreaded');
         var this_val = $(this).data('checked');
         var nval;
-        var hhtml = '<i class=\"fa fa-list-ol\"></i> View Rundown';
-        var shtml = '<i class=\"fa fa-indent\"></i> View Threaded';                                   
+        var hhtml = '<i class=\"fa fa-list-ol\"></i> Show Unthreaded';
+        var shtml = '<i class=\"fa fa-indent\"></i> Show Threaded';                                   
         
         if(this_val == 0){
             nval = 1;
@@ -755,398 +1297,12 @@ $(document).ready(function () {
             $(this).html(shtml); 
         }
     });
-    
-    
+    */
+
     /*
-     * Quick Add
-     */
-    
-    $('#qaStartTime, #qaEndTime').datetimepicker({
-        sideBySide: true,
-        showTodayButton: true,
-        allowInputToggle: true,
-        format: 'YYYY-MM-DD HH:mm:ss', 
-    });    
-    
-	$('#qaDueDate').datetimepicker({
-        sideBySide: true,
-        showTodayButton: true,
-        allowInputToggle: true,
-        format: 'YYYY-MM-DD', 
-    });   
-    
-	$('#qaInputDetails').summernote({
-		height: 150,
-        toolbar: [
-            ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
-            ['para', ['ul', 'ol']],
-            ['insert', ['link']],
-            ['misc', ['undo','redo','help']],
-        ]
-    });    
-    
-	$('#qaPushAllBut').on('click', function(){
-            if($(this).prop('disabled') == false){
-                if($(this).text() == 'Push ALL'){
-                    $('#qaReqAllBut').text('Request ALL');
-                    $(this).text('Push NONE');
-                    $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
-                        $(this).data('tr_id', 2).removeClass('btn-danger btn-success btn-ttrid0').addClass('btn-ttrid2');
-                    });
-                }
-                else {
-                    $(this).text('Push ALL');
-                    $('#qaReqAllBut').text('Request ALL');
-                    $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
-                        $(this).data('tr_id', 0).removeClass('btn-danger btn-success btn-default btn-ttrid2').addClass('btn-ttrid0');
-                    });
-                }
-            }
-        });
-            
-        $('#qaReqAllBut').on('click', function(){
-            if($(this).prop('disabled') == false){
-                if($(this).text() == 'Request ALL'){
-                    $(this).text('Request NONE');
-                    $('#qaPushAllBut').text('Push ALL');
-                    $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
-                        $(this).data('tr_id', 3).removeClass('btn-default btn-success btn-ttrid0 btn-ttrid2').addClass('btn-danger');
-                    });
-                }
-                else {
-                    $(this).text('Request ALL');
-                    $(this).parents('div.teams-panel').find('.tt-btn:not(.btn-ttrid1)').each(function(k, val){
-                        $(this).data('tr_id', 0).removeClass('btn-danger btn-success btn-default btn-ttrid2').addClass('btn-ttrid0');
-                    });
-                }
-            }
-        });
-    
-        // Disables PushALL and RequestAll buttons when no lead team is selected
-        $('#qaReqAllBut, #qaPushAllBut').on('change', function(){
-            lteam = $('#qaLeadTeamSelect').val();
-            if(!lteam)
-            {
-                $(this).attr('disabled', 'disabled');
-            }else{
-                $(this).removeAttr('disabled');
-            }
-        });        
-    
- 
-
-	
-/*
- * Modals
- * 
- */
-   
-       $('#teamAddLinkedModal').on('show.bs.modal', function(e) {
-        var parent_id = $(this).find('span.hiddenParentId').html();
-        var tid = $(this).find('span.hiddenTid').html();
-        var l_modal = $(this);
-        var doLink = $(this).find('.btn-doLink');
-        
-        doLink.on('click', function(e){
-            var team_sel = l_modal.find('#selectLinkedTeam option:selected');
-            addNewLinkedTask(tid, team_sel.val(), parent_id);
-            l_modal.modal('hide');
-            $( this ).off(e);
-        });
-    });      
-
-    $('#deleteTaskModal').on('show.bs.modal', function(e) {
-        var doDel = $(this).find('.btn-doDelete');
-        var task_id_span = $(this).find('#deleteTaskId');
-        var task_id = task_id_span.html();
-        //var pageNum = $('body').find('#pageNum').html();
-        
-        doDel.on('click', function(e){
-            if(task_id){
-                deleteTask(task_id);
-                $('#deleteTaskModal').modal('hide');
-            }
-        });
-    });
- 
-
-/*
- * Comments
- * 
- */    
-	function deleteComment(cid){
-    	if(cid !=null){        
-	        $.ajax( {
-	            url: '/comments/delete/',
-	            data: {cid:cid},
-	            type: 'post',
-	            dataType:'json',
-	            success:function(data, textStatus) {
-	                var tid = $('#ajax-content-load').find('#commentBody'+cid).data('tid');
-	                $('#ajax-content-load').find('#commentBody'+cid).fadeOut();
-	                $('#ajax-content-load').find('#commentBody'+cid).parents('.panel-tcom').parents('row').remove();
-	                var cbody = $('#ajax-content-load').find('#commentBody'+cid).parents('.panel-body').find('.panel-tcom');
-	            },
-	        });
-		}    
-    }
-	
-    
-    
-// EO Document.Ready();    
+	$('#taskListWrap').on('click', 'div.task-panel-heading button', function(e){
+        //e.stopPropagation();
+    });*/
     
 
-});
 
-
-	function updateLinkableParents(team, update_div, current, child){
-		console.log('got up link par in c.js');
-        $.ajax( {
-            url: '/tasks/linkable/',
-            data: {team:team, current:current, child:child},
-            type: 'post',
-            dataType:'html',
-            success: function(data, textStatus){
-                update_div.html(data).fadeIn('fast');
-                var new_lps = update_div.find('.linkableParentSelect');
-                bindToSelect2(new_lps);
-                new_lps.val(current);
-                new_lps.trigger('change');
-            },
-        });
-    }
-
-    function deleteTask(tid){
-        if(!tid){return false;}
-
-        $.ajax( {
-            url: '/tasks/delete/'+tid,
-            type: 'post',
-            dataType:'json',
-            beforeSend:function () {
-                $('#ajaxProgress').fadeIn('fast');
-            },
-            success:function(data, textStatus) {
-                var msg_html = '<div class=\"alert alert-success\" role=\"alert\">'+data.message+'</div>';
-                $('#taskListWrap').load('/tasks/compile?src=ajax', function(response, status, xhr){
-                    if(status == 'success'){
-                        $('#taskListWrap').html(response);
-                    }
-                });
-	            $('#cErrorStatus').html(msg_html).fadeIn().delay(3000).fadeOut('fast');
-            },
-            complete:function (XMLHttpRequest, textStatus) {
-                $('#ajaxProgress').fadeOut('fast');
-            }, 
-        });        
-    }
-
-    function updateSignature(team, in_lead, pushed){
-    	console.log('hit update sig in c.js');
-    	if(!team || !in_lead){return false;}
-
-        var lead_label = $(in_lead).parents('div.form-group').find('label');
-        var partask_label = $(in_lead).parents('form').find('.linkedParentDiv').parents('div.form-group').find('label');
-        var partask_list = $(in_lead).parents('form').find('.linkedParentDiv');
-        var ea_tlist = $(in_lead).parents('form').find('.teamsList');
-    	
-    	$.ajax( {
-            url: '/tasks_teams/updateSig/',
-            data: {team:team},
-            type: 'post',
-            dataType:'html',
-            beforeSend:function () {
-                lead_label.append('<span class=\"ajaxSmSpin\"><img src=\"/img/ajax-sm.gif\"/></span>');
-            },
-            success:function(data, textStatus) {
-                ea_tlist.html(data).fadeIn('fast');
-                $('#qaReqAllBut, #qaPushAllBut').trigger('change');
-                
-                if(pushed){
-                	setParentTeamAsPushed(pushed, $('#qaNewTeamsList'));	
-                }
-	            
-
-            },
-            error: function(xhr, statusText, err){
-                var msg = '<div class=\"alert alert-danger\" role=\"alert\"><b>Error: </b>'+err+'</div>';
-                $('#eaErrorStatus').stop().html(msg).fadeIn('fast').delay(3000).fadeOut('fast');
-            },                
-            complete:function (XMLHttpRequest, textStatus) {
-                lead_label.find('.ajaxSmSpin').remove();
-            },
-        });
-    }
-
-    function addNewLinkedTask(parent, team, parent_team){
-    	//console.log('anlt in c.js');
-        if(!parent || !team){ return false; }
-        
-        var leadTeam = $('#qaLeadTeamSelect');
-        var lpTeam = $('#qaLinkedParentDiv').find('.linkableParentSelect');
-        var qaTC = $('#qaTimeCtrl');
-        leadTeam.val(team);
-        
-        updateSignature(team, leadTeam, parent_team);
-        updateLinkableParents(team, $('#qaLinkedParentDiv'), parent);
-        lpTeam.trigger('change');
-        qaTC.trigger('change');
-        
-        if(!$('#colAdd').hasClass('in')){
-            $('#colAddHeading').trigger('click');
-        }
-
-        $('html, body').animate({
-            scrollTop: $('#ajax-content-load').offset().top
-        }, 800);
-    }
-
-    function addNewTask(start){
-        //console.log('called add new task from c.js');
-        if(!start){return false;}
-        var startTime = $(document).find('#qaStartTime');
-        var endTime = $(document).find('#qaEndTime');
-        var col_add = $(document).find('#colAdd');
-        var col_add_head = $(document).find('#colAddHeading');
-
-        startTime.data('DateTimePicker').date(moment(start));
-        endTime.data('DateTimePicker').date(moment(start));
-        $(document).find('#qaLeadTeamSelect').trigger('change');
-        
-        if(!col_add.hasClass('in')){
-            col_add_head.trigger('click');
-            console.log('got to col_add had class collapse');
-        }
-
-        $('html, body').animate({
-            scrollTop: $(document).find('#ajax-content-load').offset().top
-        }, 800);        
-    }
-
-
-	function resetAfterChangeParents(lp_select){
-        var advpid = lp_select.parents('form').find('.advancedParent');
-        var sel_par = lp_select.val('');
-        var start = lp_select.parents('form').find('.inputStartTime');
-        var tc = lp_select.parents('form').find('.inputTC');
-        var stHelp = lp_select.parents('form').find('.stHelpWhenTC');
-        var to_min = lp_select.parents('form').find('.inputOffMin');
-        var to_sec = lp_select.parents('form').find('.inputOffSec');
-        var to_sign = lp_select.parents('form').find('.inputOffSign');
-        
-        to_min.val(0).prop('disabled', true);
-        to_sec.val(0).prop('disabled', true);        
-        to_sign.prop('disabled', true);
-        tc.prop('checked', false);
-        stHelp.addClass('collapse');
-        start.prop('readonly', false);
-        
-		lp_select.val(null);        
-    	tc.prop('disabled', true);
-    	advpid.addClass('collapse');
-        
-        
-	}
-
-	function bindToSelect2(element, placeholder){
-		if(!placeholder){ 
-			placeholder = 'Select a task to link to';
-		}
-		$(element).select2({
-			theme: 'bootstrap',
-			'width':'100%',
-			//'allowClear': true,
-			placeholder: placeholder,
-       });
-	}
-	
-    function getOffset(min,sec,sign){
-        var offset = 60*parseInt(min) + parseInt(sec);
-        if (sign == '-'){
-            offset = (-1)*parseInt(offset);
-        }
-        return offset;
-    }
-
-    function setParentTeamAsPushed(par_team_id, tlist){
-        var lpt_but = $(tlist).find('span[data-team_id='+par_team_id+']');
-        if(lpt_but.hasClass('btn-ttrid0')){
-            lpt_but.removeClass('btn-ttrid0').addClass('btn-ttrid2').data('tr_id', 2); 
-        }
-    }
-
-	// Awesome: http://stackoverflow.com/a/25359264/1279639
-	$.urlParam = function(name){
-	    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-	    if (results==null){
-	       return null;
-	    }
-	    else{
-	       return results[1] || 0;
-	    }
-	}
-
-	// Generic Refresh of Tasks after Compile Options change
-    function updateCo(){
-        var form = $('#cForm');
-        var form_data = form.serialize();
-		if(form){
-	        $.ajax( {
-	            url: '/tasks/compile/',
-	            data: form_data,                
-	            type: 'post',
-	            dataType:'html',
-	            beforeSend: function(){
-	            	//form.find('.ajax_spin').fadeIn('fast');
-	            	//echo '<span class="csSpinner" style="display: none; margin-left: 5px;"></span>';
-	            	$('#coViewOpts').append('<span class="tr_spin"><i class="fa fa-cog fa-spin fa-2x"></i></span>');
-
-	            },
-	            success:function(data, textStatus){
-	            	var single_task = $.urlParam('task');
-	            	if(single_task){
-	            		window.location = '/tasks/compile/';
-	            	}
-	            	else{
-	            		$('#taskListWrap').html(data).fadeIn('fast');	
-	            	}
-	                
-	            },
-	            complete: function(){
-	            	$('#coViewOpts').parent().find('.tr_spin').remove();
-	            }
-	        });
-		}
-    }
-
-	function updateTaskDetails(tid, tbody_div){
-		if(tid && tbody_div){
-            $.ajax({
-            	url: '/tasks/details/'+tid,
-                type: 'post',
-                dataType:'html',
-                success:function(data, textStatus) {
-                    tbody_div.html(data).fadeIn('fast');
-                    var new_lpts = tbody_div.find('.linkableParentSelect');
-                    bindToSelect2(new_lpts);
-                },
-            });
-		}
-	}
-
-	function bindSummernoteStd(in_details){
-		if(in_details){
-			var this_in = $(in_details);
-			this_in.summernote({
-				//disableDragAndDrop: true,
-	            height: 150,
-	            toolbar: [
-	                ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
-	                ['para', ['ul', 'ol']],
-	                ['insert', ['link']],
-	                ['misc', ['undo','redo','help']],
-	            ]
-			
-			});
-		}
-	}

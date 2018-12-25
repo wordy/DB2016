@@ -228,6 +228,7 @@
                 <li class="sidebar-brand"><a href="#">Event Information</a></li>
                 <li><a href="#schedule"><i class="fa fa-calendar-o"></i> Schedule</a></li>
                 <li><a href="#maps"><i class="fa fa-map-o"></i> Maps</a></li>
+                <li><a href="#geninfo"><i class="fa fa-info-circle"></i> General Information</a></li>
                 <li><a href="#todo"><i class="fa fa-map-signs"></i> Things to Do</a></li>
                 <li><a href="#prizes"><i class="fa fa-trophy"></i> Prizes</a></li>
                 <li><a href="#food"><i class="fa fa-cutlery"></i> Food &amp; Beverages</a></li>
@@ -243,7 +244,7 @@
                     <div class="col-lg-12">
 <a id="home"><br><br></a>
 
-            <h1><?php 
+            <h1><i class="fa fa-diamond"></i> <?php 
                 echo Configure::read('EventLongName');
                 ?> Event Information</h1>
                 
@@ -267,83 +268,40 @@
             <?php endif;?>
 
 <br>
+<?php 
+
+echo $this->Form->create('EventInfo', array('id'=>'eventInfoForm', 'inputDefaults' => array('label' => false), 'role' => 'form')); ?>
+
+
 <a id="schedule"><br><br></a>
-            <section>
-                <h2 class="text-yh"><i class="fa fa-calendar-o"></i> Schedule</h2>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Event</th>
-                        </tr>
-                  </thead>
-                  <tbody>
-                        <tr>
-                            <td>5:00pm</td>
-                            <td>Red Carpet Reception Opens</td>
-                        </tr>
-                        <tr>
-                            <td>6:00pm</td>
-                            <td>General Registration Opens</td>
-                        </tr>
-                        <tr class="danger">
-                            <td>6:30pm</td>
-                            <td>Gala Doors Open</td>
-                        </tr>
-                        <tr class="danger">
-                            <td>7:00pm</td>
-                            <td>Photobooth Closes</td>
-                        </tr>
-                        <tr>
-                            <td>7:00pm</td>
-                            <td>Production Begins</td>
-                        </tr>
-                        <tr>
-                            <td>7:58pm</td>
-                            <td>Live Auction Begins</td>
-                        </tr>
-                        <tr>
-                            <td>8:20pm</td>
-                            <td>Dinner Service Begins</td>
-                        </tr>
-                        <tr class="success">
-                            <td>10:00pm</td>
-                            <td>Photobooth Reopens</td>
-                        </tr>
-                        <tr>
-                            <td>10:20pm</td>
-                            <td>Table Prize Pickup Opens</td>
-                        </tr>
-                        <tr>
-                            <td>10:30pm</td>
-                            <td>Silent Auction Closes</td>
-                        </tr>
-                        <tr class="info csevent">
-                            <td>11:00pm</td>
-                            <td>Silent Auction Re-Opens. </td>
-                        </tr>
-                        <tr>
-                            <td>11:00pm</td>
-                            <td>Last Chance to Submit Grand Raffle Tickets</td>
-                        </tr>
-                        <tr>
-                            <td>11:10pm</td>
-                            <td>Grand Raffle Draw in Gala Hall</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+<h2 class="text-yh"><i class="fa fa-calendar-o"></i> Schedule</h2>
+<div class="editableInfo" data-section="schedule"><?php echo $this->request->data['EventInfo']['schedule']?></div>
+
+
+
 
 <a id="maps"><br><br></a>
             <section class="lg-bot-marg">
                 <h2 class="text-yh"><i class="fa fa-map"></i> Maps</h2>
-                <img src="http://cs.thebws.com/images/db2013-100level.png" class="img-responsive"/>
-                <img src="http://cs.thebws.com/images/db2013-200level.png" class="img-responsive"/>
+                <!--<img src="http://cs.thebws.com/images/db2013-100level.png" class="img-responsive"/>
+                <img src="http://cs.thebws.com/images/db2013-200level.png" class="img-responsive"/>-->
+                <!--<a href="/img/maps/DB2017-Allstream.png" target="window.open">-->
+                <?php  //echo $this->Html->image('maps/DB2017-Allstream.png', array('class'=>"img-responsive")); ?>
+<h3>MTCC Level 100:</h3>
+<?php echo $this->Html->image('maps/MTCC-Level100.png', array('class'=>"img-responsive"));?>
+<h3>MTCC Level 200:</h3>
+<?php echo $this->Html->image('maps/MTCC-Level200.png', array('class'=>"img-responsive"));?>
+
+
+                
+                <!--</a>-->
             </section>          
 
-<?php 
 
-echo $this->Form->create('EventInfo', array('id'=>'eventInfoForm', 'inputDefaults' => array('label' => false), 'role' => 'form')); ?>
+<a id="geninfo"><br><br></a>
+<h2><span class="text-yh"><i class="fa fa-info-circle"></i> General Information</span></h2>
+<div class="editableInfo" data-section="geninfo"><?php echo $this->request->data['EventInfo']['geninfo']?></div>
+
 <a id="todo"><br><br></a>
 <h2><span class="text-yh"><i class="fa fa-map-signs"></i> Things To Do</span></h2>
 <div class="editableInfo" data-section="entertainment"><?php echo $this->request->data['EventInfo']['entertainment']?></div>

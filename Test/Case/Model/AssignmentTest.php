@@ -3,7 +3,6 @@ App::uses('Assignment', 'Model');
 
 /**
  * Assignment Test Case
- *
  */
 class AssignmentTest extends CakeTestCase {
 
@@ -14,19 +13,22 @@ class AssignmentTest extends CakeTestCase {
  */
 	public $fixtures = array(
 		'app.assignment',
+		'app.role',
 		'app.task',
-		'app.ttype',
-		'app.tcolour',
+		'app.task_type',
+		'app.actionable_type',
+		'app.task_color',
 		'app.team',
-		'app.attachment',
+		'app.zone',
 		'app.user',
-		'app.notification',
-		'app.message',
-		'app.send_team',
-		'app.rec_team',
-		'app.revision',
-		'app.parent_task',
-		'app.trole'
+		'app.user_role',
+		'app.change',
+		'app.change_type',
+		'app.comment',
+		'app.print_pref',
+		'app.teams_user',
+		'app.tasks_team',
+		'app.task_role'
 	);
 
 /**

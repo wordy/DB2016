@@ -21,6 +21,7 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 App::uses('Controller', 'Controller');
+App::uses('CakeEmail', 'Network/Email');
     
 /**
  * Application Controller
@@ -49,7 +50,7 @@ class AppController extends Controller {
     
 	public $helpers = array('Session', 'Html', 'Js', 'Form', 'Ops');
 
-   public function isAuthorized($user) {
+    public function isAuthorized($user) {
         // Admin can access every action
         if (isset($user['user_role_id']) && $user['user_role_id'] >= 500) {
             return true;
@@ -72,6 +73,8 @@ class AppController extends Controller {
         $this->Session->setFlash(__('Your permissions don\'t allow you to access that (Error: Not Authorized).'), 'flash/auth_error');
         return false;
     }
+
+    //public $roles;  
    
     public function beforeFilter(){
         parent::beforeFilter();
@@ -87,15 +90,19 @@ class AppController extends Controller {
                 
         $this->Auth->flash['key']='auth';
         $this->Auth->flash['element']='auth_error';
+        
+        //$this->roles = $this->sayHello();
+        //$this->Role->getListByTeam();
+        
     }
    
-    public function sayHello(){
-        $rs =  $this->Task->Team->find('list');
-        return $rs;
-    }
+    //public function sayHello(){
+    //    $rs =  $this->Task->Team->find('list');
+    //    return $rs;
+    //}
         
     
-    
+
     
     
     

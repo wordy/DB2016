@@ -1,7 +1,6 @@
 <?php
 /**
- * AssignmentFixture
- *
+ * Assignment Fixture
  */
 class AssignmentFixture extends CakeTestFixture {
 
@@ -11,11 +10,10 @@ class AssignmentFixture extends CakeTestFixture {
  * @var array
  */
 	public $fields = array(
-		'id' => array('type' => 'integer', 'null' => false, 'default' => null, 'length' => 10, 'key' => 'primary'),
-		'task_id' => array('type' => 'integer', 'null' => false, 'default' => null, 'length' => 10),
-		'team_id' => array('type' => 'integer', 'null' => false, 'default' => null, 'length' => 5),
-		'trole_id' => array('type' => 'integer', 'null' => false, 'default' => null, 'length' => 2),
-		'active' => array('type' => 'boolean', 'null' => false, 'default' => null),
+		'id' => array('type' => 'integer', 'null' => false, 'default' => null, 'unsigned' => false, 'key' => 'primary'),
+		'role_id' => array('type' => 'integer', 'null' => false, 'default' => null, 'unsigned' => false),
+		'task_id' => array('type' => 'integer', 'null' => false, 'default' => null, 'unsigned' => false),
+		'assign_role' => array('type' => 'integer', 'null' => false, 'default' => '1', 'unsigned' => false),
 		'indexes' => array(
 			'PRIMARY' => array('column' => 'id', 'unique' => 1)
 		),
@@ -30,10 +28,9 @@ class AssignmentFixture extends CakeTestFixture {
 	public $records = array(
 		array(
 			'id' => 1,
+			'role_id' => 1,
 			'task_id' => 1,
-			'team_id' => 1,
-			'trole_id' => 1,
-			'active' => 1
+			'assign_role' => 1
 		),
 	);
 

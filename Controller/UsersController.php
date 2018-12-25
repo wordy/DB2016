@@ -4,6 +4,9 @@
 
 App::uses('AppController', 'Controller');
 App::uses('CakeEmail', 'Network/Email');
+App::uses('CakeText', 'Utility');
+
+
 
 /**
  * Users Controller
@@ -399,6 +402,11 @@ $client->setScopes('email');
                 $comp['page'] = 1;
                 $this->Session->write('Auth.User.Compile', $comp);
                 
+                // Default Timeshift Mode is "off"
+                $this->Session->write('Auth.User.Timeshift.Mode', 0);
+                $this->Session->write('Auth.User.Timeshift.Unit', "Min");
+                
+                
                 return $this->redirect($this->Auth->redirectUrl());
             }
             else{
@@ -406,6 +414,25 @@ $client->setScopes('email');
             }
         }
     } 
+
+    //2017
+    public function setTimeshiftPref($val){
+        if($this->Session->write('Auth.User.Timeshift.Mode', $val)){
+            if($this->request->is('ajax')){
+                $this->response->statusCode(200);
+                $this->response->body(json_encode(array('success'=>true))); 
+            } 
+        }
+    }
+
+    public function setTimeshiftUnit($val){
+        if($this->Session->write('Auth.User.Timeshift.Unit', $val)){
+            if($this->request->is('ajax')){
+                $this->response->statusCode(200);
+                $this->response->body(json_encode(array('success'=>true)));
+            } 
+        }
+    }
  
     public function logout() {
         $this->Session->setFlash("You've successfully logged out.");
@@ -541,8 +568,7 @@ $client->setScopes('email');
             $usr = $this->User->find('first', array('conditions'=>array('email'=>$email)));    
             if(isset($usr['User']['id'])){
                 // Create reset token. Store hashed version while sending non-hashed to usr
-                App::uses('String', 'Utility');
-                $new_token = String::uuid();
+                $new_token = CakeText::uuid();
                 $new_token_hash = Security::hash($new_token, 'sha1', true);
                 
                 // Save token
@@ -563,6 +589,8 @@ $client->setScopes('email');
                     'pw_reset_token'=>$new_token
                     )
                 );
+                $Email->delivery = 'smtp';
+                
                 $Email->send();
                 
                 $this->Session->setFlash('Password reset email sent to <b>'.$email.'</b>. Please check your mail for details.', 'flash/success');
@@ -709,7 +737,7 @@ $client->setScopes('email');
             return $this->redirect(array('controller'=>'users', 'action'=>'index'));
         }
         else{
-            $this->Session->setFlash('Email count not be sent. Verify User status and password reset token.', 'flash/error');
+            $this->Session->setFlash('Email could not be sent. Verify User status and password reset token.', 'flash/error');
             return $this->redirect(array('controller'=>'users', 'action'=>'index'));
         }
     }

@@ -34,6 +34,9 @@
     }
         
     $this->Js->buffer("
+    
+    
+    
     var cURL = '".$cURL."';
     //console.log(cURL);
     
@@ -56,9 +59,16 @@
     $('#compActMenu').on('hidden.bs.collapse', toggleCaChevron);
     $('#compActMenu').on('shown.bs.collapse', toggleCaChevron);     
     ");
+    
+
+    
+    
+    
+    
+    
 
 ?>
-<div class="container-fluid">    
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-8 col-md-offset-2" id="cErrorStatus">
             <?php echo $this->Session->flash('compile');?>
@@ -97,10 +107,9 @@
 
     <div id="page-content" class="row">
         <div id="taskListWrap">
-            <?php echo $this->element('task/compile_screen');?>
-        </div>
-        <div id="taskLegend">
-            <?php echo $this->element('task/task_legend'); ?>
+            <?php 
+                echo $this->element('task/compile_screen');
+            ?>
         </div>
     </div>
 </div>

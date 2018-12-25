@@ -1,4 +1,6 @@
 <?php
+
+//$this->log($task);
     if (AuthComponent::user('id')) {
         $controlled_teams = AuthComponent::user('Teams');
         $controlled_tcodes = AuthComponent::user('TeamsList');
@@ -28,7 +30,7 @@
     }
     
     if(isset($task['Offset'])){
-        $this->request->data('Offset.sign', $task['Offset']['sign']);
+        $this->request->data('Offset.type', $task['Task']['time_offset_type']);
         $this->request->data('Offset.minutes', $task['Offset']['minutes']);
         $this->request->data('Offset.seconds', $task['Offset']['seconds']);
         

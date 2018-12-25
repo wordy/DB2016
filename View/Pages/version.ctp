@@ -8,6 +8,21 @@
 	<div id="page-content" class="col-md-12">
 		<div class="users index">
 			<h1>Compiler Version History</h1>
+            v3.3 (Feb 2017)
+            <ul>
+                <li>Add: Assignments - assign tasks to `Actors` who can be placeholders or Compiler users</li>
+                <li>Add: Timeline View - View hour-by-hour plan for a team, broken down by `Actor`</li>
+                <li>New: (Model) `Actors`</li>
+                <li>New: (Model) `Assignments`</li>
+            </ul>
+
+			v3.2 (Aug 2016)
+            <ul>
+                <li>Change: Timeshifting is now per task from main `compile` screen</li>
+                <li>Removed: Timeshifting multiple tasks</li>
+                <li>Removed: /tasks/timeShift action</li>
+            </ul>
+			
 			v3.1 (Nov 2015)
 			<ul>
 			    <li>New: Quickly switch teams (if you control >1)</li>
@@ -25,7 +40,7 @@
                 <li>New: Opt-in weekly digest of tasks</li>
                 <li>New: Automated password resets via email</li>
                 <li>New: Comment on tasks
-                <li>New: Automated Org Chart generation</li>
+                <li>New: (Somewhat) Automated Org Chart generation</li>
                 <li>New: Support for page numbers in PDF</li>
                 <li>New: (Model) `Zone` (Teams belong to Zones)</li>
                 <li>New: (Model) `Comments`</li>
@@ -37,13 +52,13 @@
                 <li>Dependencies (Add): <a href="https://github.com/ablanco/jquery.pwstrength.bootstrap">ablanco/jquery.pwstrength.bootstrap</a> - Enforce safer user passwords</li>
                 <li>Dependencies (Change): PDF plugin changed to <a href="https://github.com/segy/Mpdf">Segy/MPdf</a> from FriendsOfCake/CakePDF</li>
                 <li>Dependencies (Change): HTML editor changed to <a href="https://github.com/summernote/summernote/">Summernote</a> from bootstrap-wysihtml5 -- Requires IE > 9</li>
-                <li>Dependencies (Upgrade): select2 upgraded to v4.0.0</li>
+                <li>Dependencies (Upgrade): Select2 upgraded to v4.0.0</li>
             </ul>
 
 			v2.2 (Feb 2015)
             <ul>
                 <li>New: Edit task's parent, or unlink entirely</li>
-                <li>Change: Team listed as lead can no longer be added as either assisting or pushed</li>
+                <li>Change: Team listed as lead can no longer be added as any other role</li>
             </ul>
 			v2.12 (Jan 2015)
 			<ul>

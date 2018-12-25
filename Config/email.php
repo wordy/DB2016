@@ -53,6 +53,9 @@ class EmailConfig {
         'password' => '60Scottfield',
         'transport' => 'Smtp',
         //'log' => true,
+	'client' => null,
+	'timeout'=>60,
+
         
     );
 	

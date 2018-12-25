@@ -149,7 +149,7 @@
    
     <div class="row">
         <div class="col-md-12">
-            <h1 id="cpTitle">Customize Printed Plan &nbsp;</h1>
+            <h1 id="cpTitle"><i class="fa fa-print"></i> Customize Printed Plan &nbsp;</h1>
             <p>Customize the tasks that appear in <b>your</b> printed plan. These settings are saved by user, even after logging out. Use this when you're ready to prepare your printed plan.</p>
             <div class="alert alert-info hidden-print">
                 <p><b>Note: </b>What appears below is your current plan as set by your <b>Compile &amp; View Options.</b></p>

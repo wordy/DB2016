@@ -14,7 +14,6 @@ class OpsHelper extends AppHelper {
         $allowOpen = ' ban-edit'; 
         $allowClose = ' ban-edit';
         $allowPush = ' ban-edit';
-        //$buttons2 = '';
         
         if($userControls){
             $allowOpen = ' openTeam';
@@ -27,7 +26,6 @@ class OpsHelper extends AppHelper {
         foreach ($zoneTeamList as $zone => $tids){
             $ztlist[$zone] = array_keys($tids);
         }
-        
         
         $tt_l = Hash::combine($tt, '{n}[task_role_id=1].team_id', '{n}[task_role_id=1].team_code');
         $tt_p = Hash::combine($tt, '{n}[task_role_id=2].team_id', '{n}[task_role_id=2].team_code');                                    
@@ -68,7 +66,7 @@ class OpsHelper extends AppHelper {
             }    
         }
         // @DBALL var (EXEC + 4 zones in usual org chart)
-        if($fullTeamZones >= 5){
+        if($fullTeamZones >= 4){
             $buttons2.= '<span class="btn btn-primary btn-xxs ban-edit">TEAMS</span>';
             if(in_array('GMS', $fullZones)){
                 $buttons2.= '<span class="btn btn-primary btn-xxs ban-edit">GMS</span>';
@@ -203,45 +201,44 @@ class OpsHelper extends AppHelper {
         return $buttons13;
     }
 
-    public function pdfSig2016($taskTeams = array(), $zoneTeamList){
+
+    /**
+     * pdfSig2016 Method
+     * Returns simplified team signature with lead and involved teams. Doesn't distinguish requests. 
+     * @param $taskTeams Array team roles for given task
+     * @return String
+     */
+    public function pdfSig2016($taskTeams = array()){
         $tt = ($taskTeams)? $taskTeams: array();
-        $buttons13 = $buttons2 = '';
-
-        // Figures out teams in each zone, to combine buttons
-        $ztlist = array();
-        foreach ($zoneTeamList as $zone => $tids){
-            $ztlist[$zone] = array_keys($tids);
-        }
-
+        $buttons13 = '';
+        //Lead and involved but not-lead.
         $tt_l = Hash::combine($tt, '{n}[task_role_id=1].team_id', '{n}[task_role_id=1].team_code');
-        //$tt_p = Hash::combine($tt, '{n}[task_role_id=2].team_id', '{n}[task_role_id=2].team_code');                                    
-        //$tt_oa = Hash::combine($tt, '{n}[task_role_id=3].team_id', '{n}[task_role_id=3].team_code');
-        //$tt_ca = Hash::combine($tt, '{n}[task_role_id=4].team_id', '{n}[task_role_id=4].team_code');
-        //$tt_all = Hash::combine($tt, '{n}.team_id', '{n}.team_code');
         $tt_nl = Hash::combine($tt, '{n}[task_role_id!=1].team_id', '{n}[task_role_id!=1].team_code');
 
-        
         foreach ($tt_l as $tid => $tcode){
-            $buttons13.= '<span class="btn btn-ttrid1 btn-xxs"> '.$tcode.' </span> ';    
+            $buttons13.= '<span class="btn btn-ttrid1 btn-xxs">&nbsp;'.$tcode.'&nbsp;</span>&nbsp;';    
         }                                    
 
         if(count($tt_nl) > 10){
-            $buttons13.= '<span class="btn btn-default btn-xxs"> ALL </span> ';
+            $buttons13.= '<span class="btn btn-default btn-xxs">&nbsp;ALL&nbsp;</span>&nbsp;';
         }
         else{
             foreach ($tt_nl as $tid => $tcode){
-                //$buttons13.= '<span class="btn btn-xxs btn-default"> '.$tcode.' </span>&nbsp;';
-                $buttons13.= '<span style="border: 1px solid #ddd;"> '.$tcode.' </span> ';    
+                $buttons13.= '<span class="btn btn-default btn-xxs">&nbsp;'.$tcode.'&nbsp;</span>&nbsp;';
             }
         }
         
-        // Pushed ONLY
-        //$tt_p_only = $tt_p;
-
-
-        //$buttons = $buttons13;
-        
         return $buttons13;
+    }
+
+    //2018
+    public function makeAssignmentButtons($ass = array()){
+        $buttons = '';
+
+        foreach ($ass as $handle){
+            $buttons.= '<span class="btn btn-pale-yellow btn-xxs"> @'.$handle.' </span>';    
+        }                                    
+        return $buttons;
     }
 
 
@@ -264,8 +261,6 @@ class OpsHelper extends AppHelper {
             $ztlist[$zone] = array_keys($tids);
         }
 
-
-        
         $tt_l = Hash::combine($tt, '{n}[task_role_id=1].team_id', '{n}[task_role_id=1].team_code');
         //$tt_p = Hash::combine($tt, '{n}[task_role_id=2].team_id', '{n}[task_role_id=2].team_code');                                    
         $tt_oa = Hash::combine($tt, '{n}[task_role_id=3].team_id', '{n}[task_role_id=3].team_code');
@@ -415,7 +410,7 @@ class OpsHelper extends AppHelper {
         }
         $html = '<div class="linked_task" id="tid'.$task['id'].'" data-tid="'.$task['id'].'" style="border-left: 5px solid '. $task['task_color_code'].'">
             <div class="row astHeading" data-tid="'.$task['id'].'">
-                <div class="col-xs-2 col-sm-2 col-md-2">'. date($date_format, strtotime($task['start_time'])).'</div>
+                <div class="col-xs-2 col-sm-3 col-md-2">'. date($date_format, strtotime($task['start_time'])).'</div>
                 <div class="col-xs-3 col-sm-2 col-md-3">
                     <div class="row">
                         <div class="col-sm-12 col-md-push-4 col-md-8">
@@ -426,127 +421,131 @@ class OpsHelper extends AppHelper {
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-7 col-sm-8 col-md-7">'.$task['short_description'].'</div>
+                <div class="col-xs-7 col-sm-7 col-md-7">'.$task['short_description'].'</div>
             </div>                            
         </div>';
         return $html;  
     }
-/*
-    public function subtaskRowSinglePdf($task){
-        $html = '<div class="linked_task"
-            id="tid'.$task['id'].'"
-            data-tid="'.$task['id'].'" 
-            style="border-left: 5px solid '. $task['task_color_code'].'">
 
-            <div class="row astHeading" data-tid="'.$task['id'].'">
-                <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
-                <div class="col-xs-3 col-sm-2 col-md-3">
-                    <strong>'.$task['task_type'].'</strong>
-                    <span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].' </span>
-
-                </div>
-                <div class="col-xs-5 col-sm-8 col-md-7">'.$task['short_description'].'</div>
-            </div>                            
-        </div>';
-                
-        return $html;  
-    }
-*/
-    public function offsetToMinSecParts($seconds){
-        if(!$seconds){
-            return false;
-        }
-        elseif($seconds == 0){
-            $sign = '+';
-            $m = 0;
-            $s = 0;    
-        }
-        elseif($seconds>0){
-            $getMins = floor($seconds/60);
-            $getSecs = floor($seconds % 60);
-            //
-            $sign = '+';
-            $m = $getMins;
-            $s = $getSecs;
-        }
-        elseif($seconds<0){
-            $getMins = floor(abs($seconds)/60);
-            $getSecs = floor(abs($seconds) % 60);
-            $sign = '-';
-            $m = $getMins;
-            $s = $getSecs;
-            }
-        return array('sign'=>$sign, 'min'=>$m, 'sec'=>$s);
-    }
-
-    public function offsetToMmss($seconds){
-        if(!$seconds || ($seconds == 0)){
-            //return false;
-            return '00:00';
-        }
-
-        $getMins = floor(abs($seconds)/60);
-        $getSecs = floor(abs($seconds) % 60);
-
-        if($getMins < 10){
-            $getMins = '0'.$getMins;
-        }
-        if($getSecs < 10){
-            $getSecs = '0'.$getSecs;
-        }
-        if($seconds>0){
-            return '+'.$getMins.':'.$getSecs;
-        }
-        elseif($seconds<0){
-            return '-'.$getMins.':'.$getSecs;
-        }
-
-    }
-
-    public function offsetToFriendly($seconds){
-        if(!$seconds || ($seconds == 0)){
+    public function offsetToFriendly($seconds, $type = 0){
+        $sign = ($type < 0)? '-':'+';            
+        
+        if(!$seconds || $seconds == 0){
             return 'Synced';
         }
-        elseif($seconds>0){
+        elseif($seconds > 0){
             $getMins = floor($seconds/60);
             if($getMins>0){
-                return '+'.$getMins.' min';
+                return $sign.$getMins.' min';
             }
             $getSecs = floor($seconds % 60);
-            return '+'.$getSecs.' sec';
+            return $sign.$getSecs.' sec';
         }
-        elseif($seconds<0){
-            $getMins = floor(abs($seconds)/60);
-            if($getMins>0){
-                return '-'.$getMins.' min';
-            }
-            $getSecs = floor(abs($seconds) % 60);
-            return '-'.$getSecs.' sec';
-        }
-
     }
 
 
-    public function subtaskRowSingleWithOffset($task, $highlight=false){
+    // Used in tab_links (viewing/editing a task); 2018 In use
+    public function subtask($task, $opt = array()){
+        $hr = $details = $tdet = $tacts = $offMsg = $hi_class = '';
+        $br = $br_esc = ' ';
+        $defaults = array(
+            'show_offset'=>false,
+            'multi_line'=>false,
+            'show_view'=>false,
+            'show_details'=>false,
+            'highlight'=>false,     
+        );
+        
+        $options = array_merge($defaults, $opt);
+        $show_offset = $options['show_offset'];
+        $show_multi = $options['multi_line'];
+        $show_view = $options['show_view'];
+        $show_details = $options['show_details'];
+        $highlight = $options['highlight'];
+        
         $toff = $task['time_offset'];
         $tctrl = $task['time_control'];
-        $strMsg = '';
+        $tctrl_type = $task['time_offset_type'];
         $off = $this->offsetToFriendly($toff);
-        $bg = ($highlight)? ' highlight-thistask':'';
-        if($tctrl){
-            if($toff == 0){
-                $strMsg = '<button type="button" class="btn btn-primary btn-xs"><i class="fa fa-clock-o"></i> Synced</button>';
-            }
-            elseif($toff<0){
-                
-                $strMsg = '<button type="button" class="btn btn-darkgrey btn-xs"><i class="fa fa-clock-o"></i> '.$off.'</button>';
-            }
-            else{
-                $strMsg = '<button type="button" class="btn btn-darkgrey btn-xs"><i class="fa fa-clock-o"></i> '.$off.'</button>';
+        
+        if($highlight && is_string($highlight)){
+            $hi_class = ' '.$highlight;
+        }
+        
+        if($show_multi){
+            $br_esc = ' \<\b\r\>';
+            $br = '<br/>';
+        }
+
+        if($show_offset){
+            if($tctrl){
+                if($tctrl_type == -1 || $tctrl_type == 1){
+                    $offMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;">'.$off.' <i class="fa fa-clock-o"></i></button><br>';                    
+                }
+                elseif($tctrl_type == -2 || $tctrl_type == 2){
+                    $offMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';                    
+                }
+                else{
+                    $offMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
+                }
             }
         }
         
-        $html = '<div class="linked_task'.$bg.'"
+        if($show_view || $show_offset){
+             $tacts = '<div class="pull-right">'.$offMsg.$this->Html->link('<i class="fa fa-eye"></i> View', array(
+                            'controller'=>'tasks',
+                            'action'=>'compile',
+                            '?'=>array('task'=>$task['id'])
+                            ), 
+                            array(
+                                'escape'=>false,
+                                'class'=>'btn btn-default btn-xs task_view_button')
+                            ).
+                        '</div>';
+        }
+        
+        if($show_details){
+             $tacts = '<div class="pull-right">'.$offMsg.$this->Html->link('<i class="fa fa-eye"></i> View', array(
+                            'controller'=>'tasks',
+                            'action'=>'compile',
+                            '?'=>array('task'=>$task['id'])
+                            ), 
+                            array(
+                                'escape'=>false,
+                                'class'=>'btn btn-default btn-xs task_view_button')
+                            ).
+                        '</div>';
+            if(!empty($task['details'])){
+                $hr = '<hr class="inSubtask">';
+                $details = nl2br($task['details']);
+            }        
+        }        
+             
+        if($show_multi){
+            $html = '<div class="linked_task'.$hi_class.'"
+                id="tid'.$task['id'].'"
+                data-tid="'.$task['id'].'" 
+                style="border-left: 5px solid '. $task['task_color_code'].'">
+    
+                <div class="astHeading" data-tid="'.$task['id'].'">
+                    <div class="row">
+                        <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j'.$br_esc.'g:i A', strtotime($task['start_time'])).'</div>
+                        <div class="col-xs-1 col-sm-1 col-md-1">
+                            <div class="pull-left">
+                            <strong>'.$task['task_type'].'</strong>'.$br.'
+                            <span class="btn ban-edit btn-ttrid1 btn-xxs">'.$task['team_code'].'</span>
+                            </div>
+                        </div>
+                        <div class="col-xs-7 col-sm-7 col-md-7">'
+                            .$task['short_description'].$hr.$details.'
+                        </div>
+                        <div class="col-xs-2 col-sm-2 col-md-2">'.$tacts.'</div>
+                    </div>
+                </div>                            
+            </div>';
+        }
+        else{
+            $html = '<div class="linked_task'.$hi_class.'"
             id="tid'.$task['id'].'"
             data-tid="'.$task['id'].'" 
             style="border-left: 5px solid '. $task['task_color_code'].'">
@@ -564,7 +563,54 @@ class OpsHelper extends AppHelper {
                         
                     </div>
                 </div>
-                <div class="col-xs-5 col-sm-6 col-md-5">'.$task['short_description'].'</div>
+                <div class="col-xs-7 col-sm-8 col-md-7">'.$task['short_description'].'</div>
+            </div>                            
+        </div>';
+        }
+                
+        return $html;  
+    }
+
+    //In use - 2018
+    public function subtaskRowSingleWithOffset($task, $highlight=false){
+        //$this->log($task);
+        $toff = $task['time_offset'];
+        $tctrl = $task['time_control'];
+        $tctrl_type = $task['time_offset_type'];
+        $strMsg = '';
+        $off = $this->offsetToFriendly($toff,$tctrl_type);
+        $bg = ($highlight)? ' highlight-thistask':'';
+        if($tctrl){
+            if($tctrl_type == -1 || $tctrl_type == 1){
+                $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;">'.$off.' <i class="fa fa-clock-o"></i></button><br>';                    
+            }
+            elseif($tctrl_type == -2 || $tctrl_type == 2){
+                $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';                    
+            }
+            else{
+                $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
+            }
+        }
+        
+        $html = '<div class="linked_task'.$bg.'"
+            id="tid'.$task['id'].'"
+            data-tid="'.$task['id'].'" 
+            style="border-left: 5px solid '. $task['task_color_code'].'">
+
+            <div class="row astHeading" data-tid="'.$task['id'].'">
+                <div class="col-xs-2 col-sm-3 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
+                <div class="col-xs-3 col-sm-2 col-md-3">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-push-4 col-md-8">
+                            <strong>'.$task['task_type'].'</strong>
+                        </div>
+                        <div class="col-sm-12 col-md-pull-8 col-md-4">
+                            <span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].' </span>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="col-xs-5 col-sm-5 col-md-5">'.$task['short_description'].'</div>
                 <div class="col-xs-2 col-sm-2 col-md-2 text-right">'.$strMsg.'</div>
             </div>                            
         </div>';
@@ -572,45 +618,6 @@ class OpsHelper extends AppHelper {
         return $html;  
     }
 
-/*
-    public function subtaskSingleWithView($task){
-        $hr = '';
-        $details = '';
-        if(!empty($task['details'])){
-             $hr = '<hr class="inSubtask">';
-             $details = nl2br($task['details']);
-             
-             $tdet = '
-                <div class="row">
-                    <div class="col-xs-3 col-sm-2 col-md-2">'.$this->Html->link('<i class="fa fa-eye"></i> View', array(
-                            'controller'=>'tasks',
-                            'action'=>'view', $task['id']),array(
-                            'escape'=>false,
-                            'class'=>'btn btn-default btn-sm')).
-                    '</div>
-                    <div class="col-xs-9 col-sm-10 col-md-10">'.$hr.$details.'</div>
-                </div>
-             ';
-        }
-        
-        $html = '<div class="linked_task astRow"
-            id="tid'.$task['id'].'"
-            data-tid="'.$task['id'].'" 
-            style="border-left: 5px solid '. $task['task_color_code'].'">
-
-            <div class="astHeading" data-tid="'.$task['id'].'">
-                <div class="row">
-                    <div class="col-xs-3 col-sm-2 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'<br></div>
-                    <div class="col-xs-1 col-sm-1 col-md-1"><span class="btn btn-ttrid1 btn-xxs">'.$task['team_code'].'</span></div>
-                    <div class="col-xs-2 col-sm-3 col-md-2"><strong>'.$task['task_type'].'</strong></div> 
-                    <div class="col-xs-6 col-sm-6 col-md-7">'.$task['short_description'].'</div>
-                </div>'.$tdet.'
-            </div>                            
-        </div>';
-                
-        return $html;  
-    }
-*/
     public function subtaskMultiWithView($task, $show_offset = false){
         $toff = $task['time_offset'];
         $tctrl = $task['time_control'];
@@ -679,137 +686,7 @@ class OpsHelper extends AppHelper {
                 
         return $html;  
     }
-
-    public function subtask($task, $opt = array()){
-        $hr = $details = $tdet = $tacts = $offMsg = $hi_class = '';
-        $br = $br_esc = ' ';
-        $defaults = array(
-            'show_offset'=>false,
-            'multi_line'=>false,
-            'show_view'=>false,
-            'show_details'=>false,
-            'highlight'=>false,     // CSS Class name
-        );
-        
-        $options = array_merge($defaults, $opt);
-        $show_offset = $options['show_offset'];
-        $show_multi = $options['multi_line'];
-        $show_view = $options['show_view'];
-        $show_details = $options['show_details'];
-        $highlight = $options['highlight'];
-        
-        $toff = $task['time_offset'];
-        $tctrl = $task['time_control'];
-        $off = $this->offsetToFriendly($toff);
-        
-        if($highlight && is_string($highlight)){
-            $hi_class = ' '.$highlight;
-        }
-        
-        if($show_multi){
-            $br_esc = ' \<\b\r\>';
-            $br = '<br/>';
-        }
-
-        if($show_offset){
-            if($tctrl){
-                if($toff == 0){
-                    $offMsg = '<button type="button" class="btn btn-primary btn-xs" style="margin-bottom:2px;"> <i class="fa fa-clock-o"></i> Synced</button><br>';
-                }
-                elseif($toff<0){
-                    
-                    $offMsg = '<button type="button" class="btn btn-darkgrey btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
-                }
-                else{
-                    $offMsg = '<button type="button" class="btn btn-darkgrey btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
-                }
-            }
-        }
-        
-        if($show_view || $show_offset){
-             $tacts = '<div class="pull-right">'.$offMsg.$this->Html->link('<i class="fa fa-eye"></i> View', array(
-                            'controller'=>'tasks',
-                            'action'=>'compile',
-                            '?'=>array('task'=>$task['id'])
-                            ), 
-                            array(
-                                'escape'=>false,
-                                'class'=>'btn btn-default btn-xs task_view_button')
-                            ).
-                        '</div>';
-        }
-        
-        if($show_details){
-             $tacts = '<div class="pull-right">'.$offMsg.$this->Html->link('<i class="fa fa-eye"></i> View', array(
-                            'controller'=>'tasks',
-                            'action'=>'compile',
-                            '?'=>array('task'=>$task['id'])
-                            ), 
-                            array(
-                                'escape'=>false,
-                                'class'=>'btn btn-default btn-xs task_view_button')
-                            ).
-                        '</div>';
-            if(!empty($task['details'])){
-                $hr = '<hr class="inSubtask">';
-                $details = nl2br($task['details']);
-            }        
-        }        
-             
-        
-        if($show_multi){
-            $html = '<div class="linked_task'.$hi_class.'"
-                id="tid'.$task['id'].'"
-                data-tid="'.$task['id'].'" 
-                style="border-left: 5px solid '. $task['task_color_code'].'">
     
-                <div class="astHeading" data-tid="'.$task['id'].'">
-                    <div class="row">
-                        <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j'.$br_esc.'g:i A', strtotime($task['start_time'])).'</div>
-                        <div class="col-xs-1 col-sm-1 col-md-1">
-                            <div class="pull-left">
-                            <strong>'.$task['task_type'].'</strong>'.$br.'
-                            <span class="btn ban-edit btn-ttrid1 btn-xxs">'.$task['team_code'].'</span>
-                            </div>
-                        </div>
-                        <div class="col-xs-7 col-sm-7 col-md-7">'
-                            .$task['short_description'].$hr.$details.'
-                        </div>
-                        <div class="col-xs-2 col-sm-2 col-md-2">'.$tacts.'</div>
-                    </div>
-                </div>                            
-            </div>';
-        }
-        else{
-            $html = '<div class="linked_task'.$hi_class.'"
-            id="tid'.$task['id'].'"
-            data-tid="'.$task['id'].'" 
-            style="border-left: 5px solid '. $task['task_color_code'].'">
-
-            <div class="row astHeading" data-tid="'.$task['id'].'">
-                <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
-                <div class="col-xs-3 col-sm-2 col-md-3">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-push-4 col-md-8">
-                            <strong>'.$task['task_type'].'</strong>
-                        </div>
-                        <div class="col-sm-12 col-md-pull-8 col-md-4">
-                            <span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].' </span>
-                        </div>
-                        
-                    </div>
-                </div>
-                <div class="col-xs-7 col-sm-8 col-md-7">'.$task['short_description'].'</div>
-            </div>                            
-        </div>';
-        }
-                
-        return $html;  
-    }
-
-
-
-
 
 /**
  * @param $task taskid
@@ -853,58 +730,7 @@ class OpsHelper extends AppHelper {
         return $html;  
         
     }
-/*
-    public function commentInTask($comment){
-        $text = (!empty($comment['text']))? $comment['text']: '';
-        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
-        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
-        
-        $html = '
-            <blockquote class="tComment"><i class="fa fa-clock-o"></i> '.$created.
-            '<p>'.
-            $text.'</p><footer>'.
-            $handle.'</footer></blockquote>';
-        return $html;        
-    }
 
-    public function commentInTask2($comment){
-        $text = (!empty($comment['text']))? $comment['text']: '';
-        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
-        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
-        
-        $html = '
-            <div class="well well-sm">
-                <div class="row">
-                    <div class="col-sm-12">'.$text.'</div>                
-                </div>
-                <div class="row">
-                    <div class="col-sm-8">'.$handle.'</div>
-                    <div class="col-sm-4 pull-right"><i class="fa fa-clock-o"></i> '.$created.'</div>                
-                </div>
-            </div>';
-        return $html;        
-    }
-
-    public function commentInTask3($comment){
-        $text = (!empty($comment['text']))? $comment['text']: '';
-        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
-        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
-        
-        $html = '
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="panel panel-comment panel-tcom">
-                    <div class="panel-heading panel-heading-tcom">
-                        <strong>'.$handle.' </strong>
-                        <span class="text-muted">commented '.$created.'</span>
-                    </div>
-                    <div class="panel-body panel-body-tcom">'.$text.'</div>
-                </div>
-            </div>
-        </div>';
-        return $html;        
-    }
-*/
 
     // $team and $user{role,teams,handle} passed to check if user can delete comment
     public function commentByTaskWithDelete($comment, $team, $user){
@@ -938,27 +764,6 @@ class OpsHelper extends AppHelper {
         return $html;        
     }
 
-/*
-    public function commentsByTaskSecondary($comment){
-        $text = (!empty($comment['text']))? $comment['text']: '';
-        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
-        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
-        
-        $html = '
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="panel panel-comment panel-tcom">
-                    <div class="panel-heading panel-heading-tcom">
-                        <small><strong>'.$handle.' </strong></small>
-                        <span class="text-muted">commented '.$created.'</span>
-                    </div>
-                    <div class="panel-body panel-body-tcom">'.$text.'</div>
-                </div>
-            </div>
-        </div>';
-        return $html;        
-    }
- */   
     public function urgentTaskRowDouble($task){
         $html = '<div class="linked_task astRow"
             id="tid'.$task['id'].'"
@@ -976,7 +781,6 @@ class OpsHelper extends AppHelper {
                 
         return $html;  
     }
-
 
     // Adapted from W3C accessibility guidelines
     // SOURCE: http://jsfiddle.net/PXJ2C/
@@ -1001,9 +805,7 @@ class OpsHelper extends AppHelper {
     }
 
     //2015
-    
     public function chgMessage($change){
-        
         if(isset($change['Change'])){
             $change = $change['Change'];
         }
@@ -1082,8 +884,299 @@ class OpsHelper extends AppHelper {
         return $msg;
     }
 
+    public function durationFriendlyDaysOnly($start, $end, $two_lines = false){
+        if(!$start||!$end){ return 'None';}
+        
+        $str='';
+        $is = strtotime($start);
+        $ie = strtotime($end);
+        
+        if($ie < $is){
+            return 'Invalid Range';
+        }
 
-    // Color lightness detection
+        $br = ($two_lines)? '<br>': '';
+        
+        $diff = ($ie-$is);        
+        
+        if($diff < (60*60*24)){
+            return date('M j', strtotime($start));
+        }
+        // Days
+        elseif($diff >= (60*60*24)){
+            return date('M j', strtotime($start)).' -'.$br.date('M j', strtotime($end));
+        }
+
+        return $str;
+    }
+
+    public function durationFull($start, $end, $two_lines = false, $show_date = true){
+        if(!$start||!$end){ return 'None';}
+        
+        $str='';
+        $is = strtotime($start);
+        $ie = strtotime($end);
+        
+        if($ie < $is){
+            return 'Invalid Range';
+        }
+
+        $br = ($two_lines)? '\<b\r\>': '';
+        $day = ($show_date)? '\<\b\>M j\<\/\b\> '.$br: '';
+        
+        $diff = ($ie-$is);        
+        
+
+        
+        
+        
+        if($diff < 60){
+            return date($day.'H:i:s', strtotime($start)).' - '.date('H:i:s', strtotime($end));
+        }
+        // Minutes
+        elseif(($diff >=60) && ($diff < 3600)){
+            return date($day.'H:i:s', strtotime($start)).' - '.date('H:i:s', strtotime($end));
+        }
+        // Hours
+        elseif(($diff >=3600) && ($diff < 60*60*24)){
+            return date($day.'H:i:s', strtotime($start)).' - '.date('H:i:s', strtotime($end));
+        }
+        // Days
+        elseif($diff >= (60*60*24)){
+            return date('M j', strtotime($start)).' - '.date('M j', strtotime($end));
+        }
+
+        return $str;
+    }
+
+    public function durationGeneric($start, $end, $options = array()){
+        if(!$start||!$end){ return 'None';}
+        
+        $two_lines = isset($options['two_lines'])? $options['two_lines']:true;
+        $show_date = isset($options['show_date'])? $options['show_date']:true;
+        $show_zero = isset($options['show_zero'])? $options['show_zero']:false;
+        $seconds_matter = isset($options['seconds_matter'])? $options['seconds_matter']:false;
+        
+        $str= $sm = '';
+        $is = strtotime($start);
+        $ie = strtotime($end);
+        
+        if($ie < $is){
+            return 'Invalid Range';
+        }
+
+        $sm = ($seconds_matter)? 'H:i:s':'H:i';
+        $br = ($two_lines)? '\<b\r\>': '';
+        $day = ($show_date)? '\<\b\>M j\<\/\b\> '.$br: '';
+        
+        $diff = ($ie-$is);        
+        
+        
+        switch ($diff) {
+            case 0:
+                return date($day.'H:i', strtotime($start));
+                break;
+            
+            //default:
+                
+            //    break;
+        }
+        if($diff < 60){
+            return date($day.$br.$sm, strtotime($start)).' - '.date($sm, strtotime($end));
+        }
+        // Minutes
+        elseif(($diff >=60) && ($diff < 3600)){
+            return date($day.$br.$sm, strtotime($start)).' - '.date($sm, strtotime($end));
+        }
+        // Hours
+        elseif(($diff >=3600) && ($diff < 60*60*24)){
+            return date($day.$br.$sm, strtotime($start)).' - '.date($sm, strtotime($end));
+        }
+        // Days
+        elseif($diff >= (60*60*24)){
+            return date('M j', strtotime($start)).' - '.date('M j', strtotime($end));
+        }
+
+        return $str;
+    }
+    
+    public function durationFriendlyNoDate($start, $end, $options=array()){
+        $show_d = '';
+
+        if(isset($options['show_date']) && $options['show_date']==true){
+            $show_d = 'M j ';
+        }
+        
+        $t1 = date('Y-m-d H:i:s', strtotime($start));
+        $s1 = date('s', strtotime($start));
+        $s2 = date('s', strtotime($end));
+        $t2 = date('Y-m-d H:i:s', strtotime($end));
+        $d1 = date('Y-m-d', strtotime($start));
+        $d2 = date('Y-m-d', strtotime($end));
+        $m1 = date('A', strtotime($start));
+        $m2 = date('A', strtotime($end));
+        $diff = strtotime($t2)-strtotime($t1);
+        $dh = floor($diff / 3600);
+        $dm = floor(($diff / 60) % 60);
+        $ds = $diff % 60;
+        
+        $str = '';
+
+        $impSecs = false;
+        
+        // Secs are important when: (S1 != S2) && ((S1 != 0) && S2 !=0)) 
+        
+        if(($s1 != $s2) && (($s1 != 0) && ($s2 !=0) || (($diff <600) && ($diff >0)))){
+            $impSecs = true;
+        }
+    
+        if($diff == 0 && $impSecs == false){
+            $str.= date($show_d.'g:i A', strtotime($t1));
+        }
+        elseif($diff == 0 && $impSecs == true){
+            $str.= date($show_d.'g:i:s A', strtotime($t1));
+        }
+        // Important seconds
+        elseif($diff < 60){
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$diff.'s)';
+        }
+        // < hr
+        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
+            $str.= $this->Time->format($show_d.'g:i', $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dm.' min)';
+        }
+        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == true){
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$dm.' min, '.$ds.'s)';
+        }        
+        // > 1h < 24h
+        elseif($diff >= 3600 && $diff < 86400){
+            $s = ($dh > 1)? 's':'';
+            $a = ($m1 != $m2)? 'A':'';
+             
+            if($dm == 0){
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.')';
+            }
+            else{
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.', '.$dm.' min)';
+            }
+        }
+        // >1 day or spans days
+        elseif ($diff >= 86400){
+            $str.= date($show_d.'g:i A', strtotime($t1));
+        }
+        if($d1 != $d2){
+            $str.= '<br/>(Multi-day)';
+        }
+
+        return $str;
+    }
+
+    // $options: show date, show duration
+    public function startTimeFriendly($start, $end, $options=array()){
+        $show_d = '';
+        $show_dur = false;
+
+        if(isset($options['date']) && $options['date']==true){
+            $show_d = 'M j ';
+        }
+        if(isset($options['duration']) && $options['duration']==true){
+            $show_dur = true;
+        }
+
+        $t1 = date('Y-m-d H:i:s', strtotime($start));
+        $t2 = date('Y-m-d H:i:s', strtotime($end));
+        $s1 = date('s', strtotime($start));
+        $s2 = date('s', strtotime($end));
+        $d1 = date('Y-m-d', strtotime($start));
+        $d2 = date('Y-m-d', strtotime($end));
+        $m1 = date('A', strtotime($start));
+        $m2 = date('A', strtotime($end));
+        $diff = strtotime($t2)-strtotime($t1);
+        $dh = floor($diff / 3600);
+        $dm = floor(($diff / 60) % 60);
+        $ds = $diff % 60;
+        $str = '';
+        $impSecs = false;
+        
+        // Try to guess when seconds are actually important. 10 mins seems reasonable.
+        if(($s1 != $s2) && (($s1 != 0) && ($s2 !=0) || (($diff <600) && ($diff >0)))){
+            $impSecs = true;
+        }
+        if($diff == 0 && $impSecs == false){
+            $str.= date($show_d.'g:i A', strtotime($t1));
+        }
+        elseif($diff == 0 && $impSecs == true){
+            $str.= date($show_d.'g:i:s A', strtotime($t1));
+        }
+        // Important seconds
+        elseif($diff < 60){
+            $dur = ($show_dur)? ' ('.$diff.'s)':'';
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' -<br>'.$this->Time->format('g:i:s A', $end).$dur;
+        }
+        // < hr
+        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
+            $dur = ($show_dur)? ' ('.$dm.' min)':'';
+            $str.= $this->Time->format($show_d.'g:i', $start).' - '.$this->Time->format('g:i A', $end).$dur;
+        }
+        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == true){
+            $dur = ($show_dur)? ' ('.$dm.' min, '.$ds.'s)':'';
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).$dur;
+        }        
+        // > 1h < 24h
+        elseif($diff >= 3600 && $diff < 86400){
+            $s = ($dh > 1)? 's':'';
+            $a = ($m1 != $m2)? 'A':'';  // Show only if meridian changed (e.g. 10am-12pm but 10-12pm)
+            $br = !empty($a)? ' - ':' - ';
+             
+            if($dm == 0){
+                $dur = ($show_dur)? ' ('.$dh.' hr'.$s.')':'';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
+            }
+            else{
+                $dur = ($show_dur)? ' ('.$dh.' hr'.$s.', '.$dm.' min)':'';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
+            }
+        }
+        // >1 day or spans days
+        elseif ($diff >= 86400){
+            $str.= date($show_d.'g:i A', strtotime($t1));
+        }
+        if(($d1 != $d2) && $show_dur){
+            $str.= ' (Multi-day)';
+        }
+        return $str;
+    }
+
+
+
+
+    public function oxfordComma($arr){
+        //$this->log($arr);
+        if(empty($arr) || !is_array($arr)){
+            return;
+        }
+        
+        $count = count($arr);
+        $last = array_pop($arr);
+        $all_but_last = implode(', ', $arr);
+        
+        if ($all_but_last){
+            if($count > 2){
+                $all_but_last .= ', and ';    
+            }
+            elseif($count == 2) {
+               $all_but_last .= ' and '; 
+            }
+        }
+        
+        return $all_but_last.$last;
+    }
+
+
+
+
+
+
+   // Color lightness detection
     // SOURCE: http://stackoverflow.com/questions/12228644/how-to-detect-light-colors-with-php
 /*
     function HTMLToRGB($htmlCode){
@@ -1148,19 +1241,6 @@ class OpsHelper extends AppHelper {
     return (object) Array('hue' => $h, 'saturation' => $s, 'lightness' => $l);
   }
 
-*/
-
-
-
-
-
-
-
-
-
-
-
-/*
     public function subtaskWithView($task){
         $html = '<div class="linked_task astRow"
                     id="tid'.$task['id'].'"
@@ -1291,221 +1371,193 @@ class OpsHelper extends AppHelper {
 
         return $str;
     }
+
+    public function commentsByTaskSecondary($comment){
+        $text = (!empty($comment['text']))? $comment['text']: '';
+        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
+        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
+        
+        $html = '
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-comment panel-tcom">
+                    <div class="panel-heading panel-heading-tcom">
+                        <small><strong>'.$handle.' </strong></small>
+                        <span class="text-muted">commented '.$created.'</span>
+                    </div>
+                    <div class="panel-body panel-body-tcom">'.$text.'</div>
+                </div>
+            </div>
+        </div>';
+        return $html;        
+    }
+
+    public function subtaskSingleWithView($task){
+        $hr = '';
+        $details = '';
+        if(!empty($task['details'])){
+             $hr = '<hr class="inSubtask">';
+             $details = nl2br($task['details']);
+             
+             $tdet = '
+                <div class="row">
+                    <div class="col-xs-3 col-sm-2 col-md-2">'.$this->Html->link('<i class="fa fa-eye"></i> View', array(
+                            'controller'=>'tasks',
+                            'action'=>'view', $task['id']),array(
+                            'escape'=>false,
+                            'class'=>'btn btn-default btn-sm')).
+                    '</div>
+                    <div class="col-xs-9 col-sm-10 col-md-10">'.$hr.$details.'</div>
+                </div>
+             ';
+        }
+        
+        $html = '<div class="linked_task astRow"
+            id="tid'.$task['id'].'"
+            data-tid="'.$task['id'].'" 
+            style="border-left: 5px solid '. $task['task_color_code'].'">
+
+            <div class="astHeading" data-tid="'.$task['id'].'">
+                <div class="row">
+                    <div class="col-xs-3 col-sm-2 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'<br></div>
+                    <div class="col-xs-1 col-sm-1 col-md-1"><span class="btn btn-ttrid1 btn-xxs">'.$task['team_code'].'</span></div>
+                    <div class="col-xs-2 col-sm-3 col-md-2"><strong>'.$task['task_type'].'</strong></div> 
+                    <div class="col-xs-6 col-sm-6 col-md-7">'.$task['short_description'].'</div>
+                </div>'.$tdet.'
+            </div>                            
+        </div>';
+                
+        return $html;  
+    }
+
+    public function subtaskRowSinglePdf($task){
+        $html = '<div class="linked_task"
+            id="tid'.$task['id'].'"
+            data-tid="'.$task['id'].'" 
+            style="border-left: 5px solid '. $task['task_color_code'].'">
+
+            <div class="row astHeading" data-tid="'.$task['id'].'">
+                <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
+                <div class="col-xs-3 col-sm-2 col-md-3">
+                    <strong>'.$task['task_type'].'</strong>
+                    <span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].' </span>
+
+                </div>
+                <div class="col-xs-5 col-sm-8 col-md-7">'.$task['short_description'].'</div>
+            </div>                            
+        </div>';
+                
+        return $html;  
+    }
+
+    public function offsetToMinSecParts($seconds){
+        if(!$seconds){
+            return false;
+        }
+        elseif($seconds == 0){
+            $sign = '+';
+            $m = 0;
+            $s = 0;    
+        }
+        elseif($seconds>0){
+            $getMins = floor($seconds/60);
+            $getSecs = floor($seconds % 60);
+            //
+            $sign = '+';
+            $m = $getMins;
+            $s = $getSecs;
+        }
+        elseif($seconds<0){
+            $getMins = floor(abs($seconds)/60);
+            $getSecs = floor(abs($seconds) % 60);
+            $sign = '-';
+            $m = $getMins;
+            $s = $getSecs;
+            }
+        return array('sign'=>$sign, 'min'=>$m, 'sec'=>$s);
+    }
+
+    public function offsetToMmss($seconds){
+        if(!$seconds || $seconds == 0){
+            return '00:00';
+        }
+
+        $getMins = floor(abs($seconds)/60);
+        $getSecs = floor(abs($seconds) % 60);
+
+        if($getMins < 10){
+            $getMins = '0'.$getMins;
+        }
+        if($getSecs < 10){
+            $getSecs = '0'.$getSecs;
+        }
+        if($seconds>0){
+            return '+'.$getMins.':'.$getSecs;
+        }
+        elseif($seconds<0){
+            return '-'.$getMins.':'.$getSecs;
+        }
+
+    }
 */
-    public function durationFriendlyDaysOnly($start, $end, $two_lines = false){
-        if(!$start||!$end){ return 'None';}
+/*
+    public function commentInTask($comment){
+        $text = (!empty($comment['text']))? $comment['text']: '';
+        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
+        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
         
-        $str='';
-        $is = strtotime($start);
-        $ie = strtotime($end);
-        
-        if($ie < $is){
-            return 'Invalid Range';
-        }
-
-        $br = ($two_lines)? '<br>': '';
-        
-        $diff = ($ie-$is);        
-        
-        if($diff < (60*60*24)){
-            return date('M j', strtotime($start));
-        }
-        // Days
-        elseif($diff >= (60*60*24)){
-            return date('M j', strtotime($start)).' -'.$br.date('M j', strtotime($end));
-        }
-
-                
-        return $str;
+        $html = '
+            <blockquote class="tComment"><i class="fa fa-clock-o"></i> '.$created.
+            '<p>'.
+            $text.'</p><footer>'.
+            $handle.'</footer></blockquote>';
+        return $html;        
     }
 
-    public function durationFull($start, $end, $two_lines = false, $show_date = true){
-        if(!$start||!$end){ return 'None';}
+    public function commentInTask2($comment){
+        $text = (!empty($comment['text']))? $comment['text']: '';
+        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
+        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
         
-        $str='';
-        $is = strtotime($start);
-        $ie = strtotime($end);
-        
-        if($ie < $is){
-            return 'Invalid Range';
-        }
-
-        $br = ($two_lines)? '\<b\r\>': '';
-        $day = ($show_date)? '\<\b\>M j\<\/\b\> '.$br: '';
-        
-        $diff = ($ie-$is);        
-        
-        if($diff < 60){
-            return date($day.'H:i:s', strtotime($start)).' - '.date('H:i:s', strtotime($end));
-        }
-        // Minutes
-        elseif(($diff >=60) && ($diff < 3600)){
-            return date($day.'H:i:s', strtotime($start)).' - '.date('H:i:s', strtotime($end));
-        }
-        // Hours
-        elseif(($diff >=3600) && ($diff < 60*60*24)){
-            return date($day.'H:i:s', strtotime($start)).' - '.date('H:i:s', strtotime($end));
-        }
-        // Days
-        elseif($diff >= (60*60*24)){
-            return date('M j', strtotime($start)).' - '.date('M j', strtotime($end));
-        }
-
-                
-        return $str;
-    }
-    
-    public function durationFriendlyNoDate($start, $end, $options=array()){
-        $show_d = '';
-
-        if(isset($options['show_date']) && $options['show_date']==true){
-            $show_d = 'M j ';
-        }
-        
-        $t1 = date('Y-m-d H:i:s', strtotime($start));
-        $s1 = date('s', strtotime($start));
-        $s2 = date('s', strtotime($end));
-        $t2 = date('Y-m-d H:i:s', strtotime($end));
-        $d1 = date('Y-m-d', strtotime($start));
-        $d2 = date('Y-m-d', strtotime($end));
-        $m1 = date('A', strtotime($start));
-        $m2 = date('A', strtotime($end));
-        $diff = strtotime($t2)-strtotime($t1);
-        $dh = floor($diff / 3600);
-        $dm = floor(($diff / 60) % 60);
-        $ds = $diff % 60;
-        
-        $str = '';
-
-        $impSecs = false;
-        
-        // Secs are important when: (S1 != S2) && ((S1 != 0) && S2 !=0)) 
-        
-        if(($s1 != $s2) && (($s1 != 0) && ($s2 !=0) || (($diff <600) && ($diff >0)))){
-            $impSecs = true;
-        }
-    
-        if($diff == 0 && $impSecs == false){
-            $str.= date($show_d.'g:i A', strtotime($t1));
-        }
-        elseif($diff == 0 && $impSecs == true){
-            $str.= date($show_d.'g:i:s A', strtotime($t1));
-        }
-        // Important seconds
-        elseif($diff < 60){
-            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$diff.'s)';
-        }
-        // < hr
-        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
-            $str.= $this->Time->format($show_d.'g:i', $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dm.' min)';
-        }
-        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == true){
-            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).'<br/>('.$dm.' min, '.$ds.'s)';
-        }        
-        // > 1h < 24h
-        elseif($diff >= 3600 && $diff < 86400){
-            $s = ($dh > 1)? 's':'';
-            $a = ($m1 != $m2)? 'A':'';
-             
-            
-            if($dm == 0){
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.')';
-            }
-            else{
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).'<br/>('.$dh.' hr'.$s.', '.$dm.' min)';
-            }
-            
-            
-                        
-        
-        }
-        // >1 day or spans days
-        elseif ($diff >= 86400){
-            $str.= date($show_d.'g:i A', strtotime($t1));
-        }
-        if($d1 != $d2){
-            $str.= '<br/>(Multi-day)';
-        }
-
-        return $str;
+        $html = '
+            <div class="well well-sm">
+                <div class="row">
+                    <div class="col-sm-12">'.$text.'</div>                
+                </div>
+                <div class="row">
+                    <div class="col-sm-8">'.$handle.'</div>
+                    <div class="col-sm-4 pull-right"><i class="fa fa-clock-o"></i> '.$created.'</div>                
+                </div>
+            </div>';
+        return $html;        
     }
 
-    // $options: show date, show duration
-    public function startTimeFriendly($start, $end, $options=array()){
-        $show_d = '';
-        $show_dur = false;
-
-        if(isset($options['date']) && $options['date']==true){
-            $show_d = 'M j ';
-        }
-        if(isset($options['duration']) && $options['duration']==true){
-            $show_dur = true;
-        }
-
-        $t1 = date('Y-m-d H:i:s', strtotime($start));
-        $t2 = date('Y-m-d H:i:s', strtotime($end));
-        $s1 = date('s', strtotime($start));
-        $s2 = date('s', strtotime($end));
-        $d1 = date('Y-m-d', strtotime($start));
-        $d2 = date('Y-m-d', strtotime($end));
-        $m1 = date('A', strtotime($start));
-        $m2 = date('A', strtotime($end));
-        $diff = strtotime($t2)-strtotime($t1);
-        $dh = floor($diff / 3600);
-        $dm = floor(($diff / 60) % 60);
-        $ds = $diff % 60;
-        $str = '';
-        $impSecs = false;
+    public function commentInTask3($comment){
+        $text = (!empty($comment['text']))? $comment['text']: '';
+        $handle = (!empty($comment['user_handle']))? $comment['user_handle']: '';
+        $created = (!empty($comment['created']))? $this->Time->timeAgoInWords($comment['created']): '';
         
-        // Try to guess when seconds are actually important. 10 mins seems reasonable.
-        if(($s1 != $s2) && (($s1 != 0) && ($s2 !=0) || (($diff <600) && ($diff >0)))){
-            $impSecs = true;
-        }
-        if($diff == 0 && $impSecs == false){
-            $str.= date($show_d.'g:i A', strtotime($t1));
-        }
-        elseif($diff == 0 && $impSecs == true){
-            $str.= date($show_d.'g:i:s A', strtotime($t1));
-        }
-        // Important seconds
-        elseif($diff < 60){
-            $dur = ($show_dur)? ' ('.$diff.'s)':'';
-            $str.= $this->Time->format($show_d.'g:i:s', $start).' -<br>'.$this->Time->format('g:i:s A', $end).$dur;
-        }
-        // < hr
-        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
-            $dur = ($show_dur)? '<br/>('.$dm.' min)':'';
-            $str.= $this->Time->format($show_d.'g:i', $start).' - '.$this->Time->format('g:i A', $end).$dur;
-        }
-        elseif(($diff >= 60) && ($diff < 3600) && $impSecs == true){
-            $dur = ($show_dur)? '<br/>('.$dm.' min, '.$ds.'s)':'';
-            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).$dur;
-        }        
-        // > 1h < 24h
-        elseif($diff >= 3600 && $diff < 86400){
-            $s = ($dh > 1)? 's':'';
-            $a = ($m1 != $m2)? 'A':'';  // Show only if meridian changed (e.g. 10am-12pm but 10-12pm)
-            $br = !empty($a)? ' -<br>':' - ';
-             
-            if($dm == 0){
-                $dur = ($show_dur)? '<br/>('.$dh.' hr'.$s.')':'';
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
-            }
-            else{
-                $dur = ($show_dur)? '<br/>('.$dh.' hr'.$s.', '.$dm.' min)':'';
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
-            }
-        }
-        // >1 day or spans days
-        elseif ($diff >= 86400){
-            $str.= date($show_d.'g:i A', strtotime($t1));
-        }
-        if(($d1 != $d2) && $show_dur){
-            $str.= '<br/>(Multi-day)';
-        }
-        return $str;
+        $html = '
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-comment panel-tcom">
+                    <div class="panel-heading panel-heading-tcom">
+                        <strong>'.$handle.' </strong>
+                        <span class="text-muted">commented '.$created.'</span>
+                    </div>
+                    <div class="panel-body panel-body-tcom">'.$text.'</div>
+                </div>
+            </div>
+        </div>';
+        return $html;        
     }
-   
+*/
+
+
+
+
+
+
 
 //EOF
 }

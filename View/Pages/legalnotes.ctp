@@ -14,7 +14,7 @@ $this->set('title_for_layout', 'Legal Notes');
 			<h2>Legal Notes</h2>
 			
 			<h3>Ownership</h3>
-			<p>This web application was created by Brandon Prashad for the Yee Hong Community Wellness Foundation. &copy 2013-2015 Yee Hong Community Wellness Foundation.</p>
+			<p>This web application was created by Brandon Prashad for the Yee Hong Community Wellness Foundation. &copy 2013-2016 Yee Hong Community Wellness Foundation.</p>
 			
 			<h3>Software Licenses</h3>
             <p>This web application has been created using only software which allows for usage in a commercial setting.  Every attempt has been made to comply with the conditions of each individual usage license.  Where required, copyright and legal notices remain intact within the source code.  For code samples originating from the public domain, attribution notices are attached to the source.</p>

@@ -189,7 +189,16 @@ class User extends AppModel {
             return $uhan;
         }
         return false;
+    }
+    
+    public function getUsernameByUser($user_id){
+        if($this->exists($user_id)){
+            $un = $this->field('username', array($this->alias.'.id'=>$user_id));
+            return $un;
+        }
+        return false;
     }    
+        
 
 /**
  * setNewPasswordResetToken method
@@ -218,7 +227,7 @@ class User extends AppModel {
         }
 /*
         else{
-            $this->log($this->validationErrors);
+            //$this->log($this->validationErrors);
         }*/
         
         return false;

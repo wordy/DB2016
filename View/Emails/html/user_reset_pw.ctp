@@ -12,7 +12,7 @@ echo $this->Html->link('db2015/users/chooseNewPass/'.$pw_reset_token,
     );
 
 */
-    echo $this->Html->link('http://db.thebws.com/users/chooseNewPass/'.$pw_reset_token, 
+    echo $this->Html->link('http://ops.yhdragonball.com/users/chooseNewPass/'.$pw_reset_token, 
         array(
             'controller'=>'users', 
             'action'=>'chooseNewPass', $pw_reset_token,
