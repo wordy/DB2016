@@ -380,6 +380,10 @@ class TasksController extends AppController {
         
         $curViewType = 0;
 
+        //*********TEMP***************
+        //$event_date = Configure::read('EventDate');
+        $event_date = "2018-02-10";
+
         // Set up to compare settings as submitted vs. stored in user session variable
         $tmp_sess = $this->Session->read('Auth.User.Compile');
         $tmp_tl = $this->Session->read('Auth.User.Timeline');
@@ -387,7 +391,7 @@ class TasksController extends AppController {
         $qview = (int)$this->request->query('view');
         $qehr = (int)$this->request->query('hr');
         
-        if($tmp_req["view_type"] == 2 || $qview == 2 || ($this->request->is('get') && $tmp_sess['view_type']==2 && !$this->request->query('task'))){
+        if($tmp_req["view_type"] == 2 || $qview == 2 || ($this->request->is('get') && $tmp_sess['view_type']==2 && !$this->request->query('view')=='pdf' && !$this->request->query('task'))){
             //$this->log('hit view type =2 in tc');
             $comp_is_same = false;
             $usePaging = false;
@@ -416,8 +420,7 @@ class TasksController extends AppController {
             
             $settings['view_type'] = 2;
         
-            //$event_date = Configure::read('EventDate');
-            $event_date = "2018-02-10";
+
             
             $settings['tl_start_date'] = date('Y-m-d H:i:s', strtotime($event_date)+60*$settings['timeline_hr']*60);
             $settings['tl_end_date'] = date('Y-m-d H:i:s', strtotime($event_date)+(60*$settings['timeline_hr']*60)+(59*60)+59);
@@ -1044,6 +1047,7 @@ class TasksController extends AppController {
         
         $settings['view_type'] = 1;
 
+        //$this->log($settings);
         // Process settings, set defaults if necessary        
         $cc = $this->Task->makeCompileConditions($settings);
         $conditions = $cc['conditions'];
@@ -1060,7 +1064,7 @@ class TasksController extends AppController {
             'contain'=>$contain,
             'order'=>$order));
 
-        $upref = $this->Task->PrintPref->getUserPrefsByType($this->Auth->user('id'));
+        $upref = $this->Task->PrintPref->getUserPrefsByType(AuthComponent::user('id'));
         $this->set('printPrefs', $upref);
         $this->set('cSettings', $settings);
         
