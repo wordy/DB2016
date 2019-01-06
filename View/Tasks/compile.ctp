@@ -1,5 +1,8 @@
 <?php
+
+
     echo $this->Html->script('compile');
+    echo $this->Html->script('add_task');
     $this->set('title_for_layout', 'Tasks');
 
     $show_details = $this->request->data('Task.show_details');
@@ -34,40 +37,15 @@
     }
         
     $this->Js->buffer("
+        var cURL = '".$cURL."';
+        //console.log(cURL);
     
-    
-    
-    var cURL = '".$cURL."';
-    //console.log(cURL);
-    
-    // Back To Top
-    var offset = 420;
-    var duration = 700;
-    $(window).on('scroll', function() {
-        if($(this).scrollTop() > offset){ $('#back-to-top').fadeIn(duration);}
-        else{ $('#back-to-top').fadeOut(duration);}
-    });
-                
-    $('#back-to-top').on('click', function(){
-        $('html, body').animate({scrollTop : 0}, duration);
-        return false;
-    });
-    
-    //$('.helpTTs').popover({container: 'body', html:true,});
-    
-    // Accordion toggle for menu   
-    $('#compActMenu').on('hidden.bs.collapse', toggleCaChevron);
-    $('#compActMenu').on('shown.bs.collapse', toggleCaChevron);     
+        // Accordion toggle for menu   
+        $('#compActMenu').on('hidden.bs.collapse', toggleCaChevron);
+        $('#compActMenu').on('shown.bs.collapse', toggleCaChevron);     
     ");
-    
-
-    
-    
-    
-    
-    
-
 ?>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-8 col-md-offset-2" id="cErrorStatus">
@@ -87,7 +65,9 @@
                 </div>
                 <div id="colAdd" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <?php echo $this->element('task/quick_add'); ?>
+                        <span class="h2">**NEW** Click <span class="btn btn-lg btn-yh ban-edit"><i class="fa fa-plus-circle"></i> Add Task</span> in the top menu. <i class="fa fa-arrow-up fa-lg"></i></b></span>
+                        <br><small>This notice and section will be removed shortly</small>
+                        <?php //echo $this->element('task/quick_add'); ?>
                     </div>
                 </div>
             </div>
@@ -107,12 +87,12 @@
 
     <div id="page-content" class="row">
         <div id="taskListWrap">
-            <?php 
-                echo $this->element('task/compile_screen');
-            ?>
+            <?php echo $this->element('task/compile_screen'); ?>
         </div>
     </div>
 </div>
+<?php
+/*
 <!-- Modals -->
 <div class="modal fade" id="deleteTaskModal" tabindex="-1" role="dialog" aria-labelledby="deleteTaskModalLabel">
   <div class="modal-dialog" role="document">
@@ -183,5 +163,40 @@
     </div>
 </div>
 
+<div class="modal fade" id="newTaskModal" tabindex="-1" role="dialog" aria-labelledby="ntml">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="teamAddLinkedModalLabel">Add New Task</h4>
+            </div>
+            <div class="modal-body" id="addTaskModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancel</button>
+                <button type="button" class="btn btn-success btn-doLink"><i class="fa fa-plus-circle"></i> Add Task</button>
+            </div>
 
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewTaskModal" tabindex="-1" role="dialog" aria-labelledby="vtml">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="teamAddLinkedModalLabel">Task Details</h4>
+            </div>
+            <div class="modal-body" id="viewTaskDetailsModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success btn-doLink"><i class="fa fa-save"></i> Save Task</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-times"></i> Cancel</button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+*/
+?>
 <?php echo $this->Js->writeBuffer(); ?>

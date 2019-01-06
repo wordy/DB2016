@@ -9,8 +9,9 @@
 */
 ?>
 
-<div class="alert alert-danger alert-dismissable">
-  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+<div class="alert alert-danger">
+  <?php /*
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>*/?>
   <strong>AUTH ERROR: </strong> 
   
   <?php echo $message ?>

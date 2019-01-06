@@ -11,7 +11,7 @@
         )
     );    
 ?>
-<h1><i class="fa fa-sitemap"></i> <?php echo Configure::read('EventShortName')?> Organizational Chart</h1>
+<h1><i class="fa fa-sitemap"></i> <?php echo Configure::read('EventShortName')?> Ops Team</h1>
 
 
 <?php 

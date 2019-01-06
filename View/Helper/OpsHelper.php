@@ -7,6 +7,7 @@ class OpsHelper extends AppHelper {
 
     var $helpers = array('Html', 'Text', 'Time');
     
+    // Used in Compile_Screen
     public function makeTeamsSig($taskTeams = array(), $zoneTeamList, $userControls = false, $task=false){
         $tt = ($taskTeams)? $taskTeams: array();
         
@@ -37,13 +38,13 @@ class OpsHelper extends AppHelper {
         $tt_p_only = $tt_p;
 
         foreach ($tt_l as $tid => $tcode){
-            $buttons13.= '<span data-trid="1" data-teamid = "'.$tid.'" class="btn btn-ttrid1 btn-xxs ban-edit">'.$tcode.'</span>';    
+            $buttons13.= '<span data-trid="1" data-teamid = "'.$tid.'" class="btn btn-ttrid1 btn-xxs tglTR ban-edit">'.$tcode.'</span>';    
         }                                    
         foreach ($tt_oa as $tid => $tcode){
-            $buttons13.= '<span data-trid="3" data-teamid = "'.$tid.'" class="btn btn-danger btn-xxs is-oreq'.$allowOpen.'">'.$tcode.'</span>';    
+            $buttons13.= '<span data-trid="3" data-teamid = "'.$tid.'" class="btn btn-danger btn-xxs tglTR is-oreq'.$allowOpen.'">'.$tcode.'</span>';    
         }
         foreach ($tt_ca as $tid => $tcode){
-            $buttons13.= '<span data-trid ="4" data-teamid = "'.$tid.'" class="btn btn-success btn-xxs is-creq'.$allowClose.'">'.$tcode.'</span>';    
+            $buttons13.= '<span data-trid ="4" data-teamid = "'.$tid.'" class="btn btn-success btn-xxs tglTR is-creq'.$allowClose.'">'.$tcode.'</span>';    
         }
 
         // If a task involves a whole zone's teams, shorten the list by writing out a "zone" button
@@ -79,7 +80,7 @@ class OpsHelper extends AppHelper {
         }
         // Stragglers
         foreach ($tt_p_only as $tid=>$team){
-            $buttons2.= '<span data-trid ="2" data-teamid = "'.$tid.'" class="btn btn-default btn-xxs is-pushed'.$allowPush.'">'.$team.'</span>';
+            $buttons2.= '<span data-trid ="2" data-teamid = "'.$tid.'" class="btn btn-default btn-xxs tglTR is-pushed'.$allowPush.'">'.$team.'</span>';
         }                                    
         //This is a lazy way to show requests before pushes
         $buttons = $buttons13.$buttons2;
@@ -236,7 +237,7 @@ class OpsHelper extends AppHelper {
         $buttons = '';
 
         foreach ($ass as $handle){
-            $buttons.= '<span class="btn btn-pale-yellow btn-xxs"> @'.$handle.' </span>';    
+            $buttons.= '<span class="btn btn-pale-yellow btn-xxs">@'.$handle.'</span>';    
         }                                    
         return $buttons;
     }
@@ -374,7 +375,7 @@ class OpsHelper extends AppHelper {
             <div class="row astHeading" data-tid="'.$task['id'].'">
                 <div class="col-xs-3">'. date('M j g:iA', strtotime($task['start_time'])).'</div>
                 <div class="col-xs-1"><span class="btn btn-ttrid1 btn-xxs">'.$task['team_code'].'</span></div>
-                <div class="col-xs-3"><strong>'.$task['task_type'].'</strong></div>
+                <div class="col-xs-3"><strong>'.$task['task_type'].':</strong></div>
                 <div class="col-xs-5">'.$task['short_description'].'</div>
             </div>                            
         </div>';
@@ -382,6 +383,7 @@ class OpsHelper extends AppHelper {
         return $html;  
     }
 
+/*
     public function subtaskRow($task){
         $html = '<div class="linked_task astRow"
             id="tid'.$task['id'].'"
@@ -389,62 +391,36 @@ class OpsHelper extends AppHelper {
             style="border-left: 5px solid '. $task['task_color_code'].'">
 
             <div class="row astHeading" data-tid="'.$task['id'].'">
-                <div class="col-xs-2 col-sm-3 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
-                <div class="col-xs-3 col-sm-3 col-md-2"><strong>'.$task['task_type'].'</strong><br/>
-                    <span class="btn btn-ttrid1 btn-xxs">'.$task['team_code'].'</span>
-                </div>
-                <div class="col-xs-7 col-sm-6 col-md-8">'.$task['short_description'].'</div>
+                <div class="col-xs-3 col-sm-3 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
+                <div class="col-xs-3 col-sm-4 col-md-1"><span class="btn btn-ttrid1 btn-xxs">'.$task['team_code'].'</span></div>
+                <div class="col-xs-6 col-sm-5 col-md-9"><strong>'.$task['task_type'].':</strong> &nbsp;&nbsp;'.$task['short_description'].'</div>
             </div>                            
         </div>';
                 
         return $html;  
     }
-    
-    public function subtaskRowSingle($task, $options = array()){
-        $date_format = 'M j g:i A';
-        $br = $safe_br = '';
-        if(!empty($options)){
-            if($options['date_format']){
-                $date_format = $options['date_format'];    
-            }
-        }
-        $html = '<div class="linked_task" id="tid'.$task['id'].'" data-tid="'.$task['id'].'" style="border-left: 5px solid '. $task['task_color_code'].'">
-            <div class="row astHeading" data-tid="'.$task['id'].'">
-                <div class="col-xs-2 col-sm-3 col-md-2">'. date($date_format, strtotime($task['start_time'])).'</div>
-                <div class="col-xs-3 col-sm-2 col-md-3">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-push-4 col-md-8">
-                            <strong>'.$task['task_type'].'</strong>
-                        </div>
-                        <div class="col-sm-12 col-md-pull-8 col-md-4">
-                            <span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].' </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-7 col-sm-7 col-md-7">'.$task['short_description'].'</div>
-            </div>                            
-        </div>';
-        return $html;  
-    }
+  */  
 
     public function offsetToFriendly($seconds, $type = 0){
-        $sign = ($type < 0)? '-':'+';            
+        $sign = ($type < 0)? '-':'+';
+        $plural = '';            
         
         if(!$seconds || $seconds == 0){
-            return 'Synced';
+            return 'Sync';
         }
         elseif($seconds > 0){
             $getMins = floor($seconds/60);
             if($getMins>0){
-                return $sign.$getMins.' min';
+                //$plural = 's';
+                return $sign.$getMins.'';
             }
             $getSecs = floor($seconds % 60);
-            return $sign.$getSecs.' sec';
+            return $sign.$getSecs.' s';
         }
     }
 
 
-    // Used in tab_links (viewing/editing a task); 2018 In use
+    // Used in tab_links (viewing/editing a task); 2018 In use; THIS task
     public function subtask($task, $opt = array()){
         $hr = $details = $tdet = $tacts = $offMsg = $hi_class = '';
         $br = $br_esc = ' ';
@@ -457,6 +433,8 @@ class OpsHelper extends AppHelper {
         );
         
         $options = array_merge($defaults, $opt);
+        
+        //$this->log($options);
         $show_offset = $options['show_offset'];
         $show_multi = $options['multi_line'];
         $show_view = $options['show_view'];
@@ -480,31 +458,19 @@ class OpsHelper extends AppHelper {
         if($show_offset){
             if($tctrl){
                 if($tctrl_type == -1 || $tctrl_type == 1){
-                    $offMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;">'.$off.' <i class="fa fa-clock-o"></i></button><br>';                    
+                    $offMsg = '<button type="button" class="btn btn-info btn-xs">'.$off.' <i class="fa fa-clock-o"></i></button> ';                    
                 }
                 elseif($tctrl_type == -2 || $tctrl_type == 2){
-                    $offMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';                    
+                    $offMsg = '<button type="button" class="btn btn-info btn-xs"><i class="fa fa-clock-o"></i> '.$off.'</button> ';                    
                 }
                 else{
-                    $offMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
+                    $offMsg = '<button type="button" class="btn btn-info btn-xs"><i class="fa fa-clock-o"></i> '.$off.'</button> ';
                 }
             }
         }
         
-        if($show_view || $show_offset){
-             $tacts = '<div class="pull-right">'.$offMsg.$this->Html->link('<i class="fa fa-eye"></i> View', array(
-                            'controller'=>'tasks',
-                            'action'=>'compile',
-                            '?'=>array('task'=>$task['id'])
-                            ), 
-                            array(
-                                'escape'=>false,
-                                'class'=>'btn btn-default btn-xs task_view_button')
-                            ).
-                        '</div>';
-        }
         
-        if($show_details){
+        if($show_view || $offMsg){
              $tacts = '<div class="pull-right">'.$offMsg.$this->Html->link('<i class="fa fa-eye"></i> View', array(
                             'controller'=>'tasks',
                             'action'=>'compile',
@@ -515,6 +481,8 @@ class OpsHelper extends AppHelper {
                                 'class'=>'btn btn-default btn-xs task_view_button')
                             ).
                         '</div>';
+       }
+        if($show_details){
             if(!empty($task['details'])){
                 $hr = '<hr class="inSubtask">';
                 $details = nl2br($task['details']);
@@ -525,21 +493,13 @@ class OpsHelper extends AppHelper {
             $html = '<div class="linked_task'.$hi_class.'"
                 id="tid'.$task['id'].'"
                 data-tid="'.$task['id'].'" 
-                style="border-left: 5px solid '. $task['task_color_code'].'">
+                style="border-left: 7px solid '. $task['task_color_code'].'">
     
                 <div class="astHeading" data-tid="'.$task['id'].'">
                     <div class="row">
-                        <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j'.$br_esc.'g:i A', strtotime($task['start_time'])).'</div>
-                        <div class="col-xs-1 col-sm-1 col-md-1">
-                            <div class="pull-left">
-                            <strong>'.$task['task_type'].'</strong>'.$br.'
-                            <span class="btn ban-edit btn-ttrid1 btn-xxs">'.$task['team_code'].'</span>
-                            </div>
-                        </div>
-                        <div class="col-xs-7 col-sm-7 col-md-7">'
-                            .$task['short_description'].$hr.$details.'
-                        </div>
-                        <div class="col-xs-2 col-sm-2 col-md-2">'.$tacts.'</div>
+                        <div class="col-xs-4 col-sm-3 col-md-3"><span class="btn ban-edit btn-ttrid1 btn-xxs">'.$task['team_code'].'</span> <strong>'. date('g:i A', strtotime($task['start_time'])).'</strong></div>
+                        <div class="col-xs-6 col-sm-6 col-md-6"><strong><em>'.$task['task_type'].'&nbsp;&nbsp;</em></strong>'.$task['short_description'].$hr.$details.'</div>
+                        <div class="col-xs-2 col-sm-3 col-md-3"><div class="pull-right">'.$tacts.'</div></div>
                     </div>
                 </div>                            
             </div>';
@@ -548,22 +508,12 @@ class OpsHelper extends AppHelper {
             $html = '<div class="linked_task'.$hi_class.'"
             id="tid'.$task['id'].'"
             data-tid="'.$task['id'].'" 
-            style="border-left: 5px solid '. $task['task_color_code'].'">
+            style="border-left: 7px solid '. $task['task_color_code'].'">
 
             <div class="row astHeading" data-tid="'.$task['id'].'">
-                <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
-                <div class="col-xs-3 col-sm-2 col-md-3">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-push-4 col-md-8">
-                            <strong>'.$task['task_type'].'</strong>
-                        </div>
-                        <div class="col-sm-12 col-md-pull-8 col-md-4">
-                            <span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].' </span>
-                        </div>
-                        
-                    </div>
-                </div>
-                <div class="col-xs-7 col-sm-8 col-md-7">'.$task['short_description'].'</div>
+                <div class="col-xs-4 col-sm-3 col-md-3"><span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].'</span> <strong>'. date('g:i A', strtotime($task['start_time'])).'</strong></div>
+                <div class="col-xs-6 col-sm-6 col-md-6"><strong><em>'.$task['task_type'].'</em>&nbsp;&nbsp;</strong>'.$task['short_description'].'</div>
+                <div class="col-xs-2 col-sm-3 col-md-3"><div class="pull-right">'.$tacts.'</div></div>
             </div>                            
         </div>';
         }
@@ -572,73 +522,76 @@ class OpsHelper extends AppHelper {
     }
 
     //In use - 2018
+    // Synced tasks
     public function subtaskRowSingleWithOffset($task, $highlight=false){
         //$this->log($task);
         $toff = $task['time_offset'];
         $tctrl = $task['time_control'];
-        $tctrl_type = $task['time_offset_type'];
+        $tctrl_type = isset($task['time_offset_type'])? $task['time_offset_type']:0;
         $strMsg = '';
         $off = $this->offsetToFriendly($toff,$tctrl_type);
         $bg = ($highlight)? ' highlight-thistask':'';
         if($tctrl){
             if($tctrl_type == -1 || $tctrl_type == 1){
-                $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;">'.$off.' <i class="fa fa-clock-o"></i></button><br>';                    
+                $strMsg = ($toff == 0) ? '<button type="button" class="btn btn-xs btn-info">'.$off.' <i class="fa fa-clock-o"></i></button>' : '<button type="button" class="btn btn-xs btn-info">'.$off.' <i class="fa fa-clock-o"></i></button>';
             }
             elseif($tctrl_type == -2 || $tctrl_type == 2){
-                $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';                    
-            }
-            else{
-                $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
+                $strMsg = ($toff == 0) ? '<button type="button" class="btn btn-xs btn-info"><i class="fa fa-clock-o"></i> '.$off.' </button>':'<button type="button" class="btn btn-xs btn-info" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button>';                                
             }
         }
         
-        $html = '<div class="linked_task'.$bg.'"
-            id="tid'.$task['id'].'"
-            data-tid="'.$task['id'].'" 
-            style="border-left: 5px solid '. $task['task_color_code'].'">
-
-            <div class="row astHeading" data-tid="'.$task['id'].'">
-                <div class="col-xs-2 col-sm-3 col-md-2">'. date('M j g:i A', strtotime($task['start_time'])).'</div>
-                <div class="col-xs-3 col-sm-2 col-md-3">
-                    <div class="row">
-                        <div class="col-sm-12 col-md-push-4 col-md-8">
-                            <strong>'.$task['task_type'].'</strong>
-                        </div>
-                        <div class="col-sm-12 col-md-pull-8 col-md-4">
-                            <span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].' </span>
-                        </div>
-                        
-                    </div>
-                </div>
-                <div class="col-xs-5 col-sm-5 col-md-5">'.$task['short_description'].'</div>
-                <div class="col-xs-2 col-sm-2 col-md-2 text-right">'.$strMsg.'</div>
+        $html = '<div class="linked_task'.$bg.'" data-tid="'.$task['id'].' "style="border-left: 7px solid '.$task['task_color_code'].'">
+            <div class="row">
+                <div class="col-xs-5 col-sm-3 col-md-3"><span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].'</span> <span><strong>'.date('g:i A', strtotime($task['start_time'])).'</strong></span></div>
+                <div class="col-xs-5 col-sm-7 col-md-7"><strong><em>'.$task['task_type'].'</em></strong> &nbsp;'.$task['short_description'].'</div>
+                <div class="col-xs-2 col-sm-2 col-md-2"><span class="pull-right">'.$strMsg.'</span></div>
             </div>                            
         </div>';
                 
         return $html;  
     }
 
+    // Parent task, linked+synced tasks - 2018 - used in team's homepage
+    public function subtaskRowSingle($task, $options = array()){
+        $date_format = 'M j g:i A';
+        $br = $safe_br = '';
+        if(!empty($options)){
+            if($options['date_format']){
+                $date_format = $options['date_format'];    
+            }
+        }
+        $html = '<div class="linked_task col-xs-12" id="tid'.$task['id'].'" data-tid="'.$task['id'].'" style="border-left: 5px solid '.$task['task_color_code'].'"><div class="row astHeading" data-tid="'.$task['id'].'">
+                <div class="col-xs-2 col-sm-2 col-md-2">'.date($date_format, strtotime($task['start_time'])).'</div>
+                <div class="col-xs-2 col-sm-2 col-md-1"><span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].'</span></div>
+                <div class="col-xs-8 col-sm-8 col-md-9"><strong>'.$task['task_type'].':</strong>&nbsp;&nbsp;'.$task['short_description'].'</div>
+            </div></div>';
+        return $html;  
+    }
+
+    // Task-->linkages; 1 & 2 levels up
+    /*
     public function subtaskMultiWithView($task, $show_offset = false){
         $toff = $task['time_offset'];
         $tctrl = $task['time_control'];
+        $tctrl_type = $task['time_offset_type'];
+        
         $off = $this->offsetToFriendly($toff);
         $hr = '';
         $details = '';
         $tdet =''; 
 
-        $offMsg = '';
+        $strMsg = '';
         
         if($show_offset == true){
             if($tctrl){
-                if($toff == 0){
-                    $offMsg = '<button type="button" class="btn btn-primary btn-xs" style="margin-bottom:2px;"> <i class="fa fa-clock-o"></i> Synced</button><br>';
+                if($tctrl_type == -1 || $tctrl_type == 1){
+                    $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;">'.$off.' <i class="fa fa-clock-o"></i></button>&nbsp;';                    
                 }
-                elseif($toff<0){
-                    
-                    $offMsg = '<button type="button" class="btn btn-darkgrey btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
+                elseif($tctrl_type == -2 || $tctrl_type == 2){
+                    $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button>&nbsp;';                    
                 }
                 else{
-                    $offMsg = '<button type="button" class="btn btn-darkgrey btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button><br>';
+                    $strMsg = '<button type="button" class="btn btn-orange btn-xs" style="margin-bottom:2px;"><i class="fa fa-clock-o"></i> '.$off.'</button>&nbsp;';
                 }
             }
         }
@@ -648,45 +601,33 @@ class OpsHelper extends AppHelper {
              $hr = '<hr class="inSubtask">';
              $details = nl2br($task['details']);
         }     
-             $tdet = '<div class="pull-right">'.$offMsg.$this->Html->link('<i class="fa fa-eye"></i> View', array(
-                            'controller'=>'tasks',
-                            'action'=>'compile',
-                            '?'=>array('task'=>$task['id'])
-                            ), 
-                            array(
-                                'escape'=>false,
-                                'class'=>'btn btn-default btn-xs task_view_button')
-                            ).
-                        '</div>';
+        $tdet = '<div class="pull-right">'.$strMsg.' '.$this->Html->link('<i class="fa fa-eye"></i> View', array(
+                'controller'=>'tasks',
+                'action'=>'compile',
+                '?'=>array('task'=>$task['id'])
+                ), 
+                array(
+                    'escape'=>false,
+                    'class'=>'btn btn-default btn-xs task_view_button')
+                ).
+            '</div>';
         
         
-        $html = '<div class="linked_task subtask_display"
-            id="tid'.$task['id'].'"
-            data-tid="'.$task['id'].'" 
-            style="border-left: 5px solid '. $task['task_color_code'].'">
+        $html = '<div class="linked_task subtask_display" id="tid'.$task['id'].'" data-tid="'.$task['id'].'" style="border-left: 5px solid '. $task['task_color_code'].'">
 
             <div class="astHeading" data-tid="'.$task['id'].'">
                 <div class="row">
-                    <div class="col-xs-2 col-sm-2 col-md-2">'. date('M j\<\b\r\>g:i A', strtotime($task['start_time'])).'                        
-                            
-                    </div>
-                    <div class="col-xs-1 col-sm-1 col-md-1">
-                        <div class="pull-left">
-                        <strong>'.$task['task_type'].'</strong><br/>
-                        <span class="btn ban-edit btn-ttrid1 btn-xxs">'.$task['team_code'].'</span>
-                        </div>
-                    </div>
-                    <div class="col-xs-7 col-sm-7 col-md-7">'
-                        .$task['short_description'].$hr.$details.'
-                    </div>
-                    <div class="col-xs-2 col-sm-2 col-md-2">'.$tdet.'</div>
+                    <div class="col-xs-3 col-sm-3 col-md-3"><span class="btn ban-edit btn-ttrid1 btn-xxs">'.$task['team_code'].'</span> @ <b>'. date('M j g:i A', strtotime($task['start_time'])).'</b></div>
+                    <div class="col-xs-7 col-sm-6 col-md-6 highlight"><strong>'.$task['task_type'].':&nbsp;&nbsp;</strong>'.$task['short_description'].$hr.$details.'</div>
+                    <div class="col-xs-2 col-sm-3 col-md-3 pull-right"><div class="pull-right"><div class="row"><div class="col-md-12 col-sm-12 pull-right"><div class="pull-right">'.$tdet.'</div></div></div></div></div>
+                
                 </div>
             </div>                            
         </div>';
                 
         return $html;  
     }
-    
+    */
 
 /**
  * @param $task taskid
@@ -694,7 +635,7 @@ class OpsHelper extends AppHelper {
  * @param $full_width applies -ve right margin (Default: false)
  * 
  */
-    
+    /*
     public function fullSubtaskWithViewLink($task, $full_width=false){
         $row_class = ($full_width)? 'linked_task linked_task-neg-right astRow': 'linked_task astRow';
         
@@ -730,7 +671,7 @@ class OpsHelper extends AppHelper {
         return $html;  
         
     }
-
+*/
 
     // $team and $user{role,teams,handle} passed to check if user can delete comment
     public function commentByTaskWithDelete($comment, $team, $user){
@@ -911,7 +852,9 @@ class OpsHelper extends AppHelper {
     }
 
     public function durationFull($start, $end, $two_lines = false, $show_date = true){
-        if(!$start||!$end){ return 'None';}
+        if(!$start || !$end){
+            return 'None';
+        }
         
         $str='';
         $is = strtotime($start);
@@ -923,12 +866,7 @@ class OpsHelper extends AppHelper {
 
         $br = ($two_lines)? '\<b\r\>': '';
         $day = ($show_date)? '\<\b\>M j\<\/\b\> '.$br: '';
-        
         $diff = ($ie-$is);        
-        
-
-        
-        
         
         if($diff < 60){
             return date($day.'H:i:s', strtotime($start)).' - '.date('H:i:s', strtotime($end));
@@ -968,20 +906,12 @@ class OpsHelper extends AppHelper {
         $sm = ($seconds_matter)? 'H:i:s':'H:i';
         $br = ($two_lines)? '\<b\r\>': '';
         $day = ($show_date)? '\<\b\>M j\<\/\b\> '.$br: '';
-        
         $diff = ($ie-$is);        
         
-        
-        switch ($diff) {
-            case 0:
-                return date($day.'H:i', strtotime($start));
-                break;
-            
-            //default:
-                
-            //    break;
+        if($diff == 0){
+            return date($day.'H:i', strtotime($start));
         }
-        if($diff < 60){
+        elseif($diff < 60){
             return date($day.$br.$sm, strtotime($start)).' - '.date($sm, strtotime($end));
         }
         // Minutes
@@ -1019,17 +949,15 @@ class OpsHelper extends AppHelper {
         $dh = floor($diff / 3600);
         $dm = floor(($diff / 60) % 60);
         $ds = $diff % 60;
-        
         $str = '';
 
         $impSecs = false;
         
         // Secs are important when: (S1 != S2) && ((S1 != 0) && S2 !=0)) 
-        
         if(($s1 != $s2) && (($s1 != 0) && ($s2 !=0) || (($diff <600) && ($diff >0)))){
             $impSecs = true;
         }
-    
+
         if($diff == 0 && $impSecs == false){
             $str.= date($show_d.'g:i A', strtotime($t1));
         }
@@ -1070,17 +998,16 @@ class OpsHelper extends AppHelper {
         return $str;
     }
 
-    // $options: show date, show duration
+    // $options: show date, show duration -- 2018 used in every task of `compile`
     public function startTimeFriendly($start, $end, $options=array()){
-        $show_d = '';
-        $show_dur = false;
+        //$show_d = '';
+        //$show_dur = false;
 
-        if(isset($options['date']) && $options['date']==true){
-            $show_d = 'M j ';
-        }
-        if(isset($options['duration']) && $options['duration']==true){
-            $show_dur = true;
-        }
+        $show_dur = (isset($options['duration']) && ($options['duration'] == true)) ? true: false;
+        $show_d = (isset($options['date']) && $options['date']==true)? '\<\b\>M j\<\/\b\> ':''; 
+        
+        $br1 = (isset($options['line_break_duration']) && ($options['line_break_duration']))? '<br/>':'';
+        $br2 = (isset($options['line_break_multiday']) && ($options['line_break_multiday']))? '<br/>':'';
 
         $t1 = date('Y-m-d H:i:s', strtotime($start));
         $t2 = date('Y-m-d H:i:s', strtotime($end));
@@ -1095,6 +1022,7 @@ class OpsHelper extends AppHelper {
         $dm = floor(($diff / 60) % 60);
         $ds = $diff % 60;
         $str = '';
+        $space = ' ';
         $impSecs = false;
         
         // Try to guess when seconds are actually important. 10 mins seems reasonable.
@@ -1110,15 +1038,15 @@ class OpsHelper extends AppHelper {
         // Important seconds
         elseif($diff < 60){
             $dur = ($show_dur)? ' ('.$diff.'s)':'';
-            $str.= $this->Time->format($show_d.'g:i:s', $start).' -<br>'.$this->Time->format('g:i:s A', $end).$dur;
+            $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$br.$this->Time->format('g:i:s A', $end).$dur;
         }
         // < hr
         elseif(($diff >= 60) && ($diff < 3600) && $impSecs == false){
-            $dur = ($show_dur)? ' ('.$dm.' min)':'';
+            $dur = ($show_dur)? $br1.$space.'('.$dm.' min)':'';
             $str.= $this->Time->format($show_d.'g:i', $start).' - '.$this->Time->format('g:i A', $end).$dur;
         }
         elseif(($diff >= 60) && ($diff < 3600) && $impSecs == true){
-            $dur = ($show_dur)? ' ('.$dm.' min, '.$ds.'s)':'';
+            $dur = ($show_dur)? $br1.$space.'('.$dm.' min, '.$ds.'s)':'';
             $str.= $this->Time->format($show_d.'g:i:s', $start).' - '.$this->Time->format('g:i:s A', $end).$dur;
         }        
         // > 1h < 24h
@@ -1128,12 +1056,12 @@ class OpsHelper extends AppHelper {
             $br = !empty($a)? ' - ':' - ';
              
             if($dm == 0){
-                $dur = ($show_dur)? ' ('.$dh.' hr'.$s.')':'';
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
+                $dur = ($show_dur)? $br1.$space.'('.$dh.' hr'.$s.')':'';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).$dur;
             }
             else{
-                $dur = ($show_dur)? ' ('.$dh.' hr'.$s.', '.$dm.' min)':'';
-                $str.= $this->Time->format($show_d.'g:i '.$a, $start).$br.$this->Time->format('g:i A', $end).$dur;
+                $dur = ($show_dur)? $br1.$space.'('.$dh.' hr'.$s.' '.$dm.' min)':'';
+                $str.= $this->Time->format($show_d.'g:i '.$a, $start).' - '.$this->Time->format('g:i A', $end).$dur;
             }
         }
         // >1 day or spans days
@@ -1141,7 +1069,7 @@ class OpsHelper extends AppHelper {
             $str.= date($show_d.'g:i A', strtotime($t1));
         }
         if(($d1 != $d2) && $show_dur){
-            $str.= ' (Multi-day)';
+            $str.= $br2.$space.'(Multi-day)';
         }
         return $str;
     }
@@ -1171,6 +1099,52 @@ class OpsHelper extends AppHelper {
         return $all_but_last.$last;
     }
 
+
+    //**2018** Help Tools - result in popover on mousover/click with helpful info
+    public function helpPopover($type, $options = array()){
+        $out = $title = $msg = "";
+        
+        switch ($type){
+            case 'synchronize':
+                $title = 'Synchronize Tasks';
+                $msg = "Allow the <b>linked task</b> to control the start time of <b>your</b> task.  Your task moves automatically whenever the linked task moves.<br><br><b>Note:</b> When this is active, the start time is set automatically from the linked task. You will be unable to edit the start time, but may set an end time (duration) and offset.";
+                break;
+            case 'offset':
+                $title = 'Offset (For Synchronized Tasks)';
+                $msg = "The amount of time (in mins) to maintain between the start of <u>this task</u> and the <u>linked task</u>. <b>Max = 12 hours (720 mins)</b>.<br><br>You can choose to synchronyize the start of your task to before/after the start/end of the linked task. <br><br>When the linked task moves, this task moves automatically, such that the offset is preseved. <br><br>e.g. If you set an offset of 10 Minutes <i>before the linked task starts</i>, your task will always start 10 minutes before the linked task, even if the linked task's start time changes. <br><br><b>Note:</b> You can only set an offset if the task is <b>synchronized</b> with the linked task.</b>";
+                break;
+            case 'offset_type':
+                $title = 'Offset Type (For Synchronized Tasks)';
+                $msg = "Control how your task is offset from the linked task.  You can have <b>your</b> task start before/after the start/end of the linked task. If the linked task moves or its duration changes, your task will move automatically to <b>maintain the offset.</b><br><b>Note:</b> You can only set an offset type if the task is <b>synchronized</b> with the linked task.</b>";
+                break;                     
+            case 'linked_task':
+                $title = 'Linked Tasks';
+                $msg = "Link tasks when they are related.<br><br><b>Examples</b><ul><li>Link to production elements (start of grand reception, dinner, etc.) when your tasks are related</li><li>Link tasks with meeting notes to 'Meeting' tasks</li><li>Link to requests from other teams to send them people/materials/info</li></ul>";
+                break;                     
+            case 'teams':
+                $title = "Teams";
+                $msg = "Many teams can be linked to a task. There are 5 states that a team can be in for each task:<br/><br/><p><span class='btn btn-xs btn-ttrid0'>None</span><br/>Team is not associated with the task.</p><p><span class='btn btn-xs btn-ttrid1'>Lead Team</span><br>Team is the owner of this task and it appears in their plan.</p><p><span class='btn btn-xs btn-ttrid2'>Pushed Team</span><br/>Team is CC'd on this task and it will appear in their plan.  They do <b>not</b> owe the lead team anything.</p><p><span class='btn btn-xs btn-danger'>Open Request</span><br/>This team <b>owes</b> the lead team materials/info/resources/etc. This task/request will appear in their plan.</p><p><span class='btn btn-xs btn-success'>Closed Request</span><br/>Team <b>had</b> a request for this task and it is <b>complete</b>. This task/closed request will appear in their plan.</p>";
+                break;                     
+            case 'assign_task':
+                $title = "Assign Task";
+                $msg = "Assign a task to specific roles if those roles are integral to the task or responsible for it.<br><br><b>NOTE:</b> Teams will need to create roles first before assigning tasks to them.";
+                break;
+            case 'view_type':
+                $title = "View Type";
+                $msg = "Views organize tasks in different ways, which can give specific insights. <br><br><b>Examples:</b><br><br>A <b>Rundown</b> emphasizes the order of tasks and how they're connected to other tasks.<br>A <b>Timeline</b> emphasizes what different teams/people are doing at the SAME time.<br><b>Owing/Waiting</b> views help teams track deliverables owing/owed to/from other teams.";                     
+                break;
+            case 'task_actions':
+	           $title = "Task Actions";
+               $msg = "<p><b>View Single Task:</b> Allows you to view this task alone. Useful for opening single tasks in a new tab/window.</p><p><b>Link to Task: </b> Create a new task that links to this task. Only available if this task allows links.</p><p><b>Delete Task:</b> Deletes task and associations (i.e. links to other teams).</p>";
+	           break;
+        }
+        
+        if(!empty($type) && !empty($msg)){
+            $out = '<a class="helpTTs" tabindex="0" role="button" data-toggle="popover" title="'.$title.'" data-content="'.$msg.'"> <i class="fa fa-lg fa-question-circle text-info"></i></a>';    
+        }
+        
+        return $out;
+    }
 
 
 

@@ -1,4 +1,6 @@
 <?php
+    //echo $this->Html->script('compile');
+    
     if (AuthComponent::user('id')) {
         $userRole = AuthComponent::user('user_role_id');
         $userTeams = AuthComponent::user('Teams');
@@ -231,7 +233,7 @@
 									<div class="row" id="qaAdvancedLinked">
 										<div class="col-xs-12 col-sm-8 col-md-6">
 											<p>
-												<b>Synchronize </b><a class="helpTTs" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Synchronize Tasks" data-content="Allow the <u>linked task</u> to control the start time of <u>your</u> task.  Your task moves automatically whenever the linked task moves.<br><br><b>Note:</b> When this is active, the start time is set automatically from the linked task. You will be unable to edit the start time, but may set an end time (duration) and offset."><i class="fa fa-question-circle text-info"></i></a>
+												<b>Synchronize </b><a class="helpTTs" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Synchronize Tasks" data-content="Allow the <b>linked task</b> to control the start time of <b>your</b> task.  Your task moves automatically whenever the linked task moves.<br><br><b>Note:</b> When this is active, the start time is set automatically from the linked task. You will be unable to edit the start time, but may set an end time (duration) and offset."><i class="fa fa-question-circle text-info"></i></a>
 											</p>
 
 											<div class="taskTs checkbox facheckbox facheckbox-circle facheckbox-success">
@@ -280,7 +282,7 @@
 
 		<div class="col-md-3 col-xs-12">
 			<div class="row">
-				<div class="col-sm-12">
+				<div class="col-sm-12 lg-bot-marg">
 					<button class="btn btn-success btn-lg btn-block qaSubmitButton submit">
 						<i class="fa fa-plus"></i> Add New Task
 					</button>

@@ -8,7 +8,8 @@
         <?php echo $this->Html->charset(); ?>
         <title><?php echo Configure::read('EventShortName').' Compiler: '.$title_for_layout;?></title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
     <?php
         echo $this->Html->meta('icon');
@@ -57,16 +58,16 @@
             </div>
         </div>
 
-        <div style="margin-left:15px; margin-right:15px;">
-        <div id="ajax-content-load" class="container-fluid">
-            <?php echo $this->fetch('content'); ?>
-        </div><!-- /#content .container -->
+        <div class="container-fluid total-page-loc">
+            <div id="ajax-content-load" class="container-fluid">
+                <?php echo $this->fetch('content'); ?>
+            </div><!-- /#content .container -->
         </div>
         
         <footer class="footer">
             <div class="container">
                 <div class="row lg-top-marg">
-                    <div class="col-xs-6"><p class="text-muted">&copy; 2013-2016 Yee Hong Foundation</p></div>
+                    <div class="col-xs-6"><p class="text-muted">&copy; 2013-2019 Yee Hong Foundation</p></div>
                     <div class="col-xs-6 text-align-right"><a href="<?php echo $this->Html->url(array('controller'=>'pages', 'action'=>'version'));?>">Version History</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href="<?php echo $this->Html->url(array('controller'=>'pages', 'action'=>'legalnotes'));?>">Legal Notes</a></div>
                 </div>
             </div>
@@ -81,7 +82,10 @@
         //echo $this->Html->script('libs/select2.min');
         echo $this->Html->script('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js');
         echo $this->Html->script('libs/summernote.min');
+        echo $this->Html->script('libs/bootbox.min');
+        
         echo $this->Html->script('ops');
+        //echo $this->Html->script('compile');
         
         echo $this->fetch('scriptBottom');
         echo $this->Js->writeBuffer();   

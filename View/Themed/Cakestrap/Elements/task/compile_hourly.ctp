@@ -7,6 +7,11 @@
     }
     $event_date_old = date('Y-m-d', strtotime('2018-02-10'));
     
+    $this->Js->buffer("
+        
+    
+    ");
+    
     //debug(date('gA',strtotime('7:00:00')));
     //debug($timeline_hr);
     
@@ -15,6 +20,17 @@
     $ishr = 0; 
     
     if(isset($timeline_hr)){
+        $this->Js->buffer("var timeline_hr =".$timeline_hr);
+        $this->Js->buffer("
+        
+        //console.log(timeline_hr);
+        var timeline_moment = moment(DB_EVENT_DATE).add(timeline_hr*60*60,'s').format('YYYY-MM-DD HH:mm');
+        //console.log(timeline_moment);
+        
+        
+        
+        ");
+        
         //$ishr = $ishr%24;
         $ishr = $timeline_hr;    
     } 
@@ -101,16 +117,8 @@
     $eday = date('Y-m-d',  strtotime($eday_var));
     
     $this->Js->buffer("
-        /*
-        $('.tl-mark').on('click', function(){
-            alert($(this).data('min'));
-        });
-    
-        $('.tl-mark').on('mouseenter', function(){
-           $(this).append('<i class\"fa fa-plus\"></i>')
-           $(this).css('background-color','#00861C'); 
-        });
-        */
+        
+        $('.tl-mark').data('tlhr', timeline_hr);  //save for handlers elsewhere
     
         $('#btnHrPrevious, #btnHrPrevious2').on('click', function(){
             $.ajax({
@@ -140,6 +148,7 @@
         });
 
         $('#inputSelectHr,#inputSelectHr2').on('change', function(){
+            //console.log('got change from input select hr in com_hrly.ctp');
             var val = $(this).val();
             $.ajax({
                 url: '/tasks/compile?view=2&hr='+ val +'',
@@ -164,10 +173,12 @@
     </div>
 </div>
 
+<p class="lead">Navigate forward and backwards in time, from 6am event day to 6am the day after.</p>
 <div class="well">
+
     <div class="row">
         <div class="col-xs-5">
-            <button class="btn btn-ttrid1 btn-block <?php echo ($ishr-1 < 6)?'hidden':'';?>" id="btnHrPrevious"><i class="fa fa-arrow-left"></i> <?php echo $prev_hr; echo ($ishr-1<24)? ' Event Day <i class="fa fa-diamond"></i>':' Day After Event';?></button>
+            <button class="btn btn-default btn-block <?php echo ($ishr-1 < 6)?'hidden':'';?>" id="btnHrPrevious"><i class="fa fa-arrow-left"></i> <?php echo $prev_hr; echo ($ishr-1<24)? ' Event Day <i class="fa fa-diamond"></i>':' Day After Event';?></button>
         </div>
     
         <div class="col-xs-2">
@@ -382,17 +393,15 @@ if (!empty($tasks)){ ?>
 <?php        
 
     echo '<br/>';?>
+    
     <div class="well">
-    <div class="row">
-        
-    <div class="col-xs-5">
-        <button class="btn btn-ttrid1 btn-block <?php echo ($ishr-1 < 6)?'hidden':'';?>" id="btnHrPrevious2"><i class="fa fa-arrow-left"></i> <?php echo $prev_hr; echo ($ishr-1<24)? ' Event Day <i class="fa fa-diamond"></i>':' Day After Event';?></button>
-    </div>
+        <div class="row">
+            <div class="col-xs-5">
+                <button class="btn btn-default btn-block <?php echo ($ishr-1 < 6)?'hidden':'';?>" id="btnHrPrevious2"><i class="fa fa-arrow-left"></i> <?php echo $prev_hr; echo ($ishr-1<24)? ' Event Day <i class="fa fa-diamond"></i>':' Day After Event';?></button>
+            </div>
 
-    <div class="col-xs-2">
-        <!--<button class="btn btn-danger btn-block" id="btnCurHr"><i class="fa fa-star"></i> <?php echo $cur_hr;?> </button>-->    
-        
-            <?php echo $this->Form->input('hours', array(
+            <div class="col-xs-2">
+                <?php echo $this->Form->input('hours', array(
                     'empty'=>true,
                     'label'=>false, 
                     'id'=>'inputSelectHr2',
@@ -405,19 +414,17 @@ if (!empty($tasks)){ ?>
                         'Day After'=>array(24=>'12 AM', 25=>'1 AM', 26=>'2 AM', 27=>'3 AM', 28=>'4 AM', 29=>'5 AM', 30=>'6 AM')
                     ),
                     'placeholder'=>'Hour',
-                    
                     'class'=>'form-control input-date-notime')); 
-            ?>
-        
-    </div>
+                ?>
+            </div>
 
-    <div class="col-xs-5">
-        <?php if($ishr+1 <> 31):?>
-            <button class="btn btn-success btn-block" id="btnHrNext2"><?php echo $next_hr; echo ($ishr+1<24)? ' Event Day <i class="fa fa-diamond"></i>':' Day After Event';?> <i class="fa fa-arrow-right"></i></button>
-        <?php endif;?>
-    </div>
-    </div>
-</div>  
+            <div class="col-xs-5">
+                <?php if($ishr+1 <> 31):?>
+                    <button class="btn btn-success btn-block" id="btnHrNext2"><?php echo $next_hr; echo ($ishr+1<24)? ' Event Day <i class="fa fa-diamond"></i>':' Day After Event';?> <i class="fa fa-arrow-right"></i></button>
+                <?php endif;?>
+            </div>
+        </div>
+    </div>  
     <?php
     
 }
@@ -434,9 +441,5 @@ else {
 
 </div><!-- /.index -->
 
-<style>
 
-
-
-</style>
 <?php echo $this->Js->writeBuffer(); ?>

@@ -355,8 +355,9 @@ $client->setScopes('email');
                 $sdate = $edate = null;
                 $edate_config = Configure::read('CompileEnd');
                 $sdate_config = Configure::read('CompileStart');
-                $sdate = date('Y-m-d', strtotime($sdate_config));
-                $edate = date('Y-m-d', strtotime($edate_config)+86399);
+
+                $start_date = date('Y-m-d', strtotime($sdate_config));
+                $end_date = date('Y-m-d', strtotime($edate_config)+86399);
                 
                 // Save new last login date
                 $this->User->saveField('last_login', $now);
@@ -392,14 +393,12 @@ $client->setScopes('email');
                 // Set User's Default Compile Params
                 $comp = array();
                 $comp['Teams'] = $userTeams;
-                $comp['start_date'] = $sdate;
-                $comp['end_date'] = $edate;
-                $comp['sort'] = 0;
                 $comp['view_type'] = 1;
-                $comp['view_details'] = 1;
-                $comp['view_links'] = 1;
-                $comp['view_threaded'] = 0;
+                $comp['start_date'] = $start_date;
+                $comp['end_date'] = $end_date;
+                $comp['sort'] = 0;
                 $comp['page'] = 1;
+
                 $this->Session->write('Auth.User.Compile', $comp);
                 
                 // Default Timeshift Mode is "off"

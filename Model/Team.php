@@ -349,6 +349,18 @@ class Team extends AppModel {
         
         return $list;
     }
+
+    public function listControlledTeamCodeByCategoryCode(){
+        $uteams = AuthComponent::user('Teams');
+        
+        $list = $this->find('list', array(
+                'conditions'=>array(
+                    'Team.id'=>$uteams),
+                'fields'=>array('Team.id','Team.code', 'Team.zone'),
+                'order'=>array('Team.zone_id ASC', 'Team.zone ASC','Team.code ASC')));
+        
+        return $list;
+    }
     
     public function listLinkableTeamCodeByCategoryAndTask($task){
         $teams = $this->TasksTeam->getLinkableTeamsByTask($task);
@@ -370,7 +382,8 @@ class Team extends AppModel {
     // Used to determine which teams a user can select as leading when linking to another task
     public function listAssistingAndControlledByUser($task){
         $ass = $this->listLinkableTeamCodeByCategoryAndTask($task);
-        $con = $this->listControlledTeamCodeByCategory();
+        $con = $this->listControlledTeamCodeByCategoryCode();
+        
         $aic_teams = array();
         
         foreach($ass as $zone => $zteams){
