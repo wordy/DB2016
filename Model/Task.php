@@ -12,18 +12,26 @@ class Task extends AppModel {
 	
     public $stdTaskFields = array('id', 'start_time', 'end_time', 'short_description', 'task_type', 'team_code', 'task_color_code', 'time_control', 'time_offset', 'due_date');
     
+    public $stdFields = array(
+        'Task.id', 'Task.start_time', 'Task.end_time', 'Task.task_type','Task.short_description', 
+        'Task.team_code', 'Task.task_color_code', 'Task.time_control', 'Task.time_offset', 'Task.time_offset_type');
+    
     public $stdContain = array(
+        'Assignment'=>array(
+            'fields'=>array(
+                'Assignment.id', 'Assignment.role_id'),
+        ),
         'Assist'=>array(
             'fields'=>array(
                 'Assist.id', 'Assist.start_time', 'Assist.end_time', 'Assist.short_description', 'Assist.task_type',
-                'Assist.team_code', 'Assist.task_color_code', 'Assist.time_control', 'Assist.time_offset')
+                'Assist.team_code', 'Assist.task_color_code', 'Assist.time_control', 'Assist.time_offset', 'Assist.time_offset_type')
         ),
         'Comment',
         //'Assist.Assist',
         'Parent'=>array(
             'fields'=>array(
                 'Parent.id', 'Parent.parent_id', 'Parent.start_time', 'Parent.end_time', 'Parent.short_description',
-                'Parent.task_type', 'Parent.team_code', 'Parent.task_color_code', 'Parent.time_offset', 'Parent.time_control')
+                'Parent.task_type', 'Parent.team_code', 'Parent.task_color_code', 'Parent.time_control', 'Parent.time_offset', 'Parent.time_offset_type')
         ),
         'TasksTeam'=>array(
             'fields'=>array(
@@ -118,7 +126,6 @@ class Task extends AppModel {
         $this->virtualFields['task_color_code'] = sprintf('SELECT `TaskColor`.`code` from `task_colors` as `TaskColor` WHERE `TaskColor`.`id` = %s.task_color_id', $this->alias);
         $this->virtualFields['actionable_type'] = sprintf('SELECT `ActionableType`.`name` from `actionable_types` as `ActionableType` WHERE `ActionableType`.`id` = %s.actionable_type_id', $this->alias);
         $this->virtualFields['team_code'] = sprintf('SELECT `Team`.`code` from `teams` as `Team` WHERE `Team`.`id` = %s.team_id', $this->alias);
-        //$this->virtualFields['priority_date'] = sprintf('LEAST((GREATEST(0, DATE(%s.due_date))), DATE(%s.end_time))', $this->alias, $this->alias);
     }
 
  /**
@@ -152,6 +159,14 @@ class Task extends AppModel {
  * @var array
  */
 	public $hasMany = array(
+        'Assignment'=>array(
+            'className' => 'Assignment',
+            'foreignKey' => 'task_id',
+            'order'=>array(
+                'Assignment.id'=>'ASC'
+            ),
+            'dependent' => true,
+        ),	   
         'Assist'=>array(
             'className' => 'Task',
             'foreignKey' => 'parent_id',
@@ -164,6 +179,11 @@ class Task extends AppModel {
             'foreignKey' => 'task_id',
             'dependent' => true,
         ),
+        /*'NewChange' => array(
+            'className' => 'Change',
+            'foreignKey' => 'task_id',
+            'dependent' => true,
+        ),*/
 		'Comment' => array(
 			'className' => 'Comment',
 			'foreignKey' => 'task_id',
@@ -207,10 +227,7 @@ class Task extends AppModel {
         return false;
     }
     
- /** 2015: Used to prevent saving changes for deleted tasks
- *  Task.afterDelete() cascades to TasksTeam, this checks if task is deleted before
- *  allowing changes to be saved
- **/
+//** 2015 **: Used to prevent saving changes for deleted tasks. Task.afterDelete() cascades to TasksTeam, this checks if task is deleted before allowing changes to be saved
     public function isDeleted($task_id){
         $rs = $this->findById($task_id);
 
@@ -234,8 +251,7 @@ class Task extends AppModel {
         return true;
     }
 
-    // 2016 
-    // Checks if $task is in $parent's chain of parent_ids. Used to prevent loops when tasks are time controlling each other
+    // **2016** Checks if $task is in $parent's chain of parent_ids. Used to prevent loops when tasks are syncing to each other
     // @TODO/NEVERDO?: This prevents some linking even if time_control is false (for safety)    
     public function validateParentAllowed($check){
         $parent = $check['parent_id'];
@@ -259,14 +275,18 @@ class Task extends AppModel {
                return 'Potential Loop: Please choose a different linked task.';
             }
         }
+
         return true;        
     }
     
-
     // 2015. Used in Task::beforeSave(). Tests if a potential $parent ever links back to $task (loop).
     public function isChildInPidChain($task, $parent){
-        if(!$parent){ return false; }
-        if($task == $parent){ return true; }
+        if(!$parent || !$task){
+            return false; 
+        }
+        if($task == $parent){
+            return true; 
+        }
         
         // Current task and parent IDs
         $ctid = $parent;
@@ -281,11 +301,13 @@ class Task extends AppModel {
                return true;
             }
         }
+
         return false;        
     }
 
     
     public function beforeSave($options=array()) {
+        //$this->log("BeforeSave in Task");
         //$this->log($this->data);
         
         // Prevents storing empty details. Possibly overkill.
@@ -298,60 +320,78 @@ class Task extends AppModel {
         //Enforces that start time be before end time.  @DBOPS Pref If not, reverse them.
         if((isset($this->data[$this->alias]['end_time'])) && (isset($this->data[$this->alias]['start_time'])) && ((strtotime($this->data[$this->alias]['end_time']) < (strtotime($this->data[$this->alias]['start_time']))))){
             list($this->data[$this->alias]['start_time'], $this->data[$this->alias]['end_time']) = array($this->data[$this->alias]['end_time'], $this->data[$this->alias]['start_time']);
-            $this->log('Swapped start and end time in Task::beforeSave');
+            //$this->log('Swapped start and end time in Task::beforeSave');
         }
         
         // Format Offset for saving, only if time controlled
-        if(isset($this->data[$this->alias]['time_control'])){
-            $t_ctrl = $this->data[$this->alias]['time_control'];    
-        }
-        else{
-            $t_ctrl = 0;
-        }
+        $t_ctrl = (isset($this->data[$this->alias]['time_control']))? $this->data[$this->alias]['time_control']:0;
             
         if($t_ctrl == 1){
-            $o_min = (int)$this->data['Offset']['minutes'];
-            $o_sec = (int)$this->data['Offset']['seconds'];
-            $o_sign = $this->data['Offset']['sign'];
-            
-            if(!$o_min){ $o_min = 0;}
-            if(!$o_sec){ $o_sec = 0;}
+            $o_min = isset($this->data['Offset']['minutes'])? (int)$this->data['Offset']['minutes']: 0;
+            $o_sec = isset($this->data['Offset']['seconds'])? (int)$this->data['Offset']['seconds']: 0;
+            //$o_type = isset($this->data[$this->alias]['time_control_type'])? $this->data[$this->alias]['time_control_type']:0;
             
             $new_to = 60*$o_min + $o_sec;
             
-            if($o_sign == '-'){
-                $new_to = (-1)*$new_to;
-            }
             $this->data[$this->alias]['time_offset'] = $new_to;
+            //$this->data[$this->alias]['time_offset_type'] = $o_type;
         }
         else{
             // Offset requires task to be time controlled
             if(!empty($this->data['Offset']['seconds']) || !empty($this->data['Offset']['minutes'])){
                 $this->data[$this->alias]['time_offset'] = 0;
+                $this->data[$this->alias]['time_offset_type'] = 0;
             }
         }
 
+/* 
         $data_pid = (isset($this->data[$this->alias]['parent_id']))? $this->data[$this->alias]['parent_id'] : null; 
         $data_tc = (isset($this->data[$this->alias]['time_control']))? $this->data[$this->alias]['time_control'] : 0;
         $data_to = (isset($this->data[$this->alias]['time_offset']))? $this->data[$this->alias]['time_offset'] : 0;
+        $data_to_type = (isset($this->data[$this->alias]['time_offset_type']))? $this->data[$this->alias]['time_offset_type'] : 0;
+
+        
         $iDurr = 0;
 
         if((isset($this->data[$this->alias]['end_time'])) && (isset($this->data[$this->alias]['start_time']))){
             $iDurr = (strtotime($this->data[$this->alias]['end_time']) - strtotime($this->data[$this->alias]['start_time']));            
         }
 
+
         // Ensure linked start times for time controlled tasks
         if(isset($data_pid) && ($data_tc == 1)){
             $pstart = $this->getStartTimeByTask($data_pid);
-            $tstart = $this->data[$this->alias]['start_time'];
-            $test_tstart = date('Y-m-d H:i:s', strtotime($pstart)+$data_to);
-            $test_tend = date('Y-m-d H:i:s', strtotime($pstart)+$data_to+$iDurr);
-            if($test_tstart != (strtotime($tstart))){
-                $this->data[$this->alias]['start_time'] = $test_tstart;
-                $this->data[$this->alias]['end_time'] = $test_tend;
-            }    
+            $pend = $this->getEndTimeByTask($data_pid);
+            //$tstart = $this->data[$this->alias]['start_time'];
+            
+            // 2018: 4 cases when there is an offset to account for:
+         
+            if($new_to > 0){
+                if($o_type == -1){          //Before linked task starts
+                    $test_tstart = date('Y-m-d H:i:s', strtotime($pstart)-$data_to);
+                    $test_tend = date('Y-m-d H:i:s', strtotime($pstart)-$data_to+$iDurr);
+                }
+                elseif ($o_type == -2){     //Before linked task ends
+                    $test_tstart = date('Y-m-d H:i:s', strtotime($pend)-$data_to);
+                    $test_tend = date('Y-m-d H:i:s', strtotime($pend)-$data_to+$iDurr);
+                }
+                elseif ($o_type == 1){      //After linked task starts
+                    $test_tstart = date('Y-m-d H:i:s', strtotime($pstart)+$data_to);
+                    $test_tend = date('Y-m-d H:i:s', strtotime($pstart)+$data_to+$iDurr);
+                }
+                elseif ($o_type == 2){      //After linked task ends
+                    $test_tstart = date('Y-m-d H:i:s', strtotime($pend)+$data_to);
+                    $test_tend = date('Y-m-d H:i:s', strtotime($pend)+$data_to+$iDurr);
+                }
+            }
+            else{   //Time controlled, but synced (offset == 0)
+                $test_tstart = date('Y-m-d H:i:s', strtotime($pend)+abs($data_to));
+                $test_tend = date('Y-m-d H:i:s', strtotime($pend)+abs($data_to)+$iDurr);
+            }
+ 
+            
         }
-
+*/
         // Grab data pre-save... only bother if we're doing an update (i.e. $this->id exists)
         $old_lead_teams = array();
         $old_push_teams = array();
@@ -367,6 +407,8 @@ class Task extends AppModel {
             // Grab and save old teams
             $teams_before = $this->TasksTeam->getAllByTask($this->id);
             
+            $assigns_before = $this->Assignment->getRolesByTask($this->id);
+            
             if(!empty($teams_before)){
                 $old_lead_teams = Hash::extract($teams_before, '{n}.TasksTeam[task_role_id=1].team_id');
                 $old_push_teams = Hash::extract($teams_before, '{n}.TasksTeam[task_role_id=2].team_id');
@@ -380,17 +422,20 @@ class Task extends AppModel {
         $this->old_open_teams = $old_open_teams;
         $this->old_closed_teams = $old_closed_teams;
         $this->old_involved_teams = $old_involved_teams;
+        $this->old_assignments = (!empty($assigns_before))? $assigns_before: array();
         
         return true;
     }
     
     public function afterSave($created, $options = array()){
         //$this->log($this->data);
+        
+        $id_saved = $this->id;
         $before = $this->presave;
 
     	if(!empty($this->data['Task']['team_id'])){
             $cur_lead = $this->data['Task']['team_id'];    
-    	}        
+    	}
 
         if(!empty($this->data['TeamRoles'])){
             $new_tt = $this->data['TeamRoles'];
@@ -415,34 +460,57 @@ class Task extends AppModel {
                 }
             }
             
-        // To be added and to be deleted
-        $tba_lt = array_diff($lead_tt, $this->old_lead_teams);
-        $tba_pu = array_diff($push_tt, $this->old_push_teams);
-        $tba_ot = array_diff($open_tt, $this->old_open_teams);
-        $tba_ct = array_diff($closed_tt, $this->old_closed_teams);
+            // To be added and to be deleted
+            $tba_lt = array_diff($lead_tt, $this->old_lead_teams);
+            $tba_pu = array_diff($push_tt, $this->old_push_teams);
+            $tba_ot = array_diff($open_tt, $this->old_open_teams);
+            $tba_ct = array_diff($closed_tt, $this->old_closed_teams);
+            
+            // Have no role now; Had role before -- to be deleted
+            $tbd = array_intersect($no_tt, $this->old_involved_teams);
+              
+            // Additions 
+            foreach ($tba_lt as $adds){
+                $this->TasksTeam->addTeam($this->id, $adds, 1);    
+            }
+            foreach ($tba_pu as $adds){
+                $this->TasksTeam->addTeam($this->id, $adds, 2);    
+            }
+            foreach ($tba_ot as $adds){
+                $this->TasksTeam->addTeam($this->id, $adds, 3);
+            }
+            foreach ($tba_ct as $adds){
+                $this->TasksTeam->addTeam($this->id, $adds, 4);
+            }
+    
+            // Deletions
+            foreach ($tbd as $dels){
+                $this->TasksTeam->deleteAllByTaskAndTeam($this->id, $dels);
+            }
+        }//End TeamRoles
         
-        // Have no role now; Had role before -- to be deleted
-        $tbd = array_intersect($no_tt, $this->old_involved_teams);
-          
-        // Additions 
-        foreach ($tba_lt as $adds){
-            $this->TasksTeam->addTeam($this->id, $adds, 1);    
+        /** Assignments **/
+        //Unsetting an existing assignment
+        if(empty($this->data['Assignments'])){
+            $this->Assignment->deleteAllByTask($this->id);
         }
-        foreach ($tba_pu as $adds){
-            $this->TasksTeam->addTeam($this->id, $adds, 2);    
-        }
-        foreach ($tba_ot as $adds){
-            $this->TasksTeam->addTeam($this->id, $adds, 3);
-        }
-        foreach ($tba_ct as $adds){
-            $this->TasksTeam->addTeam($this->id, $adds, 4);
-        }
+        
+        //Compare new to old assignments and process changes
+        if(!empty($this->data['Task']['Assignments'])){
+            $new_ass = (is_array($this->data['Task']['Assignments']))? $this->data['Task']['Assignments'] : array();
+            $old_ass = $this->Assignment->getByTask($this->id);
+            $tba_ass = array_diff($new_ass, $old_ass);
+            $tbd_ass = array_diff($old_ass, $new_ass);
+            
+            foreach ($tba_ass as $addass){
+                $this->Assignment->setByTaskAndRole($this->id, $addass);
+            }
 
-        // Deletions
-        foreach ($tbd as $dels){
-            $this->TasksTeam->deleteAllByTaskAndTeam($this->id, $dels);
+            foreach ($tbd_ass as $delass){
+                $this->Assignment->deleteByTaskAndRole($this->id, $delass);
+            }
         }
-    }
+        
         // Process changes in Task only if it was a record update    
         if($created == false){
             $after = $this->findById($this->id);
@@ -452,11 +520,13 @@ class Task extends AppModel {
                 // Record change of lead in TasksTeam & Change
                 $this->TasksTeam->changeLeadTeam($this->id, $after['Task']['team_id']);
                 $this->Change->changeLeadTeam($this->id, $before['Task']['team_id'], $after['Task']['team_id']);
+                
+                //If lead team changes, delete all old assignments (specific to lead team)
+                $this->Assignment->deleteAllByTask($after['Task']['id']);
             }
-            // Start Time
-            if ($after['Task']['start_time'] != $before['Task']['start_time']){
+            // Start or End Time - record Change and change start/end times of all child tasks that are synchronized to this 
+            if ($after['Task']['start_time'] != $before['Task']['start_time'] || $after['Task']['end_time'] != $before['Task']['end_time']){
                 $this->Change->changeStartTime($this->id, $before['Task']['start_time'], $after['Task']['start_time']);
-                //Change all child tasks that are time linked to this one
                 $this->changeChildStartEndTime($this->id);
             }
             // Description - compare text and only record the change if >5% difference
@@ -500,12 +570,12 @@ class Task extends AppModel {
             if(!empty($after['Task']['team_id'])){
                 $this->TasksTeam->addTeam($this->id, $after['Task']['team_id'], 1);
             }
-                        
+
             //Record Due Date
             if(!empty($after['Task']['due_date'])){
                 $this->Change->changeDueDate($this->id, null, $after['Task']['due_date']);
             }
-            
+
             //Record Actionable Status
             if(!empty($after['Task']['actionable_type_id'])){
                $this->Change->changeActionableStatus($this->id, null, $after['Task']['actionable_type_id']);
@@ -513,7 +583,6 @@ class Task extends AppModel {
             
             //Record Link to Parent in Parent & Child
             if(!empty($after['Task']['parent_id'])){
-                // Record changes in parent & child                
                 $this->Change->newChild($after['Task']['parent_id'], $this->id);
                 $this->Change->setParent($this->id, $after['Task']['parent_id']);
             }
@@ -534,6 +603,7 @@ class Task extends AppModel {
             // Record unlinking of child task in parent
             $this->Change->childLeft($task['Task']['parent_id'], $task['Task']['id']);
         }
+
         return true;
     }
 
@@ -551,13 +621,13 @@ class Task extends AppModel {
         $this->deleteAll(
             array($this->alias.'.team_id'=>$team),
             true,
-            true);
+            true
+        );
         
         return true;       
     }
     
-    // 2016
-    // unsets parent_id, time_offset, time_control
+    // 2016: Unsets parent_id, time_offset, time_control
     // Used in Task::afterDelete
     public function unsetChildrenByParentId($parent_task){
         if(!$parent_task){
@@ -576,7 +646,8 @@ class Task extends AppModel {
                 array(
                     'parent_id'=>null,
                     'time_offset'=>null,
-                    'time_control'=>0),
+                    'time_control'=>0
+                ),
                 array(
                     $this->alias.'.id'=>$tasks
                 )
@@ -608,8 +679,7 @@ class Task extends AppModel {
                     'time_offset'=>null, 
                     'time_control'=>0),
                 array($this->alias.'.id'=>$task_ids)
-            ))
-            {
+            )){
                 foreach($task_ids as $k=>$task_id){
                     $this->Change->parentDisconnected($task_id, $parent_task);
                 }
@@ -627,40 +697,42 @@ class Task extends AppModel {
         if(!$this->exists($task)){
             return false;
         }
-        $team = $this->field('team_id', array($this->alias.'.id'=>$task));
-        return $team;
+        return $this->field('team_id', array($this->alias.'.id'=>$task));
     }
 
     public function getLeadCodeByTask($task){
         if(!$this->exists($task)){
             return false;
         }
-        $team = $this->field('team_code', array($this->alias.'.id'=>$task));
-        return $team;
+        return $this->field('team_code', array($this->alias.'.id'=>$task));
     }
 
     public function getStartTimeByTask($task){
         if(!$this->exists($task)){
             return false;
         }
-        $stime = $this->field('start_time', array($this->alias.'.id'=>$task));
-        return $stime;
+        return $this->field('start_time', array($this->alias.'.id'=>$task));
+    }
+
+    public function getEndTimeByTask($task){
+        if(!$this->exists($task)){
+            return false;
+        }
+        return $this->field('end_time', array($this->alias.'.id'=>$task));
     }
 
     public function getShortDescByTask($task){
         if(!$this->exists($task)){
             return false;
         }
-        $sdesc = $this->field('short_description', array($this->alias.'.id'=>$task));
-        return $sdesc;
+        return $this->field('short_description', array($this->alias.'.id'=>$task));
     }    
 
     public function getTimeControlByTask($task){
         if(!$this->exists($task)){
             return false;
         }
-        $tc = $this->field('time_control', array($this->alias.'.id'=>$task));
-        return $tc;
+        return $this->field('time_control', array($this->alias.'.id'=>$task));
     }    
 
     public function getOpenRequestsByTeam($team){
@@ -733,6 +805,7 @@ class Task extends AppModel {
                 'Task.short_description LIKE' => "%Ops Meeting%",
                 'Task.start_time >'=> date('Y-m-d'),
             ),
+            'order'=>'Task.start_time ASC',
             'fields'=>$this->stdTaskFields,
             'contain'=>array(
                 'TasksTeam'=>array(
@@ -763,12 +836,11 @@ class Task extends AppModel {
         return $data;
     }
 
-
     public function getDigestDataByTeam($team){
         $tids = $this->TasksTeam->getRecentByTeam($team);
         $recent_children = $this->Change->getRecentChildrenByTeam($team);
-        
         $next_ops_meeting = $this->getNextOpsMeeting();
+        $urgent_tasks = $this->getUrgentByTeam($team);
         
         $recent_requests = $this->find('all', array(
             'conditions'=>array(
@@ -791,6 +863,7 @@ class Task extends AppModel {
         $count_next_meeting = ($next_ops_meeting)? 1:0;
         $count_recent_links = count($recent_links);
         $count_recent_requests = count($recent_requests);
+        $count_urgent = count($urgent_tasks);
         
         return array(
             'Team'=>array(
@@ -801,32 +874,17 @@ class Task extends AppModel {
                 'next_meeting'=> $count_next_meeting,
                 'recent_links'=> $count_recent_links,
                 'recent_requests'=> $count_recent_requests,
+                'urgent_tasks'=>$count_urgent,
             ),
             'next_meeting'=> $next_ops_meeting,
             'recent_requests'=> $recent_requests,
-            'recent_links'=> $recent_links
+            'recent_links'=> $recent_links,
+            'urgent_tasks'=>$urgent_tasks,
+            
         );
     }
 
 
-/**
- * Updates task's last modified date to right now
- * @param {int} $task task to be updated
- * @return {boolean} true if modified, false if not
- */
-    public function updateLastModifiedDate($task){
-        if(!$this->exists($task)){
-            return false;
-        }
-        
-        $this->id = $task;
-        $now = date('Y-m-d H:i:s');
-        
-        if($this->saveField('modified', $now)){
-            return true;
-        }
-        return false;
-    }
 
     //2016
     public function allTasksList(){
@@ -882,24 +940,37 @@ class Task extends AppModel {
          return $rs;
     }
 
-    public function makeSafeCompileSettings($raw=array()){
-        $cst = Configure::read('CompileStart');
-        $cen = Configure::read('CompileEnd');
+    //Set task's modified date to right now
+    //2018 - commented out in TasksTeam -- would generate many unnecessary updates there.
+    public function setModifiedDateNow($task){
+        if($this->exists($task)){
+            $this->id = $task;
+            if($this->saveField('modified', date('Y-m-d H:i:s'))){
+                return true;
+            }
+        }
         
-        // Process from submitted settings.  Set defaults if necessary.
+        return false;
+    }
+
+    // Process from submitted settings.  Set defaults if necessary.
+    public function makeSafeCompileSettings($raw=array()){
         $teams = (!empty($raw['Teams']))? $raw['Teams']: array();
-        $sdate = (isset($raw['start_date']))? $raw['start_date']: '';
-        $edate = (isset($raw['end_date']))? $raw['end_date']: ''; 
-        $view_details = (isset($raw['view_details']))? (int)$raw['view_details']: 1;
-        $view_threaded = (isset($raw['view_threaded']))? (int)$raw['view_threaded']: 1;
-        $view_links = (isset($raw['view_links']))? (int)$raw['view_links']: 1;
+        $sdate = (isset($raw['start_date']))? $raw['start_date']: null;
+        $edate = (isset($raw['end_date']))? $raw['end_date']: null; 
         $view_type = (isset($raw['view_type']))? (int)$raw['view_type']: 1;
         $sort = (isset($raw['sort']))? (int)$raw['sort']: 0;
+        $timeline_hr = (isset($raw['timeline_hr']))? $raw['timeline_hr']:0;
+        //$view_details = (isset($raw['view_details']))? (int)$raw['view_details']: 1;
+        //$view_threaded = (isset($raw['view_threaded']))? (int)$raw['view_threaded']: 1;
+        //$view_threaded = $view_links = 1;
+        //$view_links = (isset($raw['view_links']))? (int)$raw['view_links']: 1;
+        //$fields = (isset($raw['fields']))? $raw['fields']: array();
         
-        // DEFAULT: show past 2 weeks if nothing set
+        // DEFAULT: current compile range
         if(!$sdate || !$edate){
-            $sdate = $cst;
-            $edate = $cen;
+            $sdate = Configure::read('CompileStart');
+            $edate = Configure::read('CompileEnd');
         }
         
         // Assume they meant it the other way, swap them
@@ -913,10 +984,14 @@ class Task extends AppModel {
             'end_date'=>$edate,
             'sort'=>$sort,
             'view_type'=>$view_type,        
-            'view_details'=>$view_details,
-            'view_links'=>$view_links,
-            'view_threaded'=>$view_threaded,
+            'timeline_hr'=>$timeline_hr,
+
+            //'fields'=>$fields,
+            //'view_details'=>$view_details,
+            //'view_links'=>$view_links,
+            //'view_threaded'=>$view_threaded,
         );
+
         return $clean;
     }
 
@@ -932,13 +1007,13 @@ class Task extends AppModel {
             $cur_s = strtotime($rs['Task']['start_time']);
             $cur_e = strtotime($rs['Task']['end_time']);
 
-            $new_s = date('Y-m-d H:i:s', ($cur_s + $increment));
-            $new_e = date('Y-m-d H:i:s', ($cur_e + $increment));
+            //$new_s = date('Y-m-d H:i:s', ($cur_s + $increment));
+            //$new_e = date('Y-m-d H:i:s', ($cur_e + $increment));
 
             $data = array(
                 'id'=>$tid,
-                'start_time' => $new_s,
-                'end_time' => $new_e,
+                'start_time' => date('Y-m-d H:i:s', ($cur_s + $increment)),
+                'end_time' => date('Y-m-d H:i:s', ($cur_e + $increment)),
             );
             
             $this->save($data);
@@ -949,17 +1024,15 @@ class Task extends AppModel {
     //2016
     public function makeLinkableParentsList($team){
         $tids = $this->TasksTeam->getLinkableParentsByTeam($team);
-        
         $cstart = Configure::read('CompileStart');
         $cend = Configure::read('CompileEnd');
 
         $rs = $this->find('all', array(
             'conditions'=>array(
-                'Task.team_id !='=>null, 
-                'Task.team_code !='=>null, 
                 'Task.id'=>$tids,
                 'Task.start_time >='=>$cstart,
                 'Task.end_time <='=>$cend,
+                //'Task.TasksTeam.team_id'=>$team,
             ),
             'order'=>array(
                 'Task.team_code ASC',
@@ -969,7 +1042,8 @@ class Task extends AppModel {
                 'Task.short_description',
                 'Task.task_type',  
                 'Task.team_code', 
-                'Task.start_time', 
+                'Task.start_time',
+                'Task.end_time', 
                 'Task.team_id')
         ));
             
@@ -978,42 +1052,63 @@ class Task extends AppModel {
     }
 
     
-    // 2016
-    // Used in Task::afterSave()
-    // If start time of a task changes, and it has child tasks linked that are time controlled
-    // alter start/end time
+    // 2016: Used in Task::afterSave()
+    // If start or end time of a task changes and it has child tasks linked that are time controlled, alter start/end time
     public function changeChildStartEndTime($parent_tid){
         $this->id = $parent_tid;
-        $p_start = $this->field('start_time');
-        $ipstart = strtotime($p_start);
+        $parent_start = $this->field('start_time');
+        $parent_end = $this->field('end_time');
+        $par_start = strtotime($parent_start);
+        $par_end = strtotime($parent_end);
         
+        // Find all time controlled tasks
         $rs = $this->find('all', array(
             'conditions'=>array(
                 $this->alias.'.parent_id'=>$parent_tid,
                 $this->alias.'.time_control'=>1),
             'fields'=>array(
-                $this->alias.'.id', $this->alias.'.start_time', $this->alias.'.end_time', $this->alias.'.time_offset'
-            )
+                $this->alias.'.id', 
+                $this->alias.'.start_time', 
+                $this->alias.'.end_time', 
+                $this->alias.'.time_offset',
+                $this->alias.'.time_offset_type')
         ));
         
+        // Loop over time controlled tasks, saving new start/end
         foreach($rs as $task){
             $ctask = $task['Task']['id'];
             $start = strtotime($task['Task']['start_time']);
             $end = strtotime($task['Task']['end_time']);
-            $off = (isset($task['Task']['time_offset']))? (int)$task['Task']['time_offset']: 0;
-            $curDur = $end - $start;
-            $new_cs = ($ipstart + $off);
-            $new_start = date('Y-m-d H:i:s', $new_cs);
-            $new_end = date('Y-m-d H:i:s', ($new_cs+$curDur));
+            $offset = (isset($task['Task']['time_offset']))? (int)$task['Task']['time_offset']: 0;
+            $offset_type = (isset($task['Task']['time_offset_type']))? (int)$task['Task']['time_offset_type']: 0;
+            $task_duration = $end - $start;
+
+            if($offset_type == -1  || $offset_type == 0){ // Starts BEFORE START of linked task
+                $new_start = date('Y-m-d H:i:s', ($par_start-$offset));
+                $new_end = date('Y-m-d H:i:s', ($par_start-$offset+$task_duration));
+            }
+            elseif ($offset_type == -2) { // Starts BEFORE END of linked task
+                $new_start = date('Y-m-d H:i:s', ($par_end-$offset));
+                $new_end = date('Y-m-d H:i:s', ($par_end-$offset+$task_duration));
+            }
+            elseif ($offset_type == 1) { // Starts AFTER START of linked task
+                $new_start = date('Y-m-d H:i:s', ($par_start+$offset));
+                $new_end = date('Y-m-d H:i:s', ($par_start+$offset+$task_duration));
+            }
+            elseif ($offset_type == 2) { // Starts AFTER END of linked task
+                $new_start = date('Y-m-d H:i:s', ($par_end+$offset));
+                $new_end = date('Y-m-d H:i:s', ($par_end+$offset+$task_duration));
+            }
             
             $this->id = $ctask;
             $this->saveField('start_time', $new_start);
             $this->id = $ctask;
             $this->saveField('end_time', $new_end);
             
+            // Record change -- task was moved because parent task moved
             $this->Change->movedByParent($ctask, $task['Task']['start_time'], $new_start, $parent_tid);
-            
         }
+
         return true;
     }
 
@@ -1032,6 +1127,7 @@ class Task extends AppModel {
                         'value'=>$task['id'],
                         'data-teamid' => $task['team_id'],
                         'data-stime' => $task['start_time'],
+                        'data-etime' => $task['end_time'],
                     );
                 }
             } 
@@ -1044,30 +1140,29 @@ class Task extends AppModel {
             return false;
         }
         elseif($seconds == 0){
-            $sign = '+';
             $m = 0;
             $s = 0;    
         }
         elseif($seconds>0){
             $getMins = floor($seconds/60);
             $getSecs = floor($seconds % 60);
-            $sign = '+';
             $m = $getMins;
             $s = $getSecs;
         }
         elseif($seconds<0){
             $getMins = floor(abs($seconds)/60);
             $getSecs = floor(abs($seconds) % 60);
-            $sign = '-';
             $m = $getMins;
             $s = $getSecs;
             }
-        return array('sign'=>$sign, 'min'=>$m, 'sec'=>$s);
+        return array('min'=>$m, 'sec'=>$s);
     }    
     
 
     //2015
     public function makeCompileConditions($settings=array()){
+        //debug($settings);
+        
         $now = date('Y-m-d');
         $owa = date('Y-m-d', strtotime("-1 weeks"));
         $twa = date('Y-m-d', strtotime("-2 weeks"));
@@ -1076,19 +1171,28 @@ class Task extends AppModel {
         $compileEnd = Configure::read('CompileEnd');
             
         $teams = isset($settings['Teams'])? $settings['Teams']: array();
+        $order = isset($settings['order'])? $settings['order']: array();
         $sdate = isset($settings['start_date'])? $settings['start_date']: $compileStart;
         $edate = isset($settings['end_date'])? $settings['end_date']: $compileEnd;
+
         $sort = isset($settings['sort'])? (int)$settings['sort']: 0;
         $view_type = (isset($settings['view_type']))? (int)$settings['view_type']: 1;
-        $view_details = (isset($settings['view_details']))? (int)$settings['view_details']: 1;
-        $view_links = (isset($settings['view_links']))? (int)$settings['view_links']: 1;
-        $view_threaded = (isset($settings['view_threaded']))? (int)$settings['view_threaded']: 1;
+        $timeline_hr = isset($settings['timeline_hr'])? $settings['timeline_hr']: 6;
+        $tlsdate = isset($settings['tl_start_date'])? $settings['tl_start_date']: $compileStart;
+        $tledate = isset($settings['tl_end_date'])? $settings['tl_end_date']: $compileEnd;
+        
+        $fields = (isset($settings['fields']))? $settings['fields']: array();
+
+        
+        //debug($timeline_hr);
+        //debug($view_type);
         
         // Conditions Initialization
         $conditions = array();
         $limit = 25;
         $contain = array();
-        $roles = array(1, 2, 3, 4);        
+        //$roles = array(1, 2, 3, 4);
+        $roles = array();        
         $order = ($sort)? 'Task.start_time DESC':'Task.start_time ASC';
 
         // Conditions
@@ -1103,6 +1207,7 @@ class Task extends AppModel {
     /*******************************
      * View Types
      * 1: Rundown
+     * 2: Timeline
      * 10: Lead Only
      * 30: Incoming Open Request
      * 31: Outgoing Open Request
@@ -1113,8 +1218,63 @@ class Task extends AppModel {
         
         // Rundown
         if($view_type == 1){
-            $roles = array(1,2,3,4);
+            //$roles = array(1,2,3,4);
             $useSubquery = true;
+        }
+
+        // Hourly Event Timeline
+        if($view_type == 2){
+            $limit = 500;
+            $roles = array(1);
+
+            //******************* TEMP *********************
+            $date_event= Configure::read('EventDate');
+            //$date_event= "2019-02-09";
+            //**********************************************
+            
+            $useSubquery = false;
+            
+            $time_s = date('Y-m-d H:i:s', strtotime($date_event)+$timeline_hr*60*60);
+            $time_e = date('Y-m-d H:i:s', strtotime($time_s) + (59*60)+59);
+            
+            //$order = $conditions = array();
+            
+            if($teams){
+                $conditions['AND'] = array('Task.team_id'=>$teams);
+            }
+            $conditions['OR'] = array(
+                array(  //Starts during, ends after
+                    'Task.start_time >='=> $time_s,
+                    'Task.start_time <='=> $time_e,
+                    'Task.end_time >'=> $time_e,               
+                ),
+                array( //Starts before, ends during
+                    'Task.start_time <'=> $time_s,
+                    'Task.end_time >'=> $time_s,
+                    'Task.end_time <='=> $time_e,   
+                ),
+                array( //Starts and ends during
+                    'Task.start_time >='=> $time_s,
+                    'Task.start_time <='=> $time_e,
+                    'Task.end_time >='=> $time_s,
+                    'Task.end_time <='=> $time_e,   
+                ),
+                array(  //Start before, ends after
+                    'Task.start_time <'=> $time_s,
+                    'Task.end_time >'=> $time_e,               
+                ),
+            );
+            
+            $contain = array(
+                'Assignment'=>array(
+                    'fields'=>array(
+                        'role_handle',
+                    )
+                )
+            );
+            
+            $order = 'Task.start_time ASC';
+            //$fields = array('Task.id', 'Task.team_code', 'Task.task_type', 'Task.start_time', 'Task.end_time', 'Task.short_description');
         }
         
         // Lead Only
@@ -1126,7 +1286,7 @@ class Task extends AppModel {
         // Incoming Open Requests
         if($view_type == 30){
             $roles = array(3);
-            $conditions['AND'] = array();
+            //$conditions['AND'] = array();
             $conditions['AND'] = array(
                 'Task.start_time >=' =>$compileStart,
                 'Task.start_time <=' =>$compileEnd,
@@ -1136,13 +1296,12 @@ class Task extends AppModel {
 
         // Outgoing Open Requests
         if($view_type == 31){
-            $ow_tasks = $this->TasksTeam->getOpenWaitingByTeam($teams);
+            $useSubquery = false; 
             $conditions['AND'] = array(
-                'Task.id'=>$ow_tasks,
-                'Task.start_time >=' =>$compileStart,
-                'Task.start_time <=' =>$compileEnd,
+                'Task.id' => $this->TasksTeam->getOpenWaitingByTeam($teams),
+                'Task.start_time >=' => $compileStart,
+                'Task.start_time <=' => $compileEnd,
             );
-            $useSubquery = false;
         }
         
         // Recently Created
@@ -1155,7 +1314,6 @@ class Task extends AppModel {
             $roles = array(1, 2, 3, 4);
             $useSubquery = true;
         }
-        
         // Assisting & Due Soon
         if($view_type == 399){
             $roles = array(3);
@@ -1172,8 +1330,7 @@ class Task extends AppModel {
                 ));
             $order = 'Task.end_time ASC';
             $useSubquery = true;
-        }
-        
+        }        
         // Actionable.
         if($view_type == 500){
             $conditions['AND'] = array(
@@ -1187,8 +1344,15 @@ class Task extends AppModel {
 
         if($useSubquery){
             // Subquery looking for tasks where $teams are listed in any of the given $roles
-            $conditionsSubQuery['`TasksTeam`.`team_id`'] = $teams;
-            $conditionsSubQuery['`TasksTeam`.`task_role_id`'] = $roles;
+            
+            if(!empty($teams)){
+                $conditionsSubQuery['`TasksTeam`.`team_id`'] = $teams;
+            }
+            
+            if(!empty($roles)){
+                $conditionsSubQuery['`TasksTeam`.`task_role_id`'] = $roles;    
+            }
+            
             $db = $this->TasksTeam->getDataSource();
             $subQuery = $db->buildStatement(
                 array(
@@ -1211,54 +1375,58 @@ class Task extends AppModel {
         if(empty($order)){
             $order = array('Task.start_time' =>'ASC');
         }
-        
-        $contain = array(
-            'Assist'=>array(
-                'fields'=>array(
-                    'Assist.id',
-                    'Assist.start_time',
-                    'Assist.end_time',
-                    'Assist.short_description',
-                    'Assist.task_type',
-                    'Assist.team_code',
-                    'Assist.task_color_code',
-                    'Assist.time_control',
-                    'Assist.time_offset',
-                )
-            ),
-            'Comment',
-            //'Assist.Assist',
-            'Parent'=>array(
-                'fields'=>array(
-                    'Parent.id',
-                    'Parent.parent_id',
-                    'Parent.start_time',
-                    'Parent.end_time',
-                    'Parent.short_description',
-                    'Parent.task_type',
-                    'Parent.team_code',
-                    'Parent.task_color_code',
-                    'Parent.time_offset',
-                    'Parent.time_control',
-                )
-            ),
-            'TasksTeam'=>array(
-                'fields'=>array(
-                    'TasksTeam.team_id',
-                    'TasksTeam.team_code',
-                    'TasksTeam.task_role_id',
+        if(empty($contain)){
+            $contain = array(
+                'Assignment',
+                'Assignment.Role',
+                'Assist'=>array(
+                    'fields'=>array(
+                        'Assist.id',
+                        'Assist.start_time',
+                        'Assist.end_time',
+                        'Assist.short_description',
+                        'Assist.task_type',
+                        'Assist.team_code',
+                        'Assist.task_color_code',
+                        'Assist.time_control',
+                        'Assist.time_offset',
+                        'Assist.time_offset_type',
                     )
                 ),
-            'Change'=>array(
-                'conditions'=>array(
-                    'Change.created >'=>$owa
+                'Comment',
+                
+                //'Assist.Assist',
+                'Parent'=>array(
+                    'fields'=>array(
+                        'Parent.id',
+                        'Parent.parent_id',
+                        'Parent.start_time',
+                        'Parent.end_time',
+                        'Parent.short_description',
+                        'Parent.task_type',
+                        'Parent.team_code',
+                        'Parent.task_color_code',
+                        'Parent.time_offset',
+                        'Parent.time_control',
+                    )
                 ),
-                'fields'=>array(
-                    'Change.created'
+                'TasksTeam'=>array(
+                    'fields'=>array(
+                        'TasksTeam.team_id',
+                        'TasksTeam.team_code',
+                        'TasksTeam.task_role_id',
+                        )
+                    ),
+                'Change'=>array(
+                    'conditions'=>array(
+                        'Change.created >'=>$owa
+                    ),
+                    'fields'=>array(
+                        'Change.created'
+                    )
                 )
-            )
-        );
-        
+            );
+            }
         $cs = array(
             'teams'=>$teams,
             'start_date'=>$sdate,
@@ -1266,13 +1434,15 @@ class Task extends AppModel {
             'sort'=>$sort,
             'conditions'=>$conditions,
             'order'=>$order,
+            'fields'=>$fields,
             'contain'=>$contain,
             'limit'=>$limit,
             'view_type'=>$view_type,
-            'view_details'=>$view_details,
-            'view_links'=>$view_links,
-            'view_threaded'=>$view_threaded,
+            'timeline_hr' => $timeline_hr,
+            'timeline_start_date'=>$tlsdate,
+            'timeline_end_date'=>$tledate,
         );
+        
         return $cs;
     }
 
@@ -1303,7 +1473,9 @@ class Task extends AppModel {
             'limit' => $limit,
         ));
 
-        return array('utasks'=> $tasks, 'nextMeeting'=>$nextMeeting);
+        return array(
+        'utasks'=> $tasks, 
+        'nextMeeting'=>$nextMeeting);
     }
 
     public function digestByTeam($team){
@@ -1337,9 +1509,6 @@ class Task extends AppModel {
 
         return array('utasks'=> $tasks, 'nextMeeting'=>$nextMeeting);
     }
-
-
-
 
 /**
  * Sends digest to Users on a team who are subscribed.

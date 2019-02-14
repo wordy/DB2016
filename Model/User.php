@@ -140,8 +140,7 @@ class User extends AppModel {
             $this->data['User']['password'] = $passwordHasher->hash($this->data['User']['password']);
         }
 
-        // Grab data pre-save. $this->data is lost on save, so save it to $this->presave
-        // Only bother if we're doing an update ($this->id exists)
+        // Grab data pre-save
         $this->old_teams = array();
         if($this->id){
             $this->presave = $this->findById($this->id);
@@ -151,8 +150,6 @@ class User extends AppModel {
             $this->old_teams = (!empty($ct_list)) ? $ct_list : array();
         }
         
-        //if(!empty($this->data[$this->alias]))
-            
         return true;
     }
     
@@ -189,7 +186,16 @@ class User extends AppModel {
             return $uhan;
         }
         return false;
+    }
+    
+    public function getUsernameByUser($user_id){
+        if($this->exists($user_id)){
+            $un = $this->field('username', array($this->alias.'.id'=>$user_id));
+            return $un;
+        }
+        return false;
     }    
+        
 
 /**
  * setNewPasswordResetToken method
@@ -218,7 +224,7 @@ class User extends AppModel {
         }
 /*
         else{
-            $this->log($this->validationErrors);
+            //$this->log($this->validationErrors);
         }*/
         
         return false;

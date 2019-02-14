@@ -10,7 +10,7 @@
     ");
     */
     echo $this->Form->create('User', array(
-        'action'=>'chooseNewPass',
+        'url'=>array('action'=>'chooseNewPass'),
         //'url'=>'/users/chooseNewPass/'.$reset_token,
         'class'=>'formChooseNew',
         'type'=>'post',

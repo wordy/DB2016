@@ -6,7 +6,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-		<?php echo $this->Html->Link(Configure::read('AppShortName').' Operations Comittee', '/', array('class' => 'navbar-brand')); ?>
+		<?php echo $this->Html->Link(Configure::read('AppShortName'), '/', array('class' => 'navbar-brand')); ?>
 	</div><!-- /.navbar-header -->
         <?php
         /*

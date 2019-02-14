@@ -1,6 +1,6 @@
 <p>Hello <?php echo $user['User']['handle']?>,</p>
 
-<p>An account has been created for you in the <?php echo Configure::read('AppShortName');?> Ops Compiler. You can access the compiler at <a href="http://db.thebws.com">http://db.thebws.com</a></p>
+<p>An account has been created for you in the <?php echo Configure::read('AppShortName');?> Ops Compiler. You can access the compiler at <a href="http://ops.yhdragonball.com">http://ops.yhdragonball.com</a></p>
 
 <p>Your username is: <b><?php echo $user['User']['username']?></b></p>
     
@@ -15,7 +15,7 @@
     );
  */
     echo $this->Html->link(
-        'http://db.thebws.com/users/chooseNewPass/'.$token, 
+        'http://ops.yhdragonball.com/users/chooseNewPass/'.$token, 
         array(
             'controller'=>'users', 
             'action'=>'chooseNewPass', $token,

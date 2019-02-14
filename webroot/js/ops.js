@@ -1,14 +1,9 @@
-/* 
- * Global variables
- * 
- */
-	// @DBOPS Settings
+/*********************
+ * Global DBOPS variables
+ *********************/
 	// This must be set to the event date in ISO format YYYY-MM-DD 00:00:00 
-	var DB_EVENT_DATE = "2016-02-06 00:00:00";
+	var DB_EVENT_DATE = "2019-02-09 00:00:00";
 	
-
-
-
 
 /**
  * Bootstrap Multiselect
@@ -19,62 +14,62 @@
  * @param {jQuery} $el
  * @returns {bool}
  */
-function multiselect_selected($el) {
-	var ret = true;
-	$('option', $el).each(function(element) {
-		if (!!!$(this).prop('selected')) {
-			ret = false;
-		}
-	});
-	return ret;
-}
+	function multiselect_selected($el) {
+		var ret = true;
+		$('option', $el).each(function(element) {
+			if (!!!$(this).prop('selected')) {
+				ret = false;
+			}
+		});
+		return ret;
+	}
 
 /**
  * Selects all the options
  * @param {jQuery} $el
  * @returns {undefined}
  */
-function multiselect_selectAll($el) {
-	$('option', $el).each(function(element) {
-		$el.multiselect('select', $(this).val());
-	});
-}
+	function multiselect_selectAll($el) {
+		$('option', $el).each(function(element) {
+			$el.multiselect('select', $(this).val());
+		});
+	}
 
 /**
  * Deselects all the options
  * @param {jQuery} $el
  * @returns {undefined}
  */
-function multiselect_deselectAll($el) {
-	$('option', $el).each(function(element) {
-		$el.multiselect('deselect', $(this).val());
-	});
-}
+	function multiselect_deselectAll($el) {
+		$('option', $el).each(function(element) {
+			$el.multiselect('deselect', $(this).val());
+		});
+	}
 
 /**
  * Clears all the selected options
  * @param {jQuery} $el
  * @returns {undefined}
  */
-function multiselect_toggle($el, $btn) {
-	if (multiselect_selected($el)) {
-		multiselect_deselectAll($el);
-		$btn.text('All');
-	} else {
-		multiselect_selectAll($el);
-		$btn.text('None');
+	function multiselect_toggle($el, $btn) {
+		if (multiselect_selected($el)) {
+			multiselect_deselectAll($el);
+			$btn.text('All');
+		} else {
+			multiselect_selectAll($el);
+			$btn.text('None');
+		}
 	}
-}
 
-
-	$('.boot-popover').hover(function () {
+/*
+	$('body').on('hover', '.boot-popoverhover', function () {
 	    $(this).popover({
             html: true
         }).popover('show');
-            }, function () {
-                $(this).popover('hide');
-            });
-            
+    }, function () {
+        $(this).popover('hide');
+    });
+  */          
 
 
 /*
@@ -148,34 +143,55 @@ function multiselect_toggle($el, $btn) {
 	    });
 	};
 	
+	// Generic Ajax redirect on error.
 	$( document ).ajaxError(function( event, request, settings ) {
 		if(request.status == 403){
 			alert('It looks like you\'ve been logged out.  Redirecting you to the log in page.  Please log in and try again.');
 	  		$('body').append( '<script> window.location = "/users/login/" </script>' );
 		}
 		else if(request.status !== 200){
-				$('#ajax-content-load').append('<div class="well" style="background-color: #d9edf7;">If you\'re seeing this, an error was reported on your last connection to the server. This error message will help track it down.<br/><ul><li>Error: '+request.status+' (' +request.statusText+ ')</li><li>URL: '+settings.url+'</li></ul></div>');	
+			//$('#ajax-content-load').append('<div class="well" style="background-color: #d9edf7;">If you\'re seeing this, an error was reported on your last connection to the server. This error message will help track it down.<br/><ul><li>Error: '+request.status+' (' +request.statusText+ ')</li><li>URL: '+settings.url+'</li></ul></div>');	
 		}
 	});
 	
-
-
     //$('div.flash-success').delay(3000).fadeOut();
-
-
             
     // Accordion toggle for menu   
     function toggleCaChevron(e) {
-        $(e.target)
-            .prev('.panel-ctab')
-            .find('i.cAindicator')
-            .toggleClass('fa-chevron-down fa-chevron-up ');
+        $(e.target).prev('.panel-ctab').find('i.cAindicator').toggleClass('fa-chevron-down fa-chevron-up ');
     }
  
+    // Back To Top
+    var offset = 420;
+    var duration = 700;
+    $(window).on('scroll', function() {
+        if($(this).scrollTop() > offset){ $('#back-to-top').fadeIn(duration);}
+        else{ $('#back-to-top').fadeOut(duration);}
+    });
 
+    $('body').on('click', '#back-to-top', function(){
+        $('html, body').animate({scrollTop : 0}, duration);
+        return false;
+    });
+
+	// Awesome: http://stackoverflow.com/a/25359264/1279639
+	$.urlParam = function(name){
+	    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	    if (results==null){
+	       return null;
+	    }
+	    else{
+	       return results[1] || 0;
+	    }
+	}
 
     
-    
-        
+	$('body').find('.helpTTs').popover({container: 'body', trigger:'click', html:true,});
+
+	/*$('body').on('click', '.helpTTs', function(e){
+		//console.log('got help from ops.js');
+		$(this).popover({container:'body', html:true, trigger:'click hover'});
+	});*/
+ 
     
    

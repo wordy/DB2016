@@ -46,13 +46,13 @@
             function(e) {
                 if(e.added){
                     var old = $('#e11').select2('val');
-                    console.log('old e11: ' +old);
+                    //console.log('old e11: ' +old);
                     //alert('hi');
                     //console.log($('#e10').select2('val'));
                     old[old.length] = e.added.id;
                     //old[] = e.added.id;
                     $('#e11').select2('val', old);
-                    console.log('after adding: ' + old);
+                    //console.log('after adding: ' + old);
                     //console.log($('#e10').select2('val'));    
                 }
             }
@@ -67,16 +67,16 @@
             function(e) {
                 if(e.removed){
                     var old = $('#e10').select2('val');
-                    console.log('old e10: '+old);
+                    //console.log('old e10: '+old);
                     var rid = e.removed.id;
                     
                     var oindex = old.indexOf(rid);
-                    console.log('oindex: ' +oindex);
+                    //console.log('oindex: ' +oindex);
                     
                     if(oindex > -1){
                         var nindex = old.splice(oindex,1);
                         $('#e10').select2('val', old);
-                        console.log('new: ' + $('#e10').select2('val'));    
+                        //console.log('new: ' + $('#e10').select2('val'));    
                     }
                     
                 }

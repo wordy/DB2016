@@ -74,17 +74,18 @@ class Team extends AppModel {
             'className'=>'Task',
             'foreignKey'=>'team_id',
             'dependent' => true,
-        ),/*
-        'NotificationReceived' => array(
-            'className'=>'Notification',
-            'foreignKey'=>'rec_team_id',
+        ),
+        'Change' => array(
+            'className'=>'Change',
+            'foreignKey'=>'team_id',
             'dependent' => true,
         ),
-        'NotificationSent' => array(
-            'className'=>'Notification',
-            'foreignKey'=>'send_team_id',
+        'Role' => array(
+            'className'=>'Role',
+            'foreignKey'=>'team_id',
             'dependent' => true,
-        ),*/
+        ),
+
 	);
     
     public $belongsTo = array(
@@ -119,27 +120,24 @@ class Team extends AppModel {
         return true;
     }
 
-    /*
+    /**
      * After delete, delete associated:
      * Tasks
-     * Notifications
      * TasksTeam
-     * 
-     */
+     * Changes
+     * TeamsUsers
+     **/
     public function afterDelete(){
         $del_tid = $this->id;
         
         // TasksTeam
         $this->TasksTeam->deleteAllByTeam($del_tid);
         
-        // Tasks
-        //$this->Task->deleteAllByTeam($del_tid);
-        
-        // Notifications
-        $this->NotificationReceived->deleteAllByTeam($del_tid);
-        
         // Teams Users
         $this->TeamsUser->deleteAllByTeam($del_tid);
+
+        // Changes
+        $this->Change->deleteAllByTeam($del_tid);
                 
         return true;
     }
@@ -191,17 +189,12 @@ class Team extends AppModel {
     }
 
     public function getTeamIdByCode($team_code){
-        if(!$team_code){ return false; }
-        
         $rs = $this->find('first', array(
             'conditions'=>array(
                 'Team.code'=>$team_code
             )
         ));
-            
-        $tcode = $rs['Team']['id'] ?: null;            
-     
-        return $tcode;
+        return (!empty($rs))? $rs['Team']['id']: false; 
     }
     
     public function getTaskColorIdByTeamId($team_id = null){
@@ -356,6 +349,18 @@ class Team extends AppModel {
         
         return $list;
     }
+
+    public function listControlledTeamCodeByCategoryCode(){
+        $uteams = AuthComponent::user('Teams');
+        
+        $list = $this->find('list', array(
+                'conditions'=>array(
+                    'Team.id'=>$uteams),
+                'fields'=>array('Team.id','Team.code', 'Team.zone'),
+                'order'=>array('Team.zone_id ASC', 'Team.zone ASC','Team.code ASC')));
+        
+        return $list;
+    }
     
     public function listLinkableTeamCodeByCategoryAndTask($task){
         $teams = $this->TasksTeam->getLinkableTeamsByTask($task);
@@ -377,7 +382,8 @@ class Team extends AppModel {
     // Used to determine which teams a user can select as leading when linking to another task
     public function listAssistingAndControlledByUser($task){
         $ass = $this->listLinkableTeamCodeByCategoryAndTask($task);
-        $con = $this->listControlledTeamCodeByCategory();
+        $con = $this->listControlledTeamCodeByCategoryCode();
+        
         $aic_teams = array();
         
         foreach($ass as $zone => $zteams){

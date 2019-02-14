@@ -139,6 +139,7 @@ class EventInfosController extends AppController {
     
     public function info() {
         $this->request->data = $this->EventInfo->find('first', array('order'=>array('EventInfo.id DESC')));
+        //$this->log($this->request->data);
     }
     
     

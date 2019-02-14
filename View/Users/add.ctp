@@ -7,6 +7,19 @@
            'theme':'bootstrap',
            'placeholder': 'Select teams user will control',
        });
+       
+    $('#all_teams_but').on('click', function(){
+        if($(this).text() == 'All'){
+            $('#newUserTeams  option').prop('selected', 'selected');     
+            $('#newUserTeams').trigger('change');
+            $('#all_teams_but').text('None');
+        }
+        else{
+            $('#newUserTeams  option').removeAttr('selected');
+            $('#newUserTeams').trigger('change');
+            $('#all_teams_but').text('All');
+        }
+    });
         
         
     ");
@@ -74,8 +87,10 @@
                               'id'=>'newUserTeams',
                               'class'=>'input-conteam-select', 
                               'options'=>$teams, 
+                              'after'=>'<a class="btn btn-md btn-info" id="all_teams_but">All</a>',
                               'multiple'=>true)); 
                           ?>
+                          
                             <p class="help-block">CAUTION: Users will have full control over any tasks owned by these teams (including deleting!). Add carefully.</p>
                         </div><!-- .form-group -->
                     </div>

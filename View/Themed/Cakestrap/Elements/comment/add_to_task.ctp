@@ -81,7 +81,7 @@
 ?>
 
     <?php echo $this->Form->create('Comment', array(
-        'action'=>'addTo',
+        'url'=>array('controller'=>'comments', 'action'=>'addTo'),
         'class'=>'formAddToTask',
         'type'=>'post',
         'data-tid'=> $tid, 

@@ -66,8 +66,7 @@ class TeamsUser extends AppModel {
     public function __construct($id = false, $table = null, $ds = null) {
         parent::__construct($id, $table, $ds);
         $this->virtualFields['user_handle'] = sprintf('SELECT `User`.`handle` from `users` as `User` WHERE `User`.`id` = %s.user_id', $this->alias);
-        $this->virtualFields['team_code'] = 
-        sprintf('SELECT `Team`.`code` from `teams` as `Team` WHERE `Team`.`id` = %s.team_id', $this->alias);
+        $this->virtualFields['team_code'] = sprintf('SELECT `Team`.`code` from `teams` as `Team` WHERE `Team`.`id` = %s.team_id', $this->alias);
     }
 
     public function beforeSave($options = array()) {
@@ -75,7 +74,7 @@ class TeamsUser extends AppModel {
         $conditions = array(
             'user_id'=>$this->data['TeamsUser']['user_id'],
             'team_id'=>$this->data['TeamsUser']['team_id']);
-        if ($this->hasAny($conditions)){
+        if($this->hasAny($conditions)){
             return false;
         }
         
@@ -268,6 +267,11 @@ class TeamsUser extends AppModel {
     }
         
     
+    public function getAll(){
+        $rs = $this->find('all');
+        return $rs;
+        
+    }
     
     
     
@@ -276,5 +280,4 @@ class TeamsUser extends AppModel {
     
     
     
-    
-}
+}//EOF

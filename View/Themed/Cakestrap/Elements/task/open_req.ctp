@@ -5,10 +5,7 @@
             window.location = '/teams/home/'+val;    
         });
     
-        $('.helpTTs').popover({
-            container: 'body',
-            html:true,
-        });
+        //$('.helpTTs').popover({ container: 'body',  html:true,   });
         
         $('#open_task_link').on('click', function(){
             $('html, body').animate({

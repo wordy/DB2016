@@ -11,7 +11,7 @@
         )
     );    
 ?>
-<h1><?php echo Configure::read('EventShortName')?> Organizational Chart</h1>
+<h1><i class="fa fa-sitemap"></i> <?php echo Configure::read('EventShortName')?> Ops Team</h1>
 
 
 <?php 
@@ -80,7 +80,7 @@
 <div class="row lg-top-marg">
     <div class="col-xs-3">
         <?php 
-            echo '<h3 class="text-yh"><i class="fa fa-bullhorn"></i> <b>'.$orgChart[10]['Zone']['name'].'</b></h3>';
+            echo '<h3 class="text-yh"><i class="fa fa-glass"></i> <b>'.$orgChart[10]['Zone']['name'].'</b></h3>';
             if($orgChart[10]['GM']){
                 $gm_id = array_keys($orgChart[10]['GM']);
                 $gm_nom = array_values($orgChart[10]['GM']);
@@ -115,7 +115,7 @@
     </div>
     <div class="col-xs-3">
         <?php 
-            echo '<h3 class="text-yh"><i class="fa fa-credit-card"></i> <b>'.$orgChart[30]['Zone']['name'].'</b></h3>';
+            echo '<h3 class="text-yh"><i class="fa fa-user-circle-o"></i> <b>'.$orgChart[30]['Zone']['name'].'</b></h3>';
             if($orgChart[30]['GM']){
                 $gm_id = array_keys($orgChart[30]['GM']);
                 $gm_nom = array_values($orgChart[30]['GM']);
@@ -132,14 +132,14 @@
     </div>
     <div class="col-xs-3">
         <?php 
-            echo '<h3 class="text-yh"><i class="fa fa-street-view"></i> <b>'.$orgChart[40]['Zone']['name']. '</b></h3>';
+            echo '<h3 class="text-yh"><i class="fa fa-tachometer"></i> <b>'.$orgChart[40]['Zone']['name'].'</b></h3>';
             if($orgChart[40]['GM']){
                 $gm_id = array_keys($orgChart[40]['GM']);
                 $gm_nom = array_values($orgChart[40]['GM']);
                 echo '<h5 class="lg-bot-marg"><b>GM </b>';
                 echo $this->Html->link($gm_nom[0], array('controller'=>'users', 'action'=>'profile', $gm_id[0]));
-                echo '</h5>';                
-            }
+                echo '</h5>';
+		}
             
             foreach($orgChart[40]['Teams'] as $name=>$users){
                 echo '<h4><b>'.$name.'</b></h4>';
@@ -148,4 +148,5 @@
             }
         ?>
     </div>
+
 </div>

@@ -177,7 +177,7 @@ class PrintPref extends AppModel {
             // If both are 0, the user is effectively removing their prefs for this task
             if($hide_task == 0 || $this->existsByUserTaskHideTask($user_id, $task_id)){
                 
-                $this->log('0,0');
+                //$this->log('0,0');
                 $this->delAllByUserTask($user_id, $task_id);
                 return false;
             }

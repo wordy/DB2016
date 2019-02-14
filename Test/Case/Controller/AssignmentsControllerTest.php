@@ -3,7 +3,6 @@ App::uses('AssignmentsController', 'Controller');
 
 /**
  * AssignmentsController Test Case
- *
  */
 class AssignmentsControllerTest extends ControllerTestCase {
 
@@ -14,16 +13,22 @@ class AssignmentsControllerTest extends ControllerTestCase {
  */
 	public $fixtures = array(
 		'app.assignment',
+		'app.role',
 		'app.task',
-		'app.ttype',
-		'app.tcolour',
+		'app.task_type',
+		'app.actionable_type',
+		'app.task_color',
 		'app.team',
-		'app.attachment',
-		'app.notification',
-		'app.message',
-		'app.revision',
+		'app.zone',
 		'app.user',
-		'app.trole'
+		'app.user_role',
+		'app.change',
+		'app.change_type',
+		'app.comment',
+		'app.print_pref',
+		'app.teams_user',
+		'app.tasks_team',
+		'app.task_role'
 	);
 
 /**
@@ -32,6 +37,7 @@ class AssignmentsControllerTest extends ControllerTestCase {
  * @return void
  */
 	public function testIndex() {
+		$this->markTestIncomplete('testIndex not implemented.');
 	}
 
 /**
@@ -40,6 +46,7 @@ class AssignmentsControllerTest extends ControllerTestCase {
  * @return void
  */
 	public function testView() {
+		$this->markTestIncomplete('testView not implemented.');
 	}
 
 /**
@@ -48,6 +55,7 @@ class AssignmentsControllerTest extends ControllerTestCase {
  * @return void
  */
 	public function testAdd() {
+		$this->markTestIncomplete('testAdd not implemented.');
 	}
 
 /**
@@ -56,6 +64,7 @@ class AssignmentsControllerTest extends ControllerTestCase {
  * @return void
  */
 	public function testEdit() {
+		$this->markTestIncomplete('testEdit not implemented.');
 	}
 
 /**
@@ -64,6 +73,7 @@ class AssignmentsControllerTest extends ControllerTestCase {
  * @return void
  */
 	public function testDelete() {
+		$this->markTestIncomplete('testDelete not implemented.');
 	}
 
 }

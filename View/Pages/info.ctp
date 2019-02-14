@@ -23,7 +23,6 @@
 
                 <li><a href="#todo">Things To Do</a>
                     <ul class="nav">
-                        <li><a href="#todo-rcphotobooth">Red Carpet Photobooth</a></li>
                         <li><a href="#todo-eventphotobooth">Photobooth</a></li>
                         <li><a href="#todo-booths">Booths</a></li>
                         <li><a href="#todo-entertainment">Entertainment</a></li>
@@ -85,12 +84,12 @@
                   </thead>
                   <tbody>
                         <tr>
-                            <td>5:00pm</td>
-                            <td>Red Carpet Reception Opens</td>
+                            <td>5:30pm</td>
+                            <td>Guest registration begins</td>
                         </tr>
                         <tr>
-                            <td>6:00pm</td>
-                            <td>General Registration Opens</td>
+                            <td>5:45pm</td>
+                            <td>Grand Reception begins / Silent Auction opens</td>
                         </tr>
                         <tr class="danger">
                             <td>6:30pm</td>
@@ -98,43 +97,35 @@
                         </tr>
                         <tr class="danger">
                             <td>7:00pm</td>
-                            <td>Photobooth Closes</td>
+                            <td>Gala Program starts</td>
                         </tr>
                         <tr>
-                            <td>7:00pm</td>
-                            <td>Production Begins</td>
+                            <td>7:45pm</td>
+                            <td>Dinner service begins</td>
                         </tr>
                         <tr>
-                            <td>7:58pm</td>
+                            <td>9:00pm</td>
                             <td>Live Auction Begins</td>
                         </tr>
                         <tr>
-                            <td>8:20pm</td>
-                            <td>Dinner Service Begins</td>
+                            <td>9:30pm</td>
+                            <td>Feature Performance</td>
                         </tr>
-                        <tr class="success">
-                            <td>10:00pm</td>
-                            <td>Photobooth Reopens</td>
+                        <tr>
+                            <td>10:15pm</td>
+                            <td>Midnight Buffet begins</td>
                         </tr>
                         <tr>
                             <td>10:20pm</td>
-                            <td>Table Prize Pickup Opens</td>
+                            <td>Table Prize &amp; Business Card Draw</td>
                         </tr>
                         <tr>
                             <td>10:30pm</td>
                             <td>Silent Auction Closes</td>
                         </tr>
-                        <tr class="info csevent">
+                        <tr class="success">
                             <td>11:00pm</td>
-                            <td>Silent Auction Re-Opens. </td>
-                        </tr>
-                        <tr>
-                            <td>11:00pm</td>
-                            <td>Last Chance to Submit Grand Raffle Tickets</td>
-                        </tr>
-                        <tr>
-                            <td>11:10pm</td>
-                            <td>Grand Raffle Draw in Gala Hall</td>
+                            <td>Silent Auction Re-Opens for pickup</td>
                         </tr>
                     </tbody>
                 </table>

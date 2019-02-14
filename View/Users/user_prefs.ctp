@@ -106,16 +106,15 @@ $uStatuses = array(
     });
 </script>
 <div id="page-container" class="container">
-    <h1>Preferences <?php if(isset($user['User']['handle'])){echo 'for '.$user['User']['handle'];} ?></h1>
+    <h1><i class="fa fa-gear"></i> Preferences <?php if(isset($user['User']['handle'])){echo 'for '.$user['User']['handle'];} ?></h1>
     <p>Set preferences related to your compiler account.</p>
     
 
-                <h2>User Settings</h2>
+                <h2><i class="fa fa-user"></i> User Settings</h2>
 
     	<div class="users form well">
     		<?php echo $this->Form->create('User', array(
-                'action'=>'prefs',
-            
+                'url' => array('action' => 'prefs'),
     			 'inputDefaults' => array(
     			     'label' => false), 
     		     'role' => 'form',
@@ -170,8 +169,7 @@ $uStatuses = array(
             </div>
             
             <?php echo $this->Form->create('User', array(
-                'action'=>'changePassword',
-            
+                'url' => array('action'=>'changePassword'),
                  'inputDefaults' => array(
                      'label' => false), 
                  'role' => 'form',
@@ -179,7 +177,7 @@ $uStatuses = array(
                  'id'=>'chgPassForm'
                  )); 
              ?>
-             <h2>Change Password</h2>
+             <h2><i class="fa fa-lock"></i> Change Password</h2>
             <div class="well">
                 <div class="row">
                     <div class="col-xs-6">

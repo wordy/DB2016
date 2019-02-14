@@ -22,19 +22,6 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
 // Setup a 'default' cache configuration for use in the application.
 Cache::config('default', array('engine' => 'File'));
 
@@ -89,12 +76,10 @@ Cache::config('short', array(
  *
  * CakePlugin::loadAll(); // Loads all plugins at once
  * CakePlugin::load('DebugKit'); //Loads a single plugin named DebugKit
- *
  */
-CakePlugin::load('DebugKit'); //Loads a single plugin named DebugKit
+
 /**
  * To prefer app translation over plugin translation, you can set
- *
  * Configure::write('I18n.preferApp', true);
  */
 
@@ -134,34 +119,30 @@ CakeLog::config('error', array(
 	'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
 	'file' => 'error',
 ));
-/*
-CakePlugin::load('CakePdf', array(
-    'bootstrap' => true, 
-    'routes' => true));
-*/
 
+
+//******************** PLUGINS **************************************
+CakePlugin::load('DebugKit'); //Loads a single plugin named DebugKit
 CakePlugin::load('Mpdf');
 CakePlugin::load('Filepicker');
 
 
-
-
-
-
-
-//  Dragon Ball Specific Global Vars
+//********************************************
+//     Dragon Ball Specific Global Vars
+//********************************************
 
 // Event Vars
-Configure::write('EventLongDate','February 6, 2016');
-Configure::write('EventLongName','Dragon Ball 2016');
-Configure::write('EventShortName','DB2016');
-Configure::write('EventDate','2016-02-06');
+Configure::write('EventLongDate','February 9, 2019');
+Configure::write('EventDate','2019-02-09');
+
+// Start and end dates for compiler -- Start date is generally 3-4 months before event until 6 weeks after (e.g. debrief)
+Configure::write('EventStartDate','2018-10-01');
+Configure::write('EventEndDate','2019-03-31');
+
+Configure::write('EventLongName','Dragon Ball 2019');
+Configure::write('EventShortName','DB2019');
 
 // Compiler Specific Variables
-Configure::write('AppShortName','DB2016');
-// Start and end dates for compiler -- Start date is generally 3-4 months before event
-// end should be at least 6 weeks after to allow for debrief, etc.
-Configure::write('CompileStart','2015-11-01');
-Configure::write('CompileEnd','2016-03-31');
-
-
+Configure::write('AppShortName','DB2019 Compiler');
+Configure::write('CompileStart','2018-10-01');
+Configure::write('CompileEnd','2019-03-31');

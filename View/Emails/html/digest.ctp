@@ -58,7 +58,7 @@ Here are the recent changes from the compiler for the week of <?php echo $wk_sta
         </tbody>
     </table>
 <?php endif; ?>
-<p>That's it for now. You can <a href="http://db.thebws.com">log into the compiler here</a> to view all your tasks.</p>
+<p>That's it for now. You can <a href="http://ops.yhdragonball.com">log into the compiler here</a> to view all your tasks.</p>
 <p>Thanks,<br>
     DBOps Compiler
 </p>

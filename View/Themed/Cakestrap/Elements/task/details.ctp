@@ -1,37 +1,43 @@
 <?php
+//$this->log($task);
+
+//debug($this->request);
+
+if(!$this->request->is('ajax')){
+    
+    echo $this->Html->script('compile');
+    echo $this->Html->script('add_task');
+    
+}
+
     if (AuthComponent::user('id')) {
         $controlled_teams = AuthComponent::user('Teams');
         $controlled_tcodes = AuthComponent::user('TeamsList');
     }
 
     //Defaults
-    $userControls = false;
-    $userIsAssisting = false;
-    
     $currTeamId = $task['Task']['team_id'];
     $tid = $task['Task']['id'];
     
-    $ateams = array();
-    //$ateams_codes = array();
-    
-    if (!empty($task['TasksTeam'])) {
-        $ateams = Hash::extract($task['TasksTeam'], '{n}.team_id');
-    //    $ateams_codes = Hash::extract($task['TasksTeam'], '{n}[task_role_id != 1].team_code');
-    }
-    
-    if (!empty($aInControl)) {
-        $userIsAssisting = true;
-    }
-    
-    if (in_array($currTeamId, $controlled_teams)) {
-        $userControls = true;
-    }
+    $ateams = (!empty($task['TasksTeam']))? Hash::extract($task['TasksTeam'], '{n}.team_id'): array();
+    $userIsAssisting = (!empty($aInControl))? TRUE: FALSE;
+    $userControls = (in_array($currTeamId, $controlled_teams)) ? TRUE : FALSE;
+
+    $jqCIN = array();
+    //$this->log($aInControl);
+    if(isset($aInControl)){
+        //foreach($aInControl as $zone){
+            foreach(Hash::extract($aInControl,'{s}') as $k => $tcode){
+                $jqCIN[$k] = $tcode;
+            }
+        //}
+        
+    }    
     
     if(isset($task['Offset'])){
-        $this->request->data('Offset.sign', $task['Offset']['sign']);
+        $this->request->data('Offset.type', $task['Task']['time_offset_type']);
         $this->request->data('Offset.minutes', $task['Offset']['minutes']);
-        $this->request->data('Offset.seconds', $task['Offset']['seconds']);
-        
+        //$this->request->data('Offset.seconds', $task['Offset']['seconds']);
     }
     
     // Checks if team color is light or not. Changes text accordingly    
@@ -43,13 +49,9 @@
         ");    
     }
     
-    
     $this->Js->buffer("
-    
-        $('.helpTTs').popover({
-            container: 'body',
-            html:true,
-        });
+         var jCIN = ".json_encode($jqCIN).";
+        //console.log(jCIN);
    
     ");
     
@@ -87,6 +89,7 @@
                     if($s_view){ echo '<li class="'.$cl_v.'"'.'><a href="#view_'.$tid.'" data-toggle="tab"><i class="fa fa-bookmark-o"></i> View</a></li>'; }
                     if($s_edit){ echo '<li class="'.$cl_e.'"'.'><a href="#edit_'.$tid.'" data-toggle="tab"><i class="fa fa-pencil"></i> Edit</a></li>';}
                     if($s_link){ echo '<li class="'.$cl_l.'"'.'><a href="#links'.$tid.'" data-toggle="tab"><i class="fa fa-link"></i> Linked Tasks</a></li>';}
+                
                 ?>
 				</ul>
 			</div>
@@ -99,7 +102,7 @@
 				<?php endif;?>
                 <?php if($s_edit): ?>
                     <div class="tab-pane fade in <?php echo $cl_e;?>" id="edit_<?php echo $tid ?>">
-                        <?php echo $this->element('task/tab_edit', array('task' => $task, 'linkable'=>$linkable)); ?>
+                        <?php echo $this->element('task/tab_edit2', array('task' => $task, 'linkable'=>$linkable)); ?>
                     </div><!-- /tab_edit-->
                 <?php endif;?>
                 <?php if($s_link): ?>

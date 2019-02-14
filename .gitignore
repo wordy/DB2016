@@ -55,3 +55,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+Config/bootstrap.php
+Config/core.php
