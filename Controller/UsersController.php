@@ -284,8 +284,7 @@ $client->setScopes('email');
             $this->request->data = $this->User->find('first', $options);
         }
         $teams = $this->User->TeamsUser->Team->listTeamCodeByCategory();
-        $userRoles = $this->User->UserRole->find('list', array('conditions'=>array(
-            'UserRole.id >='=>5)));
+        $userRoles = $this->User->UserRole->find('list');
         $teamsUser = $this->User->TeamsUser->getTeamsByUser($id);
         $userTeamCodes = $this->User->TeamsUser->getControlledTeamsTidList($id);
         $this->set(compact('teams', 'userRoles', 'teamsUser', 'userTeamCodes'));
@@ -351,63 +350,79 @@ $client->setScopes('email');
             if ($this->Auth->login()) {
                 $this->User->id = $this->Auth->user('id');
                 $user = $this->User->findById($this->Auth->user('id'));
-                $now = date('Y-m-d');
-                $sdate = $edate = null;
-                $edate_config = Configure::read('CompileEnd');
-                $sdate_config = Configure::read('CompileStart');
-                $sdate = date('Y-m-d', strtotime($sdate_config));
-                $edate = date('Y-m-d', strtotime($edate_config)+86399);
                 
-                // Save new last login date
-                $this->User->saveField('last_login', $now);
-                
-                // Cancel password reset request if a user logs in successfully. 
-                // Sets account "active" and updates session
-                if($user['User']['pass_reset_token'] && $user['User']['status']==401){
-                    $this->User->saveField('status', 200);
-                    $this->User->saveField('pass_reset_token', null);
-                    $this->Session->write('Auth', $this->User->findById(AuthComponent::user('id')));
-                    $this->Session->setFlash(__('<b>Heads Up!</b> You\'ve successfully logged in so your existing password reset request has been cancelled.'), 'flash/info');        
+                if($user['User']['user_role_id'] == 1){ // User is inactive
+                    $this->Session->setFlash(__('Your Compiler account is currently <b>inactive</b>. Please contact an Admin to re-activate your account.'), 'flash/error');
+                    return $this->redirect(array('action'=>'login'));
+                        
                 }
+                else{
+                    $now = date('Y-m-d');
+                    $sdate = $edate = null;
+                    $edate_config = Configure::read('CompileEnd');
+                    $sdate_config = Configure::read('CompileStart');
+    
+                    $start_date = date('Y-m-d', strtotime($sdate_config));
+                    $end_date = date('Y-m-d', strtotime($edate_config)+86399);
+                    
+                    // Save new last login date
+                    $this->User->saveField('last_login', $now);
+                    
+                    // Cancel password reset request if a user logs in successfully. 
+                    // Sets account "active" and updates session
+                    if($user['User']['pass_reset_token'] && $user['User']['status']==401){
+                        $this->User->saveField('status', 200);
+                        $this->User->saveField('pass_reset_token', null);
+                        $this->Session->write('Auth', $this->User->findById(AuthComponent::user('id')));
+                        $this->Session->setFlash(__('<b>Heads Up!</b> You\'ve successfully logged in so your existing password reset request has been cancelled.'), 'flash/info');        
+                    }
+    
+                    // Set User's Controlled Teams:
+                    $userTeams = $this->User->TeamsUser->getTeamsByUser($this->User->id);
+                    $userTeamCodes = $this->User->TeamsUser->getTeamCodesByUser($this->User->id);
+                    $userTeamsList = $this->User->TeamsUser->getControlledTeamsList($this->User->id);
+                    $this->Session->write('Auth.User.TeamsList', $userTeamsList);
+                    $this->Session->write('Auth.User.Teams', $userTeams);
+                    $this->Session->write('Auth.User.TeamCodes', $userTeamCodes);
+                    $this->Session->write('Auth.User.TeamsByZone', $this->User->TeamsUser->Team->listControlledTeamCodeByCategory());
+                    // Set up array for Timeshift
+                    $this->Session->write('Auth.User.Timeshift', array());
+    
+                    $mainTeamCode = $mainTeamId = false;
+                    if(count($userTeamsList) == 1){
+                        $mainTeamCode = reset($userTeamsList);
+                        reset($userTeamsList);
+                        $mainTeamId = key($userTeamsList);
+                        $this->Session->write('Auth.User.Settings.main_team_code', $mainTeamCode);
+                        $this->Session->write('Auth.User.Settings.main_team_id', $mainTeamId);
+                    }
+                    // Set User's Default Compile Params
+                    $comp = array(
+                        'Teams'=>$userTeams,
+                        'view_type'=>1,
+                        'start_date'=>$start_date,
+                        'end_date'=>$end_date,
+                        'sort'=>0,
+                        'page'=>1,
+                    );
 
-                // Set User's Controlled Teams:
-                $userTeams = $this->User->TeamsUser->getTeamsByUser($this->User->id);
-                $userTeamCodes = $this->User->TeamsUser->getTeamCodesByUser($this->User->id);
-                $userTeamsList = $this->User->TeamsUser->getControlledTeamsList($this->User->id);
-                $this->Session->write('Auth.User.TeamsList', $userTeamsList);
-                $this->Session->write('Auth.User.Teams', $userTeams);
-                $this->Session->write('Auth.User.TeamCodes', $userTeamCodes);
-                $this->Session->write('Auth.User.TeamsByZone', $this->User->TeamsUser->Team->listControlledTeamCodeByCategory());
-                // Set up array for Timeshift
-                $this->Session->write('Auth.User.Timeshift', array());
-
-                $mainTeamCode = $mainTeamId = false;
-                if(count($userTeamsList) == 1){
-                    $mainTeamCode = reset($userTeamsList);
-                    reset($userTeamsList);
-                    $mainTeamId = key($userTeamsList);
-                    $this->Session->write('Auth.User.Settings.main_team_code', $mainTeamCode);
-                    $this->Session->write('Auth.User.Settings.main_team_id', $mainTeamId);
+                    /*
+                    $comp['Teams'] = $userTeams;
+                    $comp['view_type'] = 1;
+                    $comp['start_date'] = $start_date;
+                    $comp['end_date'] = $end_date;
+                    $comp['sort'] = 0;
+                    $comp['page'] = 1;
+                     */
+    
+                    $this->Session->write('Auth.User.Compile', $comp);
+                    
+                    // Default Timeshift Mode is "off"
+                    $this->Session->write('Auth.User.Timeshift.Mode', 0);
+                    $this->Session->write('Auth.User.Timeshift.Unit', "Min");
+                    
+                    return $this->redirect($this->Auth->redirectUrl());
                 }
-                // Set User's Default Compile Params
-                $comp = array();
-                $comp['Teams'] = $userTeams;
-                $comp['start_date'] = $sdate;
-                $comp['end_date'] = $edate;
-                $comp['sort'] = 0;
-                $comp['view_type'] = 1;
-                $comp['view_details'] = 1;
-                $comp['view_links'] = 1;
-                $comp['view_threaded'] = 0;
-                $comp['page'] = 1;
-                $this->Session->write('Auth.User.Compile', $comp);
-                
-                // Default Timeshift Mode is "off"
-                $this->Session->write('Auth.User.Timeshift.Mode', 0);
-                $this->Session->write('Auth.User.Timeshift.Unit', "Min");
-                
-                
-                return $this->redirect($this->Auth->redirectUrl());
             }
             else{
                 $this->Session->setFlash(__('Invalid username or password, please try again'), 'flash/error');        

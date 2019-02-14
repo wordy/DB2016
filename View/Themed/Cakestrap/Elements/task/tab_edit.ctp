@@ -60,7 +60,8 @@
 
     $this->Js->buffer("
         $('#eaStartTime".$tid." ,#eaEndTime".$tid."').datetimepicker({
-            sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'YYYY-MM-DD HH:mm:ss', 
+            //sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'YYYY-MM-DD HH:mm:ss', 
+            sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'mmm dd, yyyy g:i A',
         });
         
         $('#eaDueDate".$tid."').datetimepicker({
@@ -165,8 +166,45 @@
         'role' => 'form')); 
 ?>
 
+
+<div class="row">
+    <div class="col-xs-6 col-sm-6 col-md-3 col-md-push-6 sm-bot-marg">        
+        <?php 
+            echo $this->Form->button('<i class="fa fa-save"></i>&nbsp; Save Task', array(
+                'type' => 'submit',
+                'id'=>'eaSubmitButton_'.$tid,
+                'class' => 'btn btn-success btn-block eaSubmitButton',
+                'escape' => false
+            ));
+        ?>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-3 col-md-push-6 sm-bot-marg">
+        <?php
+            echo $this->Form->button('<i class="fa fa-close"></i>&nbsp;Cancel', array(
+                'class' => 'btn btn-danger btn-block eaCancelBut',
+                'id'=>'eaCancelBut'.$tid,
+                'escape' => false
+            ));
+            //echo '<span class="eaSpinner" style="display: none; margin-left: 5px; vertical-align: middle;">';
+            //echo '<span class="tr_spin"><i class="fa fa-cog fa-spin"></i></span>';
+            //echo '</span><br/>'; 
+       ?>
+   </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <hr class="xs-top-marg"/>    
+    </div>
+</div> 
+
+        
+        
+
+
 <?php 
 //debug($task);
+
+
 echo $this->Form->input('id', array('id'=>'input-task-id_'.$tid, 'type'=>'hidden')); ?>
 
 <div class="row">
@@ -179,7 +217,7 @@ echo $this->Form->input('id', array('id'=>'input-task-id_'.$tid, 'type'=>'hidden
     <div class="col-md-9">
         <div>
             <div class="row">
-                <span class="hiddenTaskId" style = "display:none;"><?php echo $task['Task']['id'];?></span>
+                <span class="hiddenTaskId" style="display:none;"><?php echo $task['Task']['id'];?></span>
                 <div class="col-xs-4 col-md-4">
                     <div class="form-group">
                         <?php echo $this->Form->label('task_type_id', 'Task Type*'); ?>
@@ -294,9 +332,7 @@ echo $this->Form->input('id', array('id'=>'input-task-id_'.$tid, 'type'=>'hidden
                         <div class="advancedParent <?php echo (!$showAdvPid)? 'collapse':null?>">
                             <div class="row">
                                 <div class="col-xs-12 col-sm-6 col-md-6">
-                                    <p><b>Synchronize</b> 
-                                        <a class="helpTTs" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Synchronize Tasks" data-content="Allow the <u>linked task</u> to control the start time of <u>your</u> task.  Your task moves automatically whenever the linked task moves.<br><br><b>Note:</b> When this is active, the start time is set automatically from the linked task. You will be unable to edit the start time, but may set an end time (duration) and offset."><i class="fa fa-question-circle text-info"></i></a>
-                                    </p>  
+                                    <p><b>Synchronize</b> <?php echo $this->Ops->helpPopover('synchronize');?></p>  
                                     <div class="taskTs checkbox facheckbox facheckbox-circle facheckbox-success">
                                         <?php 
                                             $time_controlled = ($this->request->data('Task.time_control') == 0)? false: 'checked';
@@ -316,10 +352,8 @@ echo $this->Form->input('id', array('id'=>'input-task-id_'.$tid, 'type'=>'hidden
                                 </div>
                                 <div class="col-xs-12 col-sm-6 col-md-6">
                                     <div class="form-group">
-                                        <label>Offset (mm:ss)</label>
-                                        <a class="helpTTs" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Offset (For Synchronized Tasks)" data-content="The amount of time (mm:ss) to maintain between the start of <u>this task</u> and the <u>linked task</u>. You can choose to synchronyize the start of your task to before/after the start/end of the linked task. <br><br>When the linked task moves, this task moves automatically, such that the offset is preseved. <br><br>e.g. If you set an offset of 10 Minutes (10:00) <i>before the linked task starts</i>, your task will always start 10 minutes before the linked task, even if the linked task's start time changes. <br><br><b>Note:</b> You can only set an offset if the task is <b>synchronized</b> with the linked task.</b>">
-                                            <i class="fa fa-question-circle text-info"></i>                    
-                                        </a>
+                                        <label>Offset (mm:ss)</label> <?php echo $this->Ops->helpPopover('offset');?>
+                                            
                                         <div class="form-inline">
                                         <?php
                                             echo $this->Form->input('Offset.minutes', array(
@@ -372,37 +406,12 @@ echo $this->Form->input('id', array('id'=>'input-task-id_'.$tid, 'type'=>'hidden
     </div><!--col-md-9-->
     
     <div class="col-md-3">
-        <div class="row">
-            <div class="col-sm-6 col-md-12">        
-                <?php 
-                    echo $this->Form->button('<i class="fa fa-save"></i>&nbsp; Save Task', array(
-                        'type' => 'submit',
-                        'id'=>'eaSubmitButton_'.$tid,
-                        
-                        'class' => 'btn btn-success btn-lg btn-block eaSubmitButton sm-bot-marg',
-                        'escape' => false
-                    ));
-                ?>
-            </div>
-            <div class="col-sm-6 col-md-12">
-                <?php
-                    echo $this->Form->button('<i class="fa fa-close"></i>&nbsp;Cancel', array(
-                        'class' => 'btn btn-danger btn-block btn-lg eaCancelBut sm-bot-marg',
-                        'id'=>'eaCancelBut'.$tid,
-                        'escape' => false
-                    ));
-    
-                    echo '<span class="eaSpinner" style="display: none; margin-left: 5px; vertical-align: middle;">';
-                    echo '<span class="tr_spin"><i class="fa fa-cog fa-spin"></i></span>';
-                    echo '</span><br/>'; 
-               ?>
-           </div>
-        </div>
+
         
         <div class="row">
             <div class="col-sm-12">
                 <div class="panel panel-dark">
-                    <div class="panel-heading"><i class="fa fa-users"></i>&nbsp; Teams</div>
+                    <!--<div class="panel-heading"><i class="fa fa-users"></i>&nbsp; Teams</div>-->
                         <div class="panel-body">
                             <div class="row sm-bot-marg">
                                 <div class="form-group">
@@ -441,7 +450,7 @@ echo $this->Form->input('id', array('id'=>'input-task-id_'.$tid, 'type'=>'hidden
         <div class="row">
             <div class="col-sm-6 col-md-12">
                <div class="panel panel-bdanger">
-                    <div class="panel-heading"><i class="fa fa-flag"></i>&nbsp; Task Flags</div>
+                    <!--<div class="panel-heading"><i class="fa fa-flag"></i>&nbsp; Task Flags</div>-->
                     <div class="panel-body">
                         <div class="row">
                             <?php if($userRole >= 500):?>

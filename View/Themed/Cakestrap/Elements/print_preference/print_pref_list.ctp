@@ -9,8 +9,8 @@
     $this->Paginator->options(array(
         'update' => '#printTaskListWrap',
         'evalScripts' => true,
-        'before' => $this->Js->get('.pSpinner')->effect('fadeIn', array('buffer' => false)),
-        'complete' => $this->Js->get('.pSpinner')->effect('fadeOut', array('buffer' => false)),
+        'before' => $this->Js->get('#global-busy-indicator')->effect('fadeIn', array('buffer' => false)),
+        'complete' => $this->Js->get('#global-busy-indicator')->effect('fadeOut', array('buffer' => false)),
         'url' => array('controller' => 'tasks', 'action' => 'userPrint')
     ));
     
@@ -28,7 +28,6 @@
                     <?php
                             $prev_lab = 'Earlier';
                             $next_lab = 'Later';    
-                        echo '<span class="pSpinner" style="display: none; margin-left: 5px;"><i class="fa fa-cog fa-spin fa-2x"></i></span>'; 
                         echo $this->Paginator->prev('< ' . __($prev_lab), array('tag' => 'li'), null, array('class' => 'pagPrev disabled', 'tag' => 'li', 'disabledTag' => 'a'));
                         echo $this->Paginator->numbers(array('separator' => '', 'class'=>'pagNum', 'currentTag' => 'a', 'tag' => 'li', 'currentClass' => 'disabled'));
                         echo $this->Paginator->next(__($next_lab) . ' >', array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
@@ -58,6 +57,8 @@
     $eday_var = Configure::read('EventLongDate');
     $eday = date('Y-m-d',  strtotime($eday_var)); 
         foreach ($tasks as $task):
+            $ass_handles = Hash::extract($task['Assignment'], '{n}.role_handle');
+            
                     $daysAreSame = false;
         $onEday = false;
         $hoursAreSame = false;
@@ -153,7 +154,7 @@
                         </div>
                         <div class="col-xs-5 col-sm-5 col-md-6">
                             <?php
-                                echo $task['Task']['short_description'].'<br/>';
+                                echo $task['Task']['short_description'].'&nbsp;&nbsp;'.$this->Ops->makeAssignmentButtons($ass_handles).'<br/>';
                                 
                                 if (!empty($task['Task']['details'])){
                                     echo '<hr align="left" style="width: 100%; margin-bottom:2px; margin-top:3px; border-top: 1px solid #444;"/>';
@@ -203,8 +204,6 @@
                 echo $this->Paginator->prev('< ' . __('Earlier'), array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
                 echo $this->Paginator->numbers(array('separator' => '', 'currentTag' => 'a', 'tag' => 'li', 'currentClass' => 'disabled'));
                 echo $this->Paginator->next(__('Later') . ' >', array('tag' => 'li'), null, array('class' => 'disabled', 'tag' => 'li', 'disabledTag' => 'a'));
-                echo '<span class="pSpinner" style="display: none; margin-left: 5px;"><i class="fa fa-cog fa-spin fa-2x"></i></span>'; 
-            
             ?>
         </ul><!-- /.pagination -->
     <div id="pageNum" style="visibility:hidden"><?php echo $this->Paginator->param('page');?></div>

@@ -148,8 +148,16 @@ class RolesController extends AppController {
 			if ($this->Role->save($this->request->data)) {
 				$this->Session->setFlash(__('The role has been saved'), 'flash/success');
 				$this->redirect(array('action' => 'index'));
-			} else {
-				$this->Session->setFlash(__('The role could not be saved. Please, try again.'), 'flash/error');
+			}
+			else {
+                $errors = $this->Role->validationErrors;
+                $emsg = Hash::extract($errors,'{s}.{n}');
+                //$this->response->statusCode(400);
+                $this->set('message', __('The role could not be saved due to these errors:'));
+                $this->set('errors', $emsg);
+                //return $this->render('/Elements/task/validation_error');
+                
+				$this->Session->setFlash(__('The role could not be saved. Please, try again.'), 'flash/error_list');
 			}
 		} else {
 			$options = array('conditions' => array('Role.' . $this->Role->primaryKey => $id));

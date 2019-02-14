@@ -40,6 +40,7 @@
         var cur_ht = par_div.find('span.cpPrint i').data('hide_task');
         var new_ht;
         var new_hd;
+        var spin = $('#global-busy-indicator');
 
         if(clicked == 'print'){
             new_ht = (cur_ht == 0 ? 1 : 0);
@@ -79,11 +80,12 @@
         }
         
         data = {'task':tid, 'hide_detail':new_hd, 'hide_task':new_ht};
+        spin.fadeOut('fast');
         $.ajax( {
             data: data,
             url: '/print_prefs/changePref',
             beforeSend:function () {
-                cp_title.append('<span class=\"tr_spin\"><i class=\"fa fa-cog fa-spin\"></i></span>');
+                spin.fadeIn('fast');
             },
             success:function(data, textStatus) {
                 par_div.find('span.cpPrint i').data('hide_task', data.hide_task);
@@ -111,7 +113,7 @@
                 }
             },
             complete:function (XMLHttpRequest, textStatus) {
-                cp_title.find('.tr_spin').remove();
+                spin.fadeOut('fast');
             },
             error: function(xhr, statusText, err){
                 if(xhr.status == '401'){

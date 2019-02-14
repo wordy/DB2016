@@ -101,7 +101,22 @@ class AppController extends Controller {
     //    return $rs;
     //}
         
+    public function oxfordComma($list = array()){
+        $count = count($list);
+        $last = array_pop($list);
+        $ex_last = implode(', ', $list);
+        
+        if ($ex_last){
+            if($count > 2){
+                $ex_last .= ', and ';    
+            }
+            elseif($count == 2) {
+               $ex_last .= ' and '; 
+            }
+        }
     
+        return $ex_last.$last_t;
+    }    
 
     
     

@@ -64,16 +64,16 @@
                     <article class="timeline-entry">
                         <div class="timeline-entry-inner">
                             <div class="timeline-icon bg-info"><i class="fa fa-lg fa-clock-o"></i></div>
-                            <div class="timeline-label"><p><b>Task Start Time</b><br/>
+                            <div class="timeline-label"><p><b>Task Start Time </b>  
                                     <?php 
                                         if (isset($change['old_val']) && isset($change['new_val'])){
-                                            echo 'Changed from <b>'.date('M j H:i:s', strtotime($change['old_val'])).'</b> to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
+                                            echo 'changed from <b>'.date('M j H:i:s', strtotime($change['old_val'])).'</b> to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
                                         }
                                         elseif(!isset($change['old_val']) && isset($change['new_val'])){
-                                            echo 'Set to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
+                                            echo 'set to <b>'.date('M j H:i:s', strtotime($change['new_val'])).'</b>.';
                                         }
                                         elseif(!isset($change['new_val'])){
-                                            echo 'Removed.';
+                                            echo 'removed.';
                                         }
                                         echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
                                         if($show_user){
@@ -92,7 +92,7 @@
                     <article class="timeline-entry">
                         <div class="timeline-entry-inner">
                             <div class="timeline-icon bg-info"><i class="fa fa-lg fa-list-ul"></i></div>
-                            <div class="timeline-label"><p><b>Task Description Changed</b><br>
+                            <div class="timeline-label"><p><b>Task Description Changed: </b> 
                                     <?php 
                                         echo '<small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
                                         if($show_user){
@@ -111,7 +111,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-link"></i></div>
-                                <div class="timeline-label"><p><b>Added Linked Task</b><br/>
+                                <div class="timeline-label"><p><b>Added Linked Task: </b> 
                                         <?php 
                                             if ((!empty($change['var1'])) && (!empty($change['var2']))){
                                                 echo 'Linked to <b>('.$change['var1'].')</b> '.$change['var2'].'</b>.';
@@ -132,7 +132,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-link"></i></div>
-                                <div class="timeline-label"><p><b>Removed Linked Task</b><br/>
+                                <div class="timeline-label"><p><b>Removed Linked Task: </b> 
                                         <?php 
                                             if ((!empty($change['var1'])) && (!empty($change['var2']))){
                                                 echo 'Removed link to <b>('.$change['var1'].')</b> '.$change['var2'].'</b>.';
@@ -154,7 +154,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-flag"></i></div>
-                                <div class="timeline-label"><p><b>Action Item Status: </b>
+                                <div class="timeline-label"><p><b>Action Item Status: </b> 
                                         <?php 
                                             if ((!empty($change['old_val'])) && (!empty($change['new_val']))){
                                                 echo 'Changed from <b>'.$change['old_val'].'</b> to <b>'.$change['new_val'].'</b>.';
@@ -182,7 +182,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner ">
                                 <div class="timeline-icon bg-warning"><i class="fa fa-lg fa-bell-o"></i></div>
-                                <div class="timeline-label success"><p><b>Due Date: </b>
+                                <div class="timeline-label success"><p><b>Due Date: </b> 
                                         <?php 
                                             if (isset($change['old_val']) && isset($change['new_val'])){
                                                 echo 'Changed from <b>'.date('M j', strtotime($change['old_val'])).'</b> to <b>'.date('M j', strtotime($change['new_val'])).'</b>.';
@@ -211,7 +211,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-danger"><i class="fa fa-lg fa-clock-o"></i></div>
-                                <div class="timeline-label"><p><b>Start Time Changed By Time Linked Task</b><br/>
+                                <div class="timeline-label"><p><b>Start Time Changed By Time Linked Task: </b><br> 
                                     <?php 
                                         if (isset($change['old_val']) && isset($change['new_val'])){
                                             echo 'Moved from <b>'.date('M j H:i:s', strtotime($change['old_val'])).'</b> to <b>'.date('M j H:i:s', strtotime($change['new_val'])).
@@ -244,7 +244,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-lead"><i class="fa fa-lg fa-group"></i></div>
-                                <div class="timeline-label"><p>Team Role: 
+                                <div class="timeline-label"><p><b>Team Role: </b> 
                                         <?php 
                                             echo $this->Ops->chgMessage($change); 
                                             echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
@@ -262,7 +262,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-default"><i class="fa fa-lg fa-group"></i></div>
-                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                <div class="timeline-label"><p><b>Team Role: </b> 
                                         <?php 
                                             echo $this->Ops->chgMessage($change);
                                             echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
@@ -280,7 +280,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-secondary"><i class="fa fa-lg fa-group"></i></div>
-                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                <div class="timeline-label"><p><b>Team Role: </b> 
                                         <?php 
                                             echo $this->Ops->chgMessage($change);
                                             echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
@@ -299,7 +299,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-success"><i class="fa fa-lg fa-group"></i></div>
-                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                <div class="timeline-label"><p><b>Team Role: </b> 
                                         <?php 
                                             echo $this->Ops->chgMessage($change);
                                             echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
@@ -317,7 +317,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-norole"><i class="fa fa-lg fa-group"></i></div>
-                                <div class="timeline-label"><p><b>Team Role:</b> 
+                                <div class="timeline-label"><p><b>Team Role: </b> 
                                         <?php 
                                             echo $this->Ops->chgMessage($change);
                                             echo '<br><small>'.$this->Time->timeAgoInWords(strtotime($change['created']), array('format'=>'M j'));
@@ -339,7 +339,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-info"><i class="fa fa-lg fa-plus"></i></div>
-                                <div class="timeline-label"><p><b>New Task Linkage</b><br/> 
+                                <div class="timeline-label"><p><b>New Task Linkage: </b> 
                                         <?php 
                                             if ((!empty($change['var1'])) && (!empty($change['var2']))){
                                                 echo '<b>'.$change['var1'].'</b> linked a new task "'.$change['var2'].'".';
@@ -360,7 +360,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-info"><i class="fa fa-lg fa-minus"></i></div>
-                                <div class="timeline-label"><p><b>Linkage Removed</b><br/> 
+                                <div class="timeline-label"><p><b>Linkage Removed: </b>
                                         <?php 
                                             if ((!empty($change['var1'])) && (!empty($change['var2']))){
                                                 echo '<b>'.$change['var1'].'</b> unlinked task "'.$change['var2'].'".';
@@ -381,7 +381,7 @@
                         <article class="timeline-entry">
                             <div class="timeline-entry-inner">
                                 <div class="timeline-icon bg-info"><i class="fa fa-lg fa-minus"></i></div>
-                                <div class="timeline-label"><p><b>Task Role Cancelled</b><br/> 
+                                <div class="timeline-label"><p><b>Task Role Cancelled: </b> 
                                         <?php 
                                             if ((!empty($change['var1'])) && (!empty($change['var2']))){
                                                 echo 'Linked Task removed because <b>'.$change['var1'].'</b> cancelled team\'s role in "'.$change['var2'].'".';

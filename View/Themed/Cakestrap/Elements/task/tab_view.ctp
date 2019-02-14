@@ -7,7 +7,7 @@
     
     
     if (AuthComponent::user('id')){
-        //$user_role = AuthComponent::user('user_role_id');
+        $userRole = AuthComponent::user('user_role_id');
         $userTeamsList = AuthComponent::user('TeamsList');
         $userTeams = AuthComponent::user('Teams');
     }
@@ -65,10 +65,7 @@
                 <div class="col-xs-12">
                     <div class="panel panel-bdanger">
                         <div class="panel-heading">
-                            <h3 class="panel-title"><i class="fa fa-wrench"></i> Task Actions 
-                                <a class="helpTTs" tabindex="0" role="button" data-toggle="popover" data-trigger="focus" title="Task Actions" data-content="<p><b>View Single Task:</b> Allows you to view this task alone. Useful for opening single tasks in a new tab/window.</p><p><b>Add Task Here:</b> Sets you up to add a new task at the same time as this one.</p><p><b>Link to Task: </b> Create a new task that links to this task. Only available if this task allows links.</p>">
-                                            <i class="fa fa-question-circle text-default"></i>                    
-                                        </a></h3>
+                            <h3 class="panel-title"><i class="fa fa-wrench"></i> Task Actions <span style="color:#fff !important"><?php echo $this->Ops->helpPopover('task_actions');?></span></h3>
                         </div>
                         <div class="panel-body">
                             <div class="row">
@@ -85,13 +82,16 @@
                                             array(
                                                 //'target' => '_blank',
                                                 'escape'=>false,
-                                                'class'=>'btn btn-default sm-bot-marg task_view_button')
+                                                'class'=>'btn btn-default btn-md margin1 task_view_button')
                                             );
                                     ?>
-                                    <button class="btn btn-yh addTask sm-bot-marg"><i class="fa fa-plus-circle"></i> Add Task Here</button>
+                                    <button class="btn btn-md btn-yh margin1 addTask"><i class="fa fa-plus-circle"></i> Add Task Here</button>
                                     <?php if($cntCtrl>=1):?>
-                                        <button class="btn btn-yh addLink sm-bot-marg"><i class="fa fa-link"></i> Link to Task</button>
+                                        <button class="btn btn-md btn-yh margin1 addLink"><i class="fa fa-link"></i> Link to Task</button>
                                     <?php endif; ?>
+                                    <?php if($userControls):?>
+                                        <button class="btn btn-md btn-danger margin1 eaTaskDeleteButton" data-desc="<?php echo $task['Task']['short_description'];?>" data-tid="<?php echo $tid;?>"><i class="fa fa-trash-o"></i> Delete Task</button>
+                                    <?php endif;?>
                                 </div>
                             </div>
                         </div><!--panel body-->
@@ -109,24 +109,17 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-6">
-            <div class="row">
-                <div class="col-xs-12">
                     <div class="panel panel-bsteel">
                         <div class="panel-heading">
                             <h3 class="panel-title"><i class="fa fa-exchange"></i> Changes</h3>
                         </div>
                         <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="row" id="loaded_chg_<?php echo $tid ?>">
-                                        <?php echo $this->element('change/changes_by_task', array('task'=>$tid, 'userControls'=> $userControls)); ?>
-                                    </div>                        
-                                </div>
-                            </div>
+                            <div class="row" id="loaded_chg_<?php echo $tid ?>">
+                                <?php echo $this->element('change/changes_by_task', array('task'=>$tid, 'userControls'=> $userControls)); ?>
+                            </div>                        
                         </div><!--panel body-->
                     </div><!--panel-->   
-                </div>
-            </div>
+            <?php if($userRole > 100):?>
             <div class="row">
                 <div class="col-xs-12">
                     <div class="panel panel-default">
@@ -196,6 +189,7 @@
                     </div><!--/panel-->                    
                 </div>
             </div>
+            <?php endif;?>
         </div>
     </div>
 </div>

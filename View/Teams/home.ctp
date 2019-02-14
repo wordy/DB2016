@@ -128,7 +128,7 @@
 
 <div class="row">
     <div class='col-md-12'>
-        <h3 id="open_req">Open Requests to <?php echo ($team_code)?:'';?> (Owing)</h2>
+        <h2 id="open_req">Open Requests to <?php echo ($team_code)?:'';?> (Owing)</h2>
         <div  class="panel panel-bdanger">
             <div class="panel-heading">Open Requests <b>From Other Teams</b> to <b><?php echo ($team_code)?:'';?></b></div>
             <?php 
@@ -191,7 +191,7 @@
             
 <div class="row">
     <div class='col-md-12'>
-        <h3 id="waiting_req">Open Requests from <?php echo ($team_code)?:'';?> (Waiting)</h2>
+        <h2 id="waiting_req">Open Requests from <?php echo ($team_code)?:'';?> (Waiting)</h2>
 
         <div class="panel panel-dark">
             <div class="panel-heading">Open Requests <b>From <?php echo ($team_code)?:'';?></b> <b>to Other Teams</b></div>
@@ -230,7 +230,7 @@
                                 if(!empty($waiting_task['Assist'])){
                                     echo '<b><i class="fa fa-sitemap"></i> Incoming Links</b>';
                                     foreach($waiting_task['Assist'] as $k => $wt){
-                                        echo  $this->Ops->subtaskRowSingle($wt, array('two_line_date'=>true, 'date_format'=>'M j'));    
+                                        echo  $this->Ops->subtask($wt);    
                                     }    
                                 }                                    
                                 

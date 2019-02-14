@@ -21,7 +21,7 @@
             <div class="col-xs-4 col-md-2"><i class="fa fa-lg fa-flag"></i> Action Item</div>                    
             <div class="col-xs-4 col-md-2"><i class="fa fa-lg fa-comment-o"></i> Comments</div>
             <div class="col-xs-4 col-md-2"><i class="fa fa-lg fa-link"></i> Linked Tasks</div>
-            <div class="col-xs-4 col-md-2"><i class="fa fa-lg fa-clock-o"></i> Time Link</div>
+            <div class="col-xs-4 col-md-2"><i class="fa fa-lg fa-clock-o"></i> Task Sync</div>
         </div>
     </div>
        

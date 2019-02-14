@@ -27,7 +27,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
     ?>
         <div class="row">
             <div class="col-md-12">
-                <h3>Next Ops Meeting</h3>
+                <h2>Next Ops Meeting</h2>
                 <?php 
                     $dueBut = '';
                     $viewBut = $this->Html->link('<i class="fa fa-eye"></i> View', array(
@@ -72,7 +72,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
         <div class="col-md-12">
         <?php
             if(!empty($due_tasks)){
-                echo '<h3>Due Soon</h3>';
+                echo '<h2>Due Soon</h2>';
             }
             
             foreach($due_tasks as $dtask){
@@ -115,7 +115,7 @@ $nextMeeting = $urgentByTeam['nextMeeting'];
     }
 
     if(!empty($nodue_tasks)){
-        echo '<h3>Ending Soon</h3>';
+        echo '<h2>Ending Soon</h2>';
     }
 
         foreach($nodue_tasks as $ndtask){

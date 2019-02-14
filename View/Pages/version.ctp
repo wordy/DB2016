@@ -8,22 +8,33 @@
 	<div id="page-content" class="col-md-12">
 		<div class="users index">
 			<h1>Compiler Version History</h1>
-            v3.3 (Feb 2017)
+            v0.4.0 (Jan 2019)
+            <ul>
+                <li>Add: View + Export by Role</li>
+                <li>Change: Better layout for small and x-small screens</li>
+                <li>Change: Removed seconds from tasks (tracked internally, but not used enough to justify in UI)</li>
+                <li>Change: Add task from modal. Better for small screens; provides generic ability to add tasks from anywhere.</li>
+                <li>UI improvements to make inputs play nicer together (e.g. once set, tasks retain duration when moving start time now)</li>
+                <li>Fix: uuid() change broke "forgot password" function for some attempts -- fixed</li>
+                <li>Dependencies (Add): <a href="http://bootboxjs.com/">Bootbox</a> - Modal interface</li>
+            </ul>
+
+            v0.3.3 (Feb 2017)
             <ul>
                 <li>Add: Assignments - assign tasks to `Actors` who can be placeholders or Compiler users</li>
-                <li>Add: Timeline View - View hour-by-hour plan for a team, broken down by `Actor`</li>
-                <li>New: (Model) `Actors`</li>
+                <li>Add: Timeline View - View hour-by-hour plan for a team, broken down by Role</li>
+                <li>New: (Model) `Roles`</li>
                 <li>New: (Model) `Assignments`</li>
             </ul>
 
-			v3.2 (Aug 2016)
+			v0.3.2 (Aug 2016)
             <ul>
                 <li>Change: Timeshifting is now per task from main `compile` screen</li>
                 <li>Removed: Timeshifting multiple tasks</li>
                 <li>Removed: /tasks/timeShift action</li>
             </ul>
 			
-			v3.1 (Nov 2015)
+			v0.3.1 (Nov 2015)
 			<ul>
 			    <li>New: Quickly switch teams (if you control >1)</li>
 			    <li>New: PDF From Search - Generate PDF from any search term.</li>
@@ -31,7 +42,7 @@
 			    <li>New: (Model) `Event_Info`</li>
 			    <li>New (Admin) Manage Digest - Check contents per team &amp; send to team/individual</li>
 			</ul>
-            v3.0 (Aug 2015)
+            v0.3.0 (Aug 2015)
             <ul>
                 <li>New: Tracking of open/closed requests</li>
                 <li>New: Time Linking of tasks</li>
@@ -55,12 +66,12 @@
                 <li>Dependencies (Upgrade): Select2 upgraded to v4.0.0</li>
             </ul>
 
-			v2.2 (Feb 2015)
+			v0.2.2 (Feb 2015)
             <ul>
                 <li>New: Edit task's parent, or unlink entirely</li>
                 <li>Change: Team listed as lead can no longer be added as any other role</li>
             </ul>
-			v2.12 (Jan 2015)
+			v0.2.1 (Jan 2015)
 			<ul>
                 <li>New: Plain text version of compiled plan added</li>
 			    <li>Change: Changes recorded in parent &amp; child tasks when linkages are made/broken</li>
@@ -70,7 +81,7 @@
 		        <li>New: Notification system (system messages &amp; when assistance is received)</li>
 			    <li>Change: Task linking re-added</li>
 			</ul>
-            v2.0 (Nov 2014)
+            v0.2.0 (Nov 2014)
             <ul>
                 <li>Software Re-write</li>
                 <li>New: Print prefs by user</li>
@@ -87,7 +98,7 @@
                 <li>Removed: Actionable Date from tasks (use due date instead)</li>
             </ul>
             
-			v1.2 (Jan 2014)
+			v0.1.2 (Jan 2014)
             <ul>
                 <li>New: PDF Generation (using DomPDF)</li>
                 <li>New: Attachment support</li>
@@ -96,7 +107,7 @@
                 <li>New: User password hashing</li>
             </ul>
 
-			v1.0 (Nov 2013)<br/>
+			v0.1.0 (Nov 2013)<br/>
 			<ul>
 			    <li>Initial release
 			    <ul>

@@ -11,10 +11,10 @@
     
         echo $lbut.$abut;    
     }
-    else{
-        echo '<div class="alert slim-alert alert-info" role="alert"> 
-        Select a lead team first</div>';
-    }
+    //else{
+      //  echo '<div class="alert slim-alert alert-info" role="alert"> 
+        //Select a lead team first</div>';
+    //}
 
 
 

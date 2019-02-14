@@ -41,7 +41,7 @@
                 url: '/tasks/remShift',
                 
                 success:function(data, textStatus) {
-                    console.log(data.ts_count);
+                    //console.log(data.ts_count);
                     $('#userTimeshiftCount').html(data.ts_count);
                     cl_tr.fadeOut('fast');
                     

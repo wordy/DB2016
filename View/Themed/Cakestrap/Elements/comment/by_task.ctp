@@ -96,9 +96,7 @@
                     ?>
                 </div><!--panel body-->
                 <div class="panel-footer">
-                    <?php
-                        echo $this->element('comment/add_to_task', array('tid'=>$tid));
-                    ?>
+                    <?php echo $this->element('comment/add_to_task', array('tid'=>$tid)); ?>
                 </div>
             </div><!--panel-->
         </div><!--col-md-9-->
@@ -124,7 +122,6 @@
         </div>
     </div>
 </div>
-<!-- Comment styling from http://bootsnipp.com/snippets/featured/user-comment-example -->
 
 <?php
     echo $this->Js->writeBuffer(); 

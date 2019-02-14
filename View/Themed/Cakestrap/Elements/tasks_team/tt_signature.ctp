@@ -23,10 +23,12 @@
         foreach($norole as $tid => $tcode){
             $lbut.= '<span class="btn btn-sm btn-ttrid0 tt-btn" data-team_id = "'.$tid.'" data-tr_id = "0">'.$tcode.'</span>';
         }
+
+        $lbut.= '<div><button class="btn tt-gen-btn btn-default tt-push-all"><i class="fa fa-arrow-right"></i> Push to <span class="pushTxt">ALL</span></button><button class="btn tt-gen-btn tt-request-all btn-danger"><i class="fa fa-life-saver"></i> Request from <span class="reqTxt">ALL</span></button></div>';
         echo $lbut;    
     }
     else{
-        echo '<div class="alert slim-alert alert-info" role="alert">Select a lead team first.</div>';
+        //echo '<div class="alert slim-alert alert-info" role="alert">Select a lead team first.</div>';
     }
     
 ?>
