@@ -21,6 +21,17 @@ $(document).ready(function () {
         c_sort.each(function(i,e){ $(e).prop('disabled', s_disabled); });    
     }
 
+    function viewOptionsState(state){
+        var vo = $('#compileViewOptions');
+        if(state == 'disable'){
+        	vo.hide();
+        }
+        else{
+        	vo.show();
+        }
+    }
+
+
     $('#coTeams').multiselect({
         includeSelectAllOption: true,
         enableClickableOptGroups: true, 
@@ -46,37 +57,45 @@ $(document).ready(function () {
         if($(this).val() == 1){
             help_str+= '<b>Rundown View</b><ul><li>Default setting. Shows any tasks involving the selected Teams in any role.</li>';
             help_str+= '<li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>';
-            sortState('enable');        
+            sortState('enable');
+            viewOptionsState('enable');        
         }else if($(this).val() == 2){
             help_str+= '<b>Event Day Timeline</b><ul><li>Shows a 24 hour timeline from <b>6AM event day</b> to <b>6AM the next day</b> of tasks involving the selected Teams.</li>';
             help_str+= "<li>Separated by Team's roles and ordered by <u>ascending</u> Start Time</li></ul>";
-            sortState('disable'); 
+            sortState('disable');
+            viewOptionsState('disable'); 
         }else if($(this).val() == 10){
             help_str+= '<b>Lead Only</b><ul><li>Shows only tasks where the selected Teams are the lead.</li>';
             help_str+= "<li>Useful for focusing on a single team's tasks.</li><li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>";
-            sortState('enable');        
+            sortState('enable');
+            viewOptionsState('disable');        
         }else if($(this).val() == 30){
             help_str+= '<b>Open Requests <u>From</u> Other Teams (Owing)</b><ul><li>Listing of everything owed to other teams by the selected Teams.</li>';
             help_str+= '<li>Useful for tracking what your team owes other teams.</li><li>Fetches tasks from <u>all dates</u>.</li><li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>';
-            sortState('enable');        
+            sortState('enable');
+            viewOptionsState('disable');        
         }else if($(this).val() == 31){
             help_str+= '<b>Open Requests <u>To</u> Other Teams (Waiting)</b><ul><li>Tasks where selected Teams requested help from other teams and the request is still Open.</li>';
             help_str+= '<li>Useful for tracking what other teams owe your team.</li><li>Fetches tasks from <u>all dates</u>.</li><li>Ordered by <u>ascending</u> or <u>descending</u> Start Time</li></ul>';
-            sortState('enable');        
+            sortState('enable');
+            viewOptionsState('disable');        
         }else if($(this).val() == 100){
             help_str+= '<b>Recently Modified</b><ul><li>Shows most recently modified tasks.</li>';
             help_str+= '<li>Useful for seeing recent changes to tasks involving your Team.</li><li>Fetches tasks from <u>all dates</u>.</li><li>Ordered by <u>descending modified date</u> (most recently changed first).</li></ul>';
             sortState('disable');
+            viewOptionsState('disable');
         }else if($(this).val() == 500){
             help_str+= '<b>Action Items</b><ul><li>Tasks that are important to the entire Ops Team.</li>';
             help_str+= '<li>Often take place over multiple weeks and progress needs to be tracked. Ex: Calling volunteers/submitting inventory requests</li><li>Fetches tasks from <u>all teams</u> on <u>all dates</u>.</li><li>Ordered by <u>ascending due date</u> to highlight upcoming due tasks.</li></ul>';
-            sortState('disable');        
+            sortState('disable');
+            viewOptionsState('disable');        
         }
         help.html(help_str);
     });   
     
     $('#coViewList input:checked').trigger('change');
-    $('#cForm').on('change', 'input:not(.coDateRange)', updateCo);
+    //$('#cForm').on('change', 'input:not(.coDateRange)', updateCo);
+	$('#cForm').on('change', 'input:not(.coDateRange, #coViewChildren)', updateCo);
 
 	// Generic Refresh of Tasks after Compile Options change
     function updateCo(){
@@ -396,6 +415,20 @@ $(document).ready(function () {
 		options.source = 'main_menu';
 		newAddTaskModal(options);
 	});
+
+
+	function handleVOKeys(){
+        var vo = $('#coViewChildren');
+        if(vo.is(':checked')){
+            vo.prop('checked',false);
+        }
+        else{
+            vo.prop('checked',true);
+        }        
+        vo.trigger('change');
+    }
+        
+    $(document).on('keydown', null, 'shift+z', handleVOKeys);
 
     
 //************* EO Document.Ready();***********    

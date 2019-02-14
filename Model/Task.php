@@ -12,6 +12,10 @@ class Task extends AppModel {
 	
     public $stdTaskFields = array('id', 'start_time', 'end_time', 'short_description', 'task_type', 'team_code', 'task_color_code', 'time_control', 'time_offset', 'due_date');
     
+    public $stdFields = array(
+        'Task.id', 'Task.start_time', 'Task.end_time', 'Task.task_type','Task.short_description', 
+        'Task.team_code', 'Task.task_color_code', 'Task.time_control', 'Task.time_offset', 'Task.time_offset_type');
+    
     public $stdContain = array(
         'Assignment'=>array(
             'fields'=>array(
@@ -27,7 +31,7 @@ class Task extends AppModel {
         'Parent'=>array(
             'fields'=>array(
                 'Parent.id', 'Parent.parent_id', 'Parent.start_time', 'Parent.end_time', 'Parent.short_description',
-                'Parent.task_type', 'Parent.team_code', 'Parent.task_color_code', 'Parent.time_offset', 'Parent.time_control')
+                'Parent.task_type', 'Parent.team_code', 'Parent.task_color_code', 'Parent.time_control', 'Parent.time_offset', 'Parent.time_offset_type')
         ),
         'TasksTeam'=>array(
             'fields'=>array(
@@ -175,6 +179,11 @@ class Task extends AppModel {
             'foreignKey' => 'task_id',
             'dependent' => true,
         ),
+        /*'NewChange' => array(
+            'className' => 'Change',
+            'foreignKey' => 'task_id',
+            'dependent' => true,
+        ),*/
 		'Comment' => array(
 			'className' => 'Comment',
 			'foreignKey' => 'task_id',
@@ -272,8 +281,12 @@ class Task extends AppModel {
     
     // 2015. Used in Task::beforeSave(). Tests if a potential $parent ever links back to $task (loop).
     public function isChildInPidChain($task, $parent){
-        if(!$parent){ return false; }
-        if($task == $parent){ return true; }
+        if(!$parent || !$task){
+            return false; 
+        }
+        if($task == $parent){
+            return true; 
+        }
         
         // Current task and parent IDs
         $ctid = $parent;
@@ -1178,7 +1191,8 @@ class Task extends AppModel {
         $conditions = array();
         $limit = 25;
         $contain = array();
-        $roles = array(1, 2, 3, 4);        
+        //$roles = array(1, 2, 3, 4);
+        $roles = array();        
         $order = ($sort)? 'Task.start_time DESC':'Task.start_time ASC';
 
         // Conditions
@@ -1214,8 +1228,8 @@ class Task extends AppModel {
             $roles = array(1);
 
             //******************* TEMP *********************
-            //$date_event= Configure::read('EventDate');
-            $date_event= "2018-02-10";
+            $date_event= Configure::read('EventDate');
+            //$date_event= "2019-02-09";
             //**********************************************
             
             $useSubquery = false;
@@ -1330,8 +1344,15 @@ class Task extends AppModel {
 
         if($useSubquery){
             // Subquery looking for tasks where $teams are listed in any of the given $roles
-            $conditionsSubQuery['`TasksTeam`.`team_id`'] = $teams;
-            $conditionsSubQuery['`TasksTeam`.`task_role_id`'] = $roles;
+            
+            if(!empty($teams)){
+                $conditionsSubQuery['`TasksTeam`.`team_id`'] = $teams;
+            }
+            
+            if(!empty($roles)){
+                $conditionsSubQuery['`TasksTeam`.`task_role_id`'] = $roles;    
+            }
+            
             $db = $this->TasksTeam->getDataSource();
             $subQuery = $db->buildStatement(
                 array(
@@ -1357,6 +1378,7 @@ class Task extends AppModel {
         if(empty($contain)){
             $contain = array(
                 'Assignment',
+                'Assignment.Role',
                 'Assist'=>array(
                     'fields'=>array(
                         'Assist.id',
@@ -1372,6 +1394,7 @@ class Task extends AppModel {
                     )
                 ),
                 'Comment',
+                
                 //'Assist.Assist',
                 'Parent'=>array(
                     'fields'=>array(

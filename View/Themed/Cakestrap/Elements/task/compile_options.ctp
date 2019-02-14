@@ -97,6 +97,7 @@
                         'separator' => '</label></div><div class="radio"><label>',
                         'options' => $sort_by
                     ));
+                    
                 ?>
             </div>
 
@@ -137,10 +138,21 @@
                         <div class="alert alert-info" id="coViewTypeHelp"></div>
                     </div>
                 </div>
-
-                <div class="row">
+                <div class="row" id="compileViewOptions">
                     <div class="col-xs-12" id="coViewOpts">
                         <?php
+                            echo '<b>View Options</b> ';echo $this->Ops->helpPopover('view_options');
+                            echo $this->Form->input('Compile.view_children', array(
+                                'class' => 'coViewChildren',
+                                'div'=>false,
+                                'label'=>false,
+                                'type' => 'checkbox',
+                                'id'=>'coViewChildren',
+                                'default'=> true,
+                                'legend' => false,
+                                'before' => '<div class="checkbox"><label>',
+                                'after' => 'Show Linked Task Line Items</label></div>',
+                            ));
                             echo $this -> Form -> input('Compile.start_date', array('type' => 'hidden','id'=>'coStartDate'));
                             echo $this -> Form -> input('Compile.end_date', array('type' => 'hidden', 'id'=>'coEndDate'));
                         ?> 

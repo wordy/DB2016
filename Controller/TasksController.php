@@ -15,6 +15,8 @@ class TasksController extends AppController {
  * @var array
  */
     public $components = array('Paginator', 'Mpdf.Mpdf');
+    
+    //public $CONST_EventDate = Configure::read('EventDate');
 
     /*
     public function beforeFilter() {
@@ -23,6 +25,9 @@ class TasksController extends AppController {
         parent::beforeFilter();
     }
      */
+     
+     
+     
      
     public function isAuthorized($user) {
         //$this->log($user);
@@ -358,7 +363,7 @@ class TasksController extends AppController {
   
 **************************************************/
 
-    public function compile(){
+    public function compile_NEW(){
         //$this->log($this->request->data);
         //$user_id = $this->Auth->user('id');
         //$usePaging = true;
@@ -369,28 +374,33 @@ class TasksController extends AppController {
         $comp_is_same = $usePaging = true; // Used to determine if we need to save settings to session
 
         //*********TEMP***************
-        //$event_date = Configure::read('EventDate');
-        $event_date = "2018-02-09";
+        $event_date = Configure::read('EventDate');
+        //$event_date = "2018-02-09";
 
         // Set up to compare settings as submitted vs. stored in user session variable
-        $tmp_sess = $this->Session->read('Auth.User.Compile');
-        $tmp_tl = $this->Session->read('Auth.User.Timeline');
+        //$tmp_sess = $this->Session->read('Auth.User.Compile');
+        //$tmp_tl = $this->Session->read('Auth.User.Timeline');
 
         $old_compile = $AU_Compile = $this->Session->read('Auth.User.Compile');
+        //$old_compile = $AU_Compile = AuthComponent::user('Compile');
         $AU_timeline = $this->Session->read('Auth.User.Timeline');
         $AUC_page = isset($AU_Compile['page'])? $AU_Compile['page']:null;
 
         $new_compile = $TRD_Compile = $this->request->data('Compile');
-        $qSingle = $this->request->query('task');
+        
         $qView = $this->request->query('view'); 
+        $qSingle = $this->request->query('task');
         $qPage = $this->request->query('page');
         $qHr = (int)$this->request->query('hr');
         $qSrc = $this->request->query('src');
         
         // If we were paging, pass the settings into the next request
         if($this->params['paging']){
+            //$this->log($this->params['paging']);
             $this->Paginator->settings = $this->params['paging'];
         }
+        
+        
         if(isset($qView) && $qView == 2 || $this->request->is('post') && (is_array($TRD_Compile) && isset($TRD_Compile['view_type']) && $TRD_Compile['view_type'] == 2)){
         //if(isset($qView) && $qView == 2 || ($this->request->is('get') && $AU_Compile['view_type'] == 2 || $this->request->is('post') && (is_array($TRD_Compile) && isset($TRD_Compile['view_type']) && $TRD_Compile['view_type'] == 2))){
             //$this->log('hit view type =2 in TasksController');
@@ -417,6 +427,7 @@ class TasksController extends AppController {
             $settings['end_date'] = $AU_Compile['end_date'];
             //$settings['end_date'] = $event_date;
             
+            $out = array('start'=>$settings['tl_start_date'],'end'=>$settings['tl_end_date'],'hour'=>$settings['timeline_hr']);
             //$this->Session->write('Auth.User.Timeline.hour',$settings['timeline_hr']);
             $this->Session->write('Auth.User.Timeline.start', $settings['tl_start_date']);
             $this->Session->write('Auth.User.Timeline.end', $settings['tl_end_date']);
@@ -427,6 +438,7 @@ class TasksController extends AppController {
         }//END TIMELINE
         // Posted => Process new compile settings
         elseif($this->request->is('post')){
+            
             //$this->log($this->request->data);
 
             $settings['view_type'] = $TRD_Compile['view_type'];
@@ -456,8 +468,25 @@ class TasksController extends AppController {
                 //$settings['page'] = 1;
             //}
         }//END POST
-        elseif($this->request->is('get')){
-            //$this->log('hit get');
+        elseif($this->request->is('get') && $this->request->query('src')=='compile' && $this->request->query('paging') == 1){
+            $AUCP = $this->Session->read('Auth.User.CompileParams');
+            ////$this->log('hit reuse settings');
+            //$this->log($AUCP);
+            $teams = $AUCP['teams'];
+            $conditions = $AUCP['conditions'];
+            $order = (isset($AUCP['order']))?$AUCP['order']:array();
+            $contain = (isset($AUCP['contain']))?$AUCP['contain']:array();
+            $limit = (isset($AUCP['limit']))?$AUCP['limit']:array();
+            $fields = (isset($AUCP['fields']))?$AUCP['fields']:array();
+            $page = ($this->request->data('page'))?:1;
+            
+            goto SkipToPaging;
+        
+        }//End GET
+        
+        elseif($this->request->is('get') && $this->request->query('paging') == null){
+            //$this->log($this->request->query);
+            $this->log('hit generic get');
             $comp_is_same = false;
             $settings = $AU_Compile;
 
@@ -484,8 +513,8 @@ class TasksController extends AppController {
             elseif(!$qPage && ($qSrc == 'action' || $qSrc == 'ajax')){
                 $settings['page'] = $page = $AUC_page;
             }
-        }//End GET
-
+        }
+        
         // Process settings, set defaults if necessary        
         $cc = $this->Task->makeCompileConditions($settings);
         //debug($cc);
@@ -497,6 +526,9 @@ class TasksController extends AppController {
         $contain = $cc['contain'];
         $limit = $cc['limit'];
         $fields = $cc['fields'];
+        
+        $this->Session->write('Auth.User.CompileParams', compact('teams','conditions','orer','contain','limit','field','page'));    
+        
 
         // If viewing a single task, overwrite conditions. $page = 1 important so paginator won't be
         // out of bounds (i.e. with $page > 1 set elsewhere in user's conditions).
@@ -529,6 +561,7 @@ class TasksController extends AppController {
     
         $page = (isset($page))? $page : 1;
 
+SkipToPaging:
         if($usePaging){
             $this->Paginator->settings = array(
                 'Task'=>array(
@@ -596,6 +629,223 @@ class TasksController extends AppController {
         }
     }//end compile
 
+    public function compile(){
+        //$this->log($this->request->data);
+        //$user_id = $this->Auth->user('id');
+        //$usePaging = true;
+        //$usrcurViewType = 0;
+        $order = $conditions = $settings = array();
+        $limit = 25;
+        $sort = '';
+        $comp_is_same = $usePaging = true; // Used to determine if we need to save settings to session
+
+        $event_date = Configure::read('EventDate');
+
+        // Set up to compare settings as submitted vs. stored in user session variable
+        $old_compile = $AU_Compile = $this->Session->read('Auth.User.Compile');
+        $AU_timeline = $this->Session->read('Auth.User.Timeline');
+        $AUC_page = isset($AU_Compile['page'])? $AU_Compile['page']:null;
+
+        $new_compile = $TRD_Compile = $this->request->data('Compile');
+
+        //$this->log($this->params);
+        
+        // If we were paging, pass the settings into the next request
+        //if($this->params['paging']){
+            //$this->log($this->params['paging']);
+        //    $this->Paginator->settings = $this->params['paging'];
+        //}
+        if($this->request->query('view') == 2 || $this->request->is('post') && (is_array($TRD_Compile) && isset($TRD_Compile['view_type']) && $TRD_Compile['view_type'] == 2)){
+        //if(isset($qView) && $qView == 2 || ($this->request->is('get') && $AU_Compile['view_type'] == 2 || $this->request->is('post') && (is_array($TRD_Compile) && isset($TRD_Compile['view_type']) && $TRD_Compile['view_type'] == 2))){
+            //$this->log('hit view type =2 in TasksController');
+            $comp_is_same = false;
+            $usePaging = false;
+            $curViewType = 2;
+            
+            if(isset($AU_timeline['hour']) && $qHr == 0){
+                $settings['timeline_hr'] = $AU_timeline['hour'];
+            } 
+            elseif($qHr >= 6 && $qHr <= 30){
+                $settings['timeline_hr'] = $qHr;
+            } 
+            else{
+                $settings['timeline_hr'] = 6;
+            }
+
+            $settings['Teams'] = (!empty($TRD_Compile['Teams']))? $TRD_Compile['Teams'] : $AU_Compile['Teams'];
+            $settings['tl_start_date'] = date('Y-m-d H:i:s', strtotime($event_date)+60*$settings['timeline_hr']*60);
+            $settings['tl_end_date'] = date('Y-m-d H:i:s', strtotime($event_date)+(60*$settings['timeline_hr']*60)+(59*60)+59);
+            $settings['view_type'] = 2;
+            $settings['order'] = array('Task.start_time ASC');
+            $settings['start_date'] = $AU_Compile['start_date'];
+            $settings['end_date'] = $AU_Compile['end_date'];
+            //$settings['end_date'] = $event_date;
+            
+            //$this->Session->write('Auth.User.Timeline.hour',$settings['timeline_hr']);
+            $this->Session->write('Auth.User.Timeline.start', $settings['tl_start_date']);
+            $this->Session->write('Auth.User.Timeline.end', $settings['tl_end_date']);
+            $this->Session->write('Auth.User.Timeline.hour', $settings['timeline_hr']);
+            $this->Session->write('Auth.User.Compile.view_type', 2);    
+
+            $this->set('timeline_hr', $settings['timeline_hr']);
+        }//END TIMELINE
+        // Posted => Process new compile settings
+        elseif($this->request->is('post')){
+            //$this->log($this->request->data);
+            $settings['view_type'] = $TRD_Compile['view_type'];
+            $settings['page'] = isset($TRD_Compile['page'])?$TRD_Compile['page']:1;
+            $comp_is_same = false;
+            $settings = $this->Task->makeSafeCompileSettings($TRD_Compile);
+        }//END POST
+        elseif($this->request->is('get')){
+            $qSingle = $this->request->query('task');
+            $qView = $this->request->query('view'); 
+            $qPage = $this->request->query('page');
+            $qHr = (int)$this->request->query('hr');
+            $qSrc = $this->request->query('src');
+                
+            //$this->log($this->request->query);
+            //$this->log('hit get');
+            $comp_is_same = false;
+            $settings = $AU_Compile;
+
+            if(!empty($qView)){
+                if($qView == 'plain' || $qView == 'pdf' || $qView = 'excel'){
+                    $settings['view_type'] = 1;        
+                }
+            }
+
+            if($qPage>0){
+                $settings['page'] = $page = $qPage;
+                $this->Session->write('Auth.User.Compile.page', $qPage);
+            }
+            // Didn't submit a request, use saved value
+            elseif(!$qPage && !$qSrc){
+                $settings['page'] = $page = $AUC_page;
+            }
+            // Paging from compile. PaginatorHelper does ?src=compile for page=1, but ?src=compile&page=## for all others
+            elseif(!$qPage && ($qSrc == 'compile')){
+                $settings['page'] = $page = 1;
+            }
+            // When refreshing list in "Success" ajax callbacks (edit, add, delete)
+            elseif(!$qPage && ($qSrc == 'action' || $qSrc == 'ajax')){
+                $settings['page'] = $page = $AUC_page;
+            }
+        }//End GET
+
+        // Process settings, set defaults if necessary        
+        //$cc = $this->Task->makeCompileConditions($settings);
+        $cc = array('teams','conditions','order','contain','limit','fields');
+        //debug($cc);
+        //$this->log("cleaned conditions");
+        //$this->log($cc);
+        $teams = $cc['teams'];
+        $conditions = $cc['conditions'];
+        $order = $cc['order'];
+        $contain = $cc['contain'];
+        $limit = $cc['limit'];
+        $fields = $cc['fields'];
+        
+        $this->Session->write('Auth.User.CompileParams', compact('teams','conditions','order','contain','limit','fields','page'));
+        
+
+        // If viewing a single task, overwrite conditions. $page = 1 important so paginator won't be
+        // out of bounds (i.e. with $page > 1 set elsewhere in user's conditions).
+        if(!empty($qSingle)){
+            $conditions = array('Task.id'=>$qSingle);
+            $limit = 1;
+            $contain = array('Assist','TasksTeam','Assignment');
+            $page = 1;
+            $this->set('single_task', (int)$qSingle);
+        }
+        elseif($qView == 'pdf'){  // Uses user's currently selected compile settings and forces download of PDF in browser
+            $this->pdfFromUserSettings();
+        }
+        elseif($qView == 'plain' || $qView == 'excel'){
+            $usePaging = false;
+            $upref = $this->Task->PrintPref->getUserPrefsByType($this->Auth->user('id'));
+            $this->set('printPrefs', $upref);
+        }
+        elseif(isset($qSearch)){
+            $conditions = array(
+                'OR' => array(
+                    'Task.short_description LIKE' => "%$qSearch%",
+                    'Task.details LIKE' => "%$qSearch%"
+                ));
+            $order = 'Task.start_time ASC';
+            $this->set('search_term', $qSearch);
+        }
+    
+        $page = (isset($page))? $page : 1;
+
+        if($usePaging){
+            $this->Paginator->settings = array(
+                'Task'=>array(
+                    'contain'=>$contain,
+                    'paramType'=>'querystring',
+                    'limit'=>($limit)?: 25,
+                    'conditions'=>$conditions,
+                    'order'=>$order,
+                    'page'=> $page,
+                    'fields'=> $fields,
+                )
+            );           
+
+            $tasks = $this->Paginator->paginate('Task');
+        }
+        else{
+            $tasks = $this->Task->find('all', array(
+                'contain'=>$contain,
+                'conditions'=>$conditions,
+                'order'=>$order,
+                'fields'=>$fields,
+            ));
+        }
+        
+        // Set and store new compile settings, if different
+        if(!$comp_is_same){
+            $this->Session->write('Auth.User.Compile', $settings);
+        }       
+    
+        // Settings for Compile Options
+        $this->set('cSettings', $settings);
+        $this->set('tasks', $tasks);
+        $this->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
+        $this->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
+        $this->set('zoneNameTeamList', $this->Task->Team->Zone->listZoneNameTeamIdTeamCode());
+        $this->set('actionableTypes', $this->Task->ActionableType->makeList());
+        $this->set('taskTypes', $this->Task->TaskType->makeListByCategory());
+        //$this->set('user_shift', $this->Session->read('Auth.User.Timeshift'));
+        $this->set('user_shift', AuthComponent::user('Timeshift'));
+        //$this->set('roles', $this->Task->Team->Role->getListByTeam());
+        
+        //$AUTH_teams = AuthComponent::user('Teams');
+        $user_roles = $this->Task->Team->Role->getByTeams(AuthComponent::user('Teams'));
+        $this->set('roles', $user_roles);
+
+        if($this->request->is('ajax')){
+            return $this->render('/Elements/task/compile_screen');
+        }
+        
+        //$this->log('value of qView before choosing layout: '.$qView);
+        if($qView == 'plain'){
+            $this->layout = 'compile_pdf';
+            $this->render('/Elements/task/tasks_table');
+        }
+        elseif($qView == 'excel'){
+            $this->layout = 'pdf/default';
+            $this->render('/Tasks/pdf/compile');
+        }
+        // PDF View, in browser
+        elseif($qView == 'pib'){
+            $upref = $this->Task->PrintPref->getUserPrefsByType(AuthComponent::user('id'));
+            $this->set('printPrefs', $upref);
+
+            $this->layout = 'compile_pdf';
+            $this->render('/Elements/task/tasks_table_pdf');
+        }
+    }//end compile
+    
     public function byRole(){
         $AUTH_teams = AuthComponent::user('Teams');
             
@@ -611,12 +861,12 @@ class TasksController extends AppController {
         $conditions = $contain = $order = $fields = $tasks = array();
         $start_date = $end_date = $view = '';
 
-        //$start_date = Configure::read('CompileStart');
-        //$end_date = Configure::read('CompileEnd');
+        $start_date = Configure::read('CompileStart');
+        $end_date = Configure::read('CompileEnd');
 
         //*********************@TODO TEMP***********************
-        $start_date = "2018-01-01";
-        $end_date = "2020-01-01";
+        //$start_date = "2018-10-01";
+        //$end_date = "2020-01-01";
         //*********************TEMP***********************
 
         $order = array('Task.start_time'=>'asc');
@@ -756,17 +1006,18 @@ class TasksController extends AppController {
         
         $options = array(
             'contain' => array(
-                'Assignment',
-                'TasksTeam',
+                'Assignment'=>$this->stdContain['Assignment'],
+                'TasksTeam'=>$this->stdContain['TasksTeam'],
                 'Assist' => array(
                     'order' => array('Assist.created DESC')
                 ),
-                'Assist.TasksTeam',
-                'Parent'
+                //'Assist.TasksTeam',
+                'Parent'=>$this->stdContain['Parent']
             ), 
             'conditions' => array(
                 'Task.'.$this->Task->primaryKey => $task_id
-            )
+            ),
+            'fields'=>$this->stdFields
         );
         
         $task = $this->Task->find('first', $options);
@@ -939,23 +1190,25 @@ class TasksController extends AppController {
         $this->render('search');
     }
 
-    public function linkable($team=null, $current=null, $child_task=null){
+    //Find linkable parent tasks from $team.  Current selecion is $current for task.id = $child.
+    public function linkable($team=null, $current=null, $child=null){
         if($this->request->is('ajax')){
             $team = $this->request->data('team');
             $current = $this->request->data('current');
-            $child_task = $this->request->data('child');
+            $child = $this->request->data('child');
         }
 
-        $nl = $this->Task->linkableParentsList($team, $child_task);
+        $linkable = $this->Task->linkableParentsList($team, $child);
         
         if(!empty($this->request->params['requested'])){ 
-            return $nl;
+            return $linkable;
         }
-        $this->set('linkable', $nl);
+        
+        $this->set('linkable', $linkable);
         $this->set('team', $team);
         $this->set('current', $current);
-        $this->set('child_task', $child_task);
-        $this->set(compact('linkable', 'team', 'current', 'child'));
+        $this->set('child_task', $child);
+        //$this->set(compact('linkable', 'team', 'current', 'child'));
         $this->set('_serialize', array('linkable', 'team', 'current', 'child'));
 
         $this->render('/Elements/task/linkable_parents_list');       
@@ -967,23 +1220,15 @@ class TasksController extends AppController {
             throw new MethodNotAllowedException();
         }
         
-        $this->layout = false;
-        $this->autoRender = false;
         $task = $this->request->data('task');
         $new_par = $this->request->data('parent');
+        $this->layout = false;
+        $this->autoRender = false;
             
-        if($task && $new_par){
-            $c_in_p = $this->Task->isChildInPidChain($task, $new_par);
-            
-            $data = array(
-                'allow_parent'=>!$c_in_p,
-            );    
-            
-        return json_encode($data);
-    }
-        
-        
-     //$this->render('time_shift');
+        if($new_par){
+            $data = array('allow_parent'=>!$this->Task->isChildInPidChain($task, $new_par));    
+            return json_encode($data);
+        }
     }
 
     public function nextOpsMeeting(){
@@ -991,9 +1236,13 @@ class TasksController extends AppController {
     }
 
     public function pdfFromUserSettings(){
+        
+        $AU_id = AuthComponent::user('id');
         $settings = $this->Session->read('Auth.User.Compile');
         
-        $settings['view_type'] = 1;
+        if($settings['view_type'] ==2){
+            $settings['view_type'] = 1;
+        }
 
         //$this->log($settings);
         // Process settings, set defaults if necessary        
@@ -1001,6 +1250,7 @@ class TasksController extends AppController {
         $conditions = $cc['conditions'];
         $order = $cc['order'];
         $contain = $cc['contain'];
+        
 
         $user = AuthComponent::user('handle');
         $date = date('Y-m-d');
@@ -1012,7 +1262,7 @@ class TasksController extends AppController {
             'contain'=>$contain,
             'order'=>$order));
 
-        $upref = $this->Task->PrintPref->getUserPrefsByType(AuthComponent::user('id'));
+        $upref = $this->Task->PrintPref->getUserPrefsByType($AU_id);
         $this->set('printPrefs', $upref);
         $this->set('cSettings', $settings);
         
@@ -1024,13 +1274,14 @@ class TasksController extends AppController {
         $view->layout='compile_pdf';
        
         $view->set ('tasks', $tasks); // set your variables for view here
+        
         $view->set('teamIdCodeList', $this->Task->Team->teamIdCodeList());
         $view->set('zoneTeamCodeList', $this->Task->Team->Zone->listZoneCodeTeamIdTeamCode());
         //$this->set(compact('tasks','teamIdCodeList','zoneTeamCodeList'));
         //$html=$view->render('compile_pdf');
         $html=$view->render('tasks_table_pdf');
-
-        $cdate = date('M j, Y');
+        //$this->log($this->Mpdf);
+        $cdate = date('g:iA M j, Y');
         $this->Mpdf->init(array('format'=>'A4-L'));
     
         $footer = array (
@@ -1039,21 +1290,21 @@ class TasksController extends AppController {
               'content' => 'As of '.$cdate,
               'font-size' => 9,
               'font-style' => '',
-              'font-family' => 'serif',
+              'font-family' => 'sans-serif',
               'color'=>'#333'
             ),
             'C' => array (
               'content' => '',
               'font-size' => 10,
               'font-style' => 'B',
-              'font-family' => 'serif',
+              'font-family' => 'sans-serif',
               'color'=>'#000000'
             ),
             'R' => array (
               'content' => 'Page {PAGENO} of {nb}',
               'font-size' => 9,
               'font-style' => '',
-              'font-family' => 'serif',
+              'font-family' => 'sans-serif',
               'color'=>'#333'
             ),
             'line' => 1,

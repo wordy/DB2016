@@ -51,14 +51,7 @@ if(!$this->request->is('ajax')){
     
     $this->Js->buffer("
          var jCIN = ".json_encode($jqCIN).";
-         
         //console.log(jCIN);
-    
-    /*
-        $('.helpTTs').popover({
-            container: 'body',
-            html:true,
-        });*/
    
     ");
     

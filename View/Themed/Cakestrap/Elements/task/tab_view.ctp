@@ -109,24 +109,16 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-6">
-            <div class="row">
-                <div class="col-xs-12">
                     <div class="panel panel-bsteel">
                         <div class="panel-heading">
                             <h3 class="panel-title"><i class="fa fa-exchange"></i> Changes</h3>
                         </div>
                         <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="row" id="loaded_chg_<?php echo $tid ?>">
-                                        <?php echo $this->element('change/changes_by_task', array('task'=>$tid, 'userControls'=> $userControls)); ?>
-                                    </div>                        
-                                </div>
-                            </div>
+                            <div class="row" id="loaded_chg_<?php echo $tid ?>">
+                                <?php echo $this->element('change/changes_by_task', array('task'=>$tid, 'userControls'=> $userControls)); ?>
+                            </div>                        
                         </div><!--panel body-->
                     </div><!--panel-->   
-                </div>
-            </div>
             <?php if($userRole > 100):?>
             <div class="row">
                 <div class="col-xs-12">

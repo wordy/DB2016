@@ -53,9 +53,11 @@
           //$this->start('scriptTop');
             //echo "<script> $('body').on('hidden.bs.modal', '.modal', function () {\$(this).removeData('bs.modal');});</script>";
         //$this->end();  
-    
+
+        /*<div class="alert alert-danger hidden-print"><span class="lead"><b>**DEMO MODE**</b> Currently showing DB2018's tasks. This will change to DB2019 shortly.</span></div>*/ 
+        
+            
 ?>
-<div class="alert alert-danger hidden-print"><span class="lead"><b>**DEMO MODE**</b> Currently showing DB2018's tasks. This will change to DB2019 shortly.</span></div> 
             
 <div class="row main-container">
     <div class="col-sm-12">

@@ -230,7 +230,7 @@
                                 if(!empty($waiting_task['Assist'])){
                                     echo '<b><i class="fa fa-sitemap"></i> Incoming Links</b>';
                                     foreach($waiting_task['Assist'] as $k => $wt){
-                                        echo  $this->Ops->subtaskRowSingle($wt, array('two_line_date'=>true, 'date_format'=>'M j'));    
+                                        echo  $this->Ops->subtask($wt);    
                                     }    
                                 }                                    
                                 

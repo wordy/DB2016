@@ -44,6 +44,12 @@
                                 <?php
                                     $pST = null;
                                     foreach($tasks as $task){
+                                        
+                                        $ass_handles = Hash::extract($task['Assignment'], '{n}.role_handle');
+                                        
+                                        
+                                        
+                                        
                                         $hide_det = false;
                                         
                                         if(in_array($task['Task']['id'], $pht)){
@@ -72,9 +78,10 @@
                                         
                                         echo '</td><td><b>'.$task['Task']['task_type'].'</b><br>';
                                         echo $this->Ops->pdfSig2016($task['TasksTeam'], $zoneTeamCodeList).'</td>';
-                                        echo '<td>'.$task['Task']['short_description'];
+                                        echo '<td>'.$task['Task']['short_description'].'&nbsp;'.$this->Ops->makeAssignmentButtons($ass_handles).'&nbsp;';
                                         
-                                        if($task['Task']['details'] && !$hide_det){
+                                        
+                                        if(isset($task['Task']['details']) && strlen($task['Task']['details'])>2 && !$hide_det){
                                             echo '<hr class="hr-slim">';
                                             echo nl2br($task['Task']['details']);    
                                         }

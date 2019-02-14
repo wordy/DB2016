@@ -60,7 +60,8 @@
 
     $this->Js->buffer("
         $('#eaStartTime".$tid." ,#eaEndTime".$tid."').datetimepicker({
-            sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'YYYY-MM-DD HH:mm:ss', 
+            //sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'YYYY-MM-DD HH:mm:ss', 
+            sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'mmm dd, yyyy g:i A',
         });
         
         $('#eaDueDate".$tid."').datetimepicker({

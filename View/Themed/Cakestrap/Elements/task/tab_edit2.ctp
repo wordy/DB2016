@@ -253,6 +253,7 @@
                 'div' => array(
                     'class' => 'input-group', 
                     'id' => 'inputStartTime', 
+                    //'data-date-format' => 'Y-m-d H:i:s'
                     'data-date-format' => 'Y-m-d H:i:s'
                 ), 
                 'after' => '<span class="input-group-addon"><i class="fa fa-calendar"></i></span>', 

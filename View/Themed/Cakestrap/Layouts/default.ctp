@@ -20,18 +20,22 @@
         echo $this->Html->css('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
         
         echo $this->Html->css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css');
-        echo $this->Html->css('libs/bootstrap-multiselect');
+        echo $this->Html->css('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css');
+        
         //echo $this->Html->css('datetimepicker');
+        //echo $this->Html->css('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css');
+        //echo $this->Html->css('libs/select2.min'); 
+        
+        
+        echo $this->Html->css('libs/bootstrap-multiselect');
         echo $this->Html->css('libs/daterangepicker');
-		//echo $this->Html->css('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css');
-		echo $this->Html->css('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/css/select2.min.css');
-		//echo $this->Html->css('libs/select2.min'); 
 		echo $this->Html->css('libs/select2-bootstrap.min');
-		
- 
         echo $this->Html->css('libs/summernote');
         echo $this->Html->css('libs/bootstrap-datetimepicker.min');
 		echo $this->Html->css('core');
+ 
+        //echo $this->Html->css('compressed/css.min');
+ 
         echo $this->fetch('css');
         //echo $this->Html->script('libs/bootstrap-datetimepicker_bp');
         //echo $this->Html->script('libs/daterangepicker');
@@ -75,16 +79,20 @@
         <a href="#" id="back-to-top" class="back-to-top"><i class="fa fa-2x fa-arrow-circle-o-up"></i> <span class="h4">Top</span></a>
     <?php
         //echo $this->Filepicker->scriptTag(); 
+        
         echo $this->Html->script('libs/moment.min');
         echo $this->Html->script('libs/bootstrap-datetimepicker_bp.min');
         echo $this->Html->script('libs/daterangepicker.min');
         echo $this->Html->script('libs/bootstrap-multiselect.min');
-        //echo $this->Html->script('libs/select2.min');
         echo $this->Html->script('//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/select2.min.js');
         echo $this->Html->script('libs/summernote.min');
         echo $this->Html->script('libs/bootbox.min');
+        echo $this->Html->script('libs/jquery.hotkeys');
         
         echo $this->Html->script('ops');
+        
+        //echo $this->Html->script('compressed/compressed');
+        
         //echo $this->Html->script('compile');
         
         echo $this->fetch('scriptBottom');

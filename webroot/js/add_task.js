@@ -23,11 +23,6 @@ $(document).ready(function () {
 		return false;
 	})
  
-
- 
- 
- 
- 
 	// Save task via ajax
 	function ajaxAddTask(options){
 		//console.log('hit addTask');
@@ -312,70 +307,66 @@ $(document).ready(function () {
     //Change Linked Parent
     $('body').on('change','.linkableParentSelect', function(e){
         //console.log('chg linkedparentselect chg in at.js');
-        var this_sel = $(this);
-        var sel_par = $(this).val();
-        //console.log('selected parent '+sel_par);
-        var form = this_sel.parents('form');
-        var this_clear_parent_but = $(this).parents('.form-group').find('.pidClearBut');
-        var tc = form.find('.inputTC');
-        var start = form.find('.inputStartTime');
-        var stHelp = form.find('.stHelpWhenTC');
-        var to_min = form.find('.inputOffMin');
-        var to_sec = form.find('.inputOffSec');
-        var to_type = form.find('.inputOffType');
-        var advpid = form.find('.advancedParent');
+        var inParent = $(this);
+        var inParentVal = $(this).val();
+        var form = inParent.parents('form');
+        var inStart = form.find('.inputStartTime');
+        var inMin = form.find('.inputOffMin');
+        //var inSec = form.find('.inputOffSec');
+        var inTOType = form.find('.inputOffType');
+        var inTC = form.find('.inputTC');
+        var btnClearPID = $(this).parents('.form-group').find('.pidClearBut');
+        var startHelp = form.find('.stHelpWhenTC');
+        var advOpts = form.find('.advancedParent');
         var curTID =  form.data('tid');
-        var partask_label = $(this).parents('.form-group').find('label');
-
-        to_min.val(0).prop('disabled', true);
-        to_sec.val(0).prop('disabled', true);        
-        to_type.prop('disabled', true);
-        tc.prop('checked', false);
+        var no_tc_html = '<div class=\"alert alert-danger par_disallow\"><i class=\"fa fa-lg fa-exclamation-triangle\"></i> <b>Cannot Link to The Selected Task</b><br/>The task you\'re attempting to link to already links <u>back</u> to this task, possibly through one or more intermediate tasks. Please select a different task to link to. <br><br>This can often be resolved by changing the linked task to something with higher priority, like a Production item or Chair task.</div>';
+		//var partask_label = $(this).parents('.form-group').find('label');
+        //to_min.val(0).prop('disabled', true);
+        //to_sec.val(0).prop('disabled', true);        
+        //to_type.prop('disabled', true);
+        //tc.prop('checked', false);
         
-        if(!sel_par){
-            advpid.addClass('collapse');
-            start.prop('readonly',false);
-            this_clear_parent_but.addClass('disabled');
-            stHelp.addClass('collapse');
+        if(!inParentVal){
+            advOpts.addClass('collapse');
+            inStart.prop('readonly',false);
+            btnClearPID.addClass('disabled');
+            startHelp.addClass('collapse');
             $(this).prop('readonly', false);
-            to_min.val(0).prop('disabled', true);
-            to_sec.val(0).prop('disabled', true);        
+            inMin.val(0).prop('disabled', true);
+            inTOType.prop('disabled', true);
+        	inTC.prop('checked', false);
+            //inSec.val(0).prop('disabled', true);        
         }else{
-            advpid.removeClass('collapse');
-            this_clear_parent_but.removeClass('disabled');
-            start.prop('readonly', false);
-            stHelp.addClass('collapse');
-            var no_tc_html = '<div class=\"alert alert-danger par_disallow\"><i class=\"fa fa-lg fa-exclamation-triangle\"></i> <b>Cannot Link to The Selected Task</b><br/>The task you\'re attempting to link to already links <u>back</u> to this task, possibly through one or more intermediate tasks. Please select a different task to link to. <br><br>This can often be resolved by changing the linked task to something with higher priority, like a Production item or Chair task.</div>';
-            tc.prop('checked', false);
-            tc.prop('disabled', false);
+            advOpts.removeClass('collapse');
+            btnClearPID.removeClass('disabled');
+            inStart.prop('readonly', false);
+            startHelp.addClass('collapse');
+            inTC.prop('checked', false).prop('disabled', false);
                             
-            if(sel_par && curTID){
-                //console.log('check PID from compile');
-                $.ajax( {
-                    url: '/tasks/checkPid/', data: {task:curTID, parent:sel_par}, type: 'post', dataType:'json',
+            if(inParentVal){
+                $.ajax({
+                    url: '/tasks/checkPid/', data: {task:curTID, parent:inParentVal}, type: 'post', dataType:'json',
                     beforeSend:function () {
-                        partask_label.append('<span class="tr_spin" style="margin-left:5px;"><i class="fa fa-cog fa-spin"></i></span>');
-                        advpid.parent().find('.par_disallow').remove();
+                        advOpts.parent().find('.par_disallow').remove();
                     },            
                     success:function(data, textStatus) {
-                        if(data.allow_parent == false){
-                            this_sel.val('').trigger('change');
-                            tc.prop('checked', false);
-                            tc.prop('disabled', true);
-                            to_min.prop('disabled', true);
-                            to_sec.prop('disabled', true);
-                            to_type.prop('disabled', true);
-                            advpid.parent().append(no_tc_html);
-                        }else{ tc.prop('disabled', false);}
+                        if(data.allow_parent == true){
+                        	inTC.prop('disabled', false);
+                        }else{ 
+                            inParent.val('').trigger('change');
+                            inTC.prop('checked', false).prop('disabled', true);
+                            inMin.prop('disabled', true);
+                            //inSec.prop('disabled', true);
+                            inTOType.prop('disabled', true);
+                            advOpts.parent().append(no_tc_html);
+                        }
                     },
-                    complete:function (XMLHttpRequest, textStatus) {
-                        partask_label.find('.tr_spin').remove();
-                    },
-                });
-            }else{ // No curTID (i.e. adding new) or parent val selected
-                to_min.val(0).prop('disabled', true);
-                to_sec.val(0).prop('disabled', true);        
-                to_type.prop('disabled', true);
+                    complete:function (XMLHttpRequest, textStatus){},
+                });                
+            }else{ // No parent selected
+                inMin.val(0).prop('disabled', true);
+                inSec.val(0).prop('disabled', true);        
+                inTOType.prop('disabled', true);
             }
         }
     });
@@ -631,7 +622,8 @@ $(document).ready(function () {
 	}
 	
 	function bindStartEndToDTP(element){
-		$(element).datetimepicker({ sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'YYYY-MM-DD HH:mm', 
+		//$(element).datetimepicker({ sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'YYYY-MM-DD HH:mm', 
+		$(element).datetimepicker({ sideBySide: true, showTodayButton: true, allowInputToggle: true, format: 'MMM D, YYYY h:mm A',
 	        //format: 'YYYY-MM-DD HH:mm:ss',
     	}); 
 	}
@@ -708,8 +700,6 @@ $(document).ready(function () {
 	    	return null;
     	}else{ return results[1] || 0; }
 	}
-
-	
 
 	function newViewTaskModal(options){
 		//console.log('options from newViewTaskModal');

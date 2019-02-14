@@ -237,7 +237,7 @@ class OpsHelper extends AppHelper {
         $buttons = '';
 
         foreach ($ass as $handle){
-            $buttons.= '<span class="btn btn-pale-yellow btn-xxs">@'.$handle.'</span>';    
+            $buttons.= '<span class="btn btn-pale-yellow btn-xxs">@'.$handle.'</span> ';    
         }                                    
         return $buttons;
     }
@@ -443,7 +443,7 @@ class OpsHelper extends AppHelper {
         
         $toff = $task['time_offset'];
         $tctrl = $task['time_control'];
-        $tctrl_type = $task['time_offset_type'];
+        $tctrl_type = isset($task['time_offset_type'])? $task['time_offset_type']: 0;
         $off = $this->offsetToFriendly($toff);
         
         if($highlight && is_string($highlight)){
@@ -541,16 +541,29 @@ class OpsHelper extends AppHelper {
         }
         
         $html = '<div class="linked_task'.$bg.'" data-tid="'.$task['id'].' "style="border-left: 7px solid '.$task['task_color_code'].'">
-            <div class="row">
-                <div class="col-xs-5 col-sm-3 col-md-3"><span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].'</span> <span><strong>'.date('g:i A', strtotime($task['start_time'])).'</strong></span></div>
-                <div class="col-xs-5 col-sm-7 col-md-7"><strong><em>'.$task['task_type'].'</em></strong> &nbsp;'.$task['short_description'].'</div>
-                <div class="col-xs-2 col-sm-2 col-md-2"><span class="pull-right">'.$strMsg.'</span></div>
+             <div class="row">
+                <div class="col-xs-10 col-sm-11 col-md-11">
+                    <div class="row">
+                        <div class="col-xs-2 col-sm-1 col-md-1"><span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].'</span></div>
+                        <div class="col-xs-5 col-sm-2 col-md-2"> <span><strong>'.date('g:i A', strtotime($task['start_time'])).'</strong></span></div>
+                        <div class="col-xs-5 col-sm-3 col-md-2 sm-bot-marg"><strong><em>'.$task['task_type'].'</em></strong></div>
+                        <div class="col-xs-12 col-sm-6 col-md-7"> &nbsp;'.$task['short_description'].'</div>
+                    </div>
+                </div>
+                <div class="col-xs-2 col-sm-1 col-md-1"><span class="pull-right">'.$strMsg.'</span></div>
             </div>                            
+       
         </div>';
                 
         return $html;  
     }
-
+/*
+ *      <div class="row">
+                <div class="col-xs-12 col-sm-3 col-md-3"><div class="row"><div class="col-xs-2"><span class="btn btn-ttrid1 ban-edit btn-xxs">'.$task['team_code'].'</span></div><div class="col-xs-4"> <span><strong>'.date('g:i A', strtotime($task['start_time'])).'</strong></span></div></div></div>
+                <div class="col-xs-12 col-sm-7 col-md-7"><div class="row"><div class="col-xs-6"><strong><em>'.$task['task_type'].'</em></strong></div><div class="col-xs-12"> &nbsp;'.$task['short_description'].'</div></div></div>
+                <div class="col-xs-12 col-sm-2 col-md-2"><span class="pull-right">'.$strMsg.'</span></div>
+            </div>                            
+       /*
     // Parent task, linked+synced tasks - 2018 - used in team's homepage
     public function subtaskRowSingle($task, $options = array()){
         $date_format = 'M j g:i A';
@@ -1123,7 +1136,7 @@ class OpsHelper extends AppHelper {
                 break;                     
             case 'teams':
                 $title = "Teams";
-                $msg = "Many teams can be linked to a task. There are 5 states that a team can be in for each task:<br/><br/><p><span class='btn btn-xs btn-ttrid0'>None</span><br/>Team is not associated with the task.</p><p><span class='btn btn-xs btn-ttrid1'>Lead Team</span><br>Team is the owner of this task and it appears in their plan.</p><p><span class='btn btn-xs btn-ttrid2'>Pushed Team</span><br/>Team is CC'd on this task and it will appear in their plan.  They do <b>not</b> owe the lead team anything.</p><p><span class='btn btn-xs btn-danger'>Open Request</span><br/>This team <b>owes</b> the lead team materials/info/resources/etc. This task/request will appear in their plan.</p><p><span class='btn btn-xs btn-success'>Closed Request</span><br/>Team <b>had</b> a request for this task and it is <b>complete</b>. This task/closed request will appear in their plan.</p>";
+                $msg = "Many teams can be linked to a task. There are 5 states that a team can be in for each task:<br/><br/><p><span class='btn btn-xs btn-ttrid0'>None</span><br/>Team is not associated with the task.</p><p><span class='btn btn-xs btn-ttrid1'>Lead Team</span><br>Team is the owner of this task and it appears in their plan.</p><p><span class='btn btn-xs btn-ttrid2'>Pushed Team</span><br/>Team is CC'd on this task and it will appear in their plan.  They do <b>not</b> owe the lead team anything.</p><p><span class='btn btn-xs btn-danger'>Open Request</span><br/>This team <b>owes</b> the lead team materials/info/resources/etc. This task/request will appear in their plan.</p><p><span class='btn btn-xs btn-success'>Closed Request</span><br/>Team <b>had</b> a request for this task and but it is now considered <b>complete / fulfilled / acknowledged / etc.</b>. This task/closed request will appear in their plan.</p>";
                 break;                     
             case 'assign_task':
                 $title = "Assign Task";
@@ -1133,6 +1146,11 @@ class OpsHelper extends AppHelper {
                 $title = "View Type";
                 $msg = "Views organize tasks in different ways, which can give specific insights. <br><br><b>Examples:</b><br><br>A <b>Rundown</b> emphasizes the order of tasks and how they're connected to other tasks.<br>A <b>Timeline</b> emphasizes what different teams/people are doing at the SAME time.<br><b>Owing/Waiting</b> views help teams track deliverables owing/owed to/from other teams.";                     
                 break;
+            case 'view_options':
+                $title = "View Options";
+                $msg = "Change the way tasks are displayed.<br><br><b>Show Linked Task Line Items - Keyboard Shortcut:</b> <kbd>Shift+z</kbd><br><br>Tasks that are <u>linked</u> appear in a rundown TWICE -- once under the task they're linked to and again as their own task line item.<br><br>Unselecting this option <u>hides the individual task line items</u>.  This is useful when reviewing the total plan, but if you need to see details of the individual linked tasks, it should be ON (checked).";                     
+                break;
+            
             case 'task_actions':
 	           $title = "Task Actions";
                $msg = "<p><b>View Single Task:</b> Allows you to view this task alone. Useful for opening single tasks in a new tab/window.</p><p><b>Link to Task: </b> Create a new task that links to this task. Only available if this task allows links.</p><p><b>Delete Task:</b> Deletes task and associations (i.e. links to other teams).</p>";

@@ -49,7 +49,7 @@
             <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-flash fa-lg"></i><span class="hidden-sm"> <?php echo 'Actions';//($main_team_code)? $main_team_code:'Team';?></span><b class="caret"></b></a>
                 <ul class="dropdown-menu">
                     <?php $team_txt = ($main_team_code)? $main_team_code:'Team';?>
-                    <li><?php echo $this->Html->link(__('<i class="fa fa-tachometer fa-lg"></i> <span class="hidden-sm">'.$team_txt.' Dashboard</span>'), array('controller'=>'teams', 'action'=>'home', $main_team_code),array('escape'=>false));?></li>
+                    <li><?php echo $this->Html->link(__('<i class="fa fa-tachometer fa-lg"></i> '.$team_txt.' Dashboard'), array('controller'=>'teams', 'action'=>'home', $main_team_code),array('escape'=>false));?></li>
                     <li class="divider"></li>
                     <li><?php echo $this->Html->link(__('<i class="fa fa-print fa-lg"></i> Export Your Plan'), array('controller'=>'tasks', 'action'=>'userPrint'), array('escape'=>false));?></li>
                     <li><?php echo $this->Html->link(__('<i class="fa fa-vcard-o fa-lg"></i> Export Plan By Role'), array('controller'=>'tasks', 'action'=>'byRole'), array('escape'=>false));?></li>
@@ -81,7 +81,7 @@
                 <ul class="dropdown-menu">
                     <li><?php echo $this->Html->link(__('<i class="fa fa-diamond"></i> Event Info'), array('controller' => 'event_infos', 'action' => 'info'), array('escape'=>false,));?></li>
                     <li><?php echo $this->Html->link(__('<i class="fa fa-sitemap"></i> Ops Org Chart'), array('controller' => 'users', 'action' => 'orgChart'), array('escape'=>false));?></li>
-                    <li><?php echo $this->Html->link(__('<i class="fa fa-files-o"></i> Files (Google Drive)'), 'https://drive.google.com/drive/folders/0B2G1CiYORu1UeDhGcktEbjA3ODA?ths=true', array('target'=>'_blank','escape'=>false));?></li>
+                    <li><?php echo $this->Html->link(__('<i class="fa fa-files-o"></i> Files (Google Drive)'), 'https://drive.google.com/drive/folders/1I_gKhDhEisykmZopmAlXvpshEzKiUSZ_?ths=true', array('target'=>'_blank','escape'=>false));?></li>
                 </ul>
             </li>
 

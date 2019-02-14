@@ -1,6 +1,6 @@
 <?php
 
-
+//$this->log($this->Paginator->settings);
     echo $this->Html->script('compile');
     echo $this->Html->script('add_task');
     $this->set('title_for_layout', 'Tasks');
@@ -56,6 +56,8 @@
     <!-- Accordion Credit: http://jsfiddle.net/d2p17qj7/ -->    
     <div class="row hidden-print">
         <div class="panel-group" id="compActMenu">
+            
+            <?php /*
             <div class="panel panel-bsuccess">
                 <div id="colAddHeading" class="panel-heading panel-ctab accordion-toggle" data-toggle="collapse" data-parent="#compActMenu" href="#colAdd">
                     <h4 class="panel-title">          
@@ -70,7 +72,7 @@
                         <?php //echo $this->element('task/quick_add'); ?>
                     </div>
                 </div>
-            </div>
+            </div>*/?>
             <div class="panel panel-bsteel">
                 <div class="panel-heading panel-ctab accordion-toggle" data-toggle="collapse" data-parent="#compActMenu" href="#colCompOpts">
                     <h4 class="panel-title">

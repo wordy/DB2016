@@ -15,6 +15,12 @@
 </div><!-- .form-group -->
 
 <div class="form-group">
+    <?php echo $this->Form->label('team_id', 'Team');?>
+        <?php echo $this->Form->input('team_id', array('class' => 'form-control')); ?>
+</div><!-- .form-group -->
+
+
+<div class="form-group">
 	<?php echo $this->Form->label('handle', 'handle');?>
 		<?php echo $this->Form->input('handle', array('class' => 'form-control')); ?>
 </div><!-- .form-group -->

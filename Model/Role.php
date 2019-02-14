@@ -29,7 +29,8 @@ class Role extends AppModel {
 		'handle' => array(
 		    'isUnique'=>array(
                 'rule' => 'isUnique',
-                'message' => 'That handle is already registered.  Please try something else.'
+                'message' => 'That handle is already registered.  Please try something else.',
+                'on'=>'create',
             ),
 			'notBlank' => array(
 				'rule' => array('notBlank'),
@@ -97,6 +98,25 @@ class Role extends AppModel {
 		)
 	);
     
+    public function beforeSave($options=array()) {
+        //If user added '@' to handle, remove
+        if(substr($this->data[$this->alias]['handle'], 0, 1) == "@"){
+            $this->data[$this->alias]['handle'] = substr($this->data[$this->alias]['handle'], 1, strlen($this->data[$this->alias]['handle'])-1);
+        }
+        
+        return true;
+    }
+
+    public function existsByTeamAndUser($team, $user){
+        $rs = $this->find('first', array(
+            'conditions'=>array(
+                'team_id'=>$team,
+                'user_id'=>$user
+            ),
+        ));
+        return (!empty($rs))? TRUE:FALSE;
+    }
+
     public function getList($teams = null){
         $conditions = array();
         
@@ -158,20 +178,6 @@ class Role extends AppModel {
             }
         }
         return $rs;
-    }
-
-
-
-
-
-    public function existsByTeamAndUser($team, $user){
-        $rs = $this->find('first', array(
-            'conditions'=>array(
-                'team_id'=>$team,
-                'user_id'=>$user
-            ),
-        ));
-        return (!empty($rs))? TRUE:FALSE;
     }
 
     public function setByUsernameTeamUser($username, $team, $user){

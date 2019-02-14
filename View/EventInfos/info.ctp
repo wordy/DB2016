@@ -277,26 +277,21 @@ echo $this->Form->create('EventInfo', array('id'=>'eventInfoForm', 'inputDefault
 <h2 class="text-yh"><i class="fa fa-calendar-o"></i> Schedule</h2>
 <div class="editableInfo" data-section="schedule"><?php echo $this->request->data['EventInfo']['schedule']?></div>
 
-
-
-
 <a id="maps"><br><br></a>
-            <section class="lg-bot-marg">
-                <h2 class="text-yh"><i class="fa fa-map"></i> Maps</h2>
-                <!--<img src="http://cs.thebws.com/images/db2013-100level.png" class="img-responsive"/>
-                <img src="http://cs.thebws.com/images/db2013-200level.png" class="img-responsive"/>-->
-                <!--<a href="/img/maps/DB2017-Allstream.png" target="window.open">-->
-                <?php  //echo $this->Html->image('maps/DB2017-Allstream.png', array('class'=>"img-responsive")); ?>
+<section class="md-bot-marg">
+    <h2 class="text-yh"><i class="fa fa-map"></i> Maps</h2>
+<?php /********** MTCC************
 <h3>MTCC Level 100:</h3>
 <?php echo $this->Html->image('maps/MTCC-Level100.png', array('class'=>"img-responsive"));?>
 <h3>MTCC Level 200:</h3>
 <?php echo $this->Html->image('maps/MTCC-Level200.png', array('class'=>"img-responsive"));?>
-
-
-                
-                <!--</a>-->
-            </section>          
-
+*/?>
+    <h2>Beanfield Centre: 1st Floor (Ground Level)</h2>
+    <p><b>Note:</b> Beanfield Centre was formerly known as Allstream Centre</p>
+    <?php echo $this->Html->image('maps/BeanfieldCentre-Floor1.jpg', array('class'=>"img-responsive"));?>
+    <h2>Beanfield Centre: 2nd Floor</h2>
+    <?php echo $this->Html->image('maps/BeanfieldCentre-Floor2.jpg', array('class'=>"img-responsive"));?>
+</section>          
 
 <a id="geninfo"><br><br></a>
 <h2><span class="text-yh"><i class="fa fa-info-circle"></i> General Information</span></h2>
@@ -317,6 +312,21 @@ echo $this->Form->create('EventInfo', array('id'=>'eventInfoForm', 'inputDefault
 <a id="auction"><br><br></a>
 <h2><span class="text-yh"><i class="fa fa-gavel"></i> Auction</span></h2>
 <div class="editableInfo" data-section="auction"><?php echo $this->request->data['EventInfo']['auction']?></div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+
 <?php 
     echo $this->Form->end(); 
     
